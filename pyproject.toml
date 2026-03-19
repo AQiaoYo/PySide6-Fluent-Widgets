@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "PySide6-Fluent-Widgets-Qiao"
-version = "2.0.5"
+version = "2.0.6"
 description = "A fluent design widgets library based on PySide6"
 readme = "README.md"
 requires-python = ">=3.8"
