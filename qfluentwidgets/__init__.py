@@ -12,12 +12,12 @@ Examples are available at https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree
 :license: GPLv3 for non-commercial project, see README for more details.
 """
 
-from importlib import import_module
 from pathlib import Path
 
 from ._lazy import LazyExportNames, build_package_exports, export_dir, load_child_module, load_export
+from ._rc import resource as resource
 
-__version__ = "1.11.1"
+__version__ = "2.0.5"
 __author__ = "AQiaoYo"
 __maintainer__ = "AQiaoYo"
 __maintainer_email__ = "AQiaoYo@qq.com"
@@ -54,8 +54,8 @@ def _all_exports():
     return names
 
 # Resource registration must happen during package import so qrc icon paths
-# are available before any widget/icon class is first accessed.
-resource = import_module("qfluentwidgets._rc.resource")
+# are available before any widget/icon class is first accessed. Keep this as a
+# static import so PyInstaller can discover the bundled qfluentwidgets._rc package.
 
 __all__ = LazyExportNames(_all_exports)
 
