@@ -8,7 +8,6 @@ version = "2.0.0"
 description = "A fluent design widgets library based on PySide6"
 readme = "README.md"
 requires-python = ">=3.8"
-license-files = ["LICENSE"]
 authors = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
 maintainers = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
 keywords = ["pyside6", "fluent", "widgets"]
@@ -43,6 +42,9 @@ docs = [
     "sphinx-markdown-tables==0.0.17",
     "urllib3<2.0.0",
 ]
+
+[tool.setuptools]
+license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
 include = ["qfluentwidgets*"]
