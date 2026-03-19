@@ -8,7 +8,6 @@ version = "2.0.0"
 description = "A fluent design widgets library based on PySide6"
 readme = "README.md"
 requires-python = ">=3.8"
-license = "GPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
 maintainers = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
