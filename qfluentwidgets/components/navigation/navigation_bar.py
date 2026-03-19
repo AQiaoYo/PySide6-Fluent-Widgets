@@ -15,7 +15,7 @@ from ...common.router import qrouter
 from ...common.style_sheet import FluentStyleSheet
 from ..widgets.scroll_area import ScrollArea
 from .navigation_widget import NavigationPushButton, NavigationWidget, NavigationIndicator
-from .navigation_panel import RouteKeyError, NavigationItemPosition
+from .navigation_types import RouteKeyError, NavigationItemPosition
 
 
 class IconSlideAnimation(QPropertyAnimation):

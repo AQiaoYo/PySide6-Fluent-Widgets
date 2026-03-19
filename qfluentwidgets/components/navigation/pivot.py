@@ -11,7 +11,7 @@ from ...common.style_sheet import themeColor, FluentStyleSheet
 from ...common.color import autoFallbackThemeColor
 from ...common.animation import FluentAnimation, FluentAnimationType, FluentAnimationProperty, ScaleSlideAnimation
 from ..widgets.button import PushButton
-from .navigation_panel import RouteKeyError
+from .navigation_types import RouteKeyError
 
 
 class PivotItem(PushButton):

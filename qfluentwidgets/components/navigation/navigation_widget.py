@@ -15,7 +15,6 @@ from ...common.color import autoFallbackThemeColor
 from ...common.font import setFont, getFont
 from ...common.animation import ScaleSlideAnimation
 from ..widgets.scroll_area import ScrollArea
-from ..widgets.label import AvatarWidget
 from ..widgets.info_badge import InfoBadgeManager, InfoBadgePosition
 
 
@@ -695,6 +694,8 @@ class NavigationAvatarWidget(NavigationWidget):
 
     def __init__(self, name: str, avatar: Union[str, QPixmap, QImage] = None, parent=None):
         super().__init__(isSelectable=False, parent=parent)
+        from ..widgets.label import AvatarWidget
+
         self.name = name
         self.avatar = AvatarWidget(self)
 

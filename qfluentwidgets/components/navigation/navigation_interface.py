@@ -5,8 +5,8 @@ from PySide6.QtCore import Qt, QEvent, Signal
 from PySide6.QtGui import QResizeEvent, QIcon, QPixmap
 from PySide6.QtWidgets import QWidget
 
-from .navigation_panel import NavigationPanel, NavigationItemPosition, NavigationWidget, NavigationDisplayMode
-from .navigation_widget import NavigationTreeWidget, NavigationUserCard
+from .navigation_types import NavigationItemPosition, NavigationDisplayMode
+from .navigation_widget import NavigationTreeWidget, NavigationUserCard, NavigationWidget
 from ...common.style_sheet import FluentStyleSheet
 from ...common.icon import FluentIconBase
 
@@ -33,6 +33,8 @@ class NavigationInterface(QWidget):
             Is the navigation interface collapsible
         """
         super().__init__(parent=parent)
+        from .navigation_panel import NavigationPanel
+
         self.panel = NavigationPanel(self)
         self.panel.setMenuButtonVisible(showMenuButton and collapsible)
         self.panel.setReturnButtonVisible(showReturnButton)

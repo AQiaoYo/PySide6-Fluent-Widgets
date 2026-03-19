@@ -1,5 +1,4 @@
 # coding:utf-8
-from enum import Enum
 from typing import Dict, Union
 
 from PySide6.QtCore import Qt, QPropertyAnimation, QRect, QSize, QEvent, QEasingCurve, Signal, QPoint, QRectF
@@ -8,32 +7,14 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QFrame, QApplication, QHBoxL
 
 from .navigation_widget import (NavigationTreeWidgetBase, NavigationToolButton, NavigationWidget, NavigationSeparator,
                                 NavigationTreeWidget, NavigationFlyoutMenu, NavigationItemHeader, NavigationIndicator)
-from ..widgets.acrylic_label import AcrylicBrush
+from .navigation_types import NavigationDisplayMode, NavigationItemPosition, RouteKeyError
 from ..widgets.scroll_area import ScrollArea
 from ..widgets.tool_tip import ToolTipFilter
 from ..widgets.scroll_bar import ScrollBarHandleDisplayMode
-from ..widgets.flyout import Flyout, FlyoutAnimationType, FlyoutViewBase, SlideRightFlyoutAnimationManager
-from ..material.acrylic_flyout import AcrylicFlyout, AcrylicFlyoutViewBase
 from ...common.router import qrouter
 from ...common.style_sheet import FluentStyleSheet, isDarkTheme
 from ...common.icon import FluentIconBase
 from ...common.icon import FluentIcon as FIF
-
-
-class NavigationDisplayMode(Enum):
-    """ Navigation display mode """
-    MINIMAL = 0
-    COMPACT = 1
-    EXPAND = 2
-    MENU = 3
-
-
-class NavigationItemPosition(Enum):
-    """ Navigation item position """
-    TOP = 0
-    SCROLL = 1
-    BOTTOM = 2
-
 
 class NavigationToolTipFilter(ToolTipFilter):
     """ Navigation tool tip filter """
@@ -42,10 +23,6 @@ class NavigationToolTipFilter(ToolTipFilter):
         isVisible = super()._canShowToolTip()
         parent = self.parent()  # type: NavigationWidget
         return isVisible and parent.isCompacted
-
-
-class RouteKeyError(Exception):
-    """ Route key error """
 
 
 class NavigationItem:
@@ -75,7 +52,7 @@ class NavigationPanel(QFrame):
 
         self.indicator = NavigationIndicator(self)
 
-        self.acrylicBrush = AcrylicBrush(self, 30)
+        self.acrylicBrush = None
 
         self.scrollArea = ScrollArea(self)
         self.scrollWidget = QWidget()
@@ -163,6 +140,7 @@ class NavigationPanel(QFrame):
         self.topLayout.addWidget(self.menuButton, 0, Qt.AlignTop)
 
     def _updateAcrylicColor(self):
+        brush = self._ensureAcrylicBrush()
         if isDarkTheme():
             tintColor = QColor(32, 32, 32, 200)
             luminosityColor = QColor(0, 0, 0, 0)
@@ -170,8 +148,16 @@ class NavigationPanel(QFrame):
             tintColor = QColor(255, 255, 255, 180)
             luminosityColor = QColor(255, 255, 255, 0)
 
-        self.acrylicBrush.tintColor = tintColor
-        self.acrylicBrush.luminosityColor = luminosityColor
+        brush.tintColor = tintColor
+        brush.luminosityColor = luminosityColor
+
+    def _ensureAcrylicBrush(self):
+        if self.acrylicBrush is None:
+            from ..widgets.acrylic_label import AcrylicBrush
+
+            self.acrylicBrush = AcrylicBrush(self, 30)
+
+        return self.acrylicBrush
 
     def isIndicatorAnimationEnabled(self):
         return self._isIndicatorAnimationEnabled
@@ -519,7 +505,7 @@ class NavigationPanel(QFrame):
 
             # grab acrylic image
             if self._canDrawAcrylic():
-                self.acrylicBrush.grabImage(
+                self._ensureAcrylicBrush().grabImage(
                     QRect(self.mapToGlobal(QPoint()), QSize(self.expandWidth, self.height())))
 
             if not self._parent.isWindow():
@@ -673,9 +659,13 @@ class NavigationPanel(QFrame):
         if not widget.isRoot() or widget.isLeaf():
             return
 
+        from ..widgets.flyout import Flyout, FlyoutAnimationType, FlyoutViewBase, SlideRightFlyoutAnimationManager
+
         layout = QHBoxLayout()
 
         if self._canDrawAcrylic():
+            from ..material.acrylic_flyout import AcrylicFlyout, AcrylicFlyoutViewBase
+
             view = AcrylicFlyoutViewBase()
             view.setLayout(layout)
             flyout = AcrylicFlyout(view, self.window())
@@ -696,7 +686,7 @@ class NavigationPanel(QFrame):
 
         menu.expanded.connect(lambda: self._adjustFlyoutMenuSize(flyout, widget, menu))
 
-    def _adjustFlyoutMenuSize(self, flyout: Flyout, widget: NavigationTreeWidget, menu: NavigationFlyoutMenu):
+    def _adjustFlyoutMenuSize(self, flyout, widget: NavigationTreeWidget, menu: NavigationFlyoutMenu):
         flyout.view.setFixedSize(menu.size())
         flyout.setFixedSize(flyout.layout().sizeHint())
 
@@ -770,7 +760,7 @@ class NavigationPanel(QFrame):
         return 36 + th + bh + sh + spacing
 
     def _canDrawAcrylic(self):
-        return self.acrylicBrush.isAvailable() and self.isAcrylicEnabled()
+        return self.isAcrylicEnabled() and self._ensureAcrylicBrush().isAvailable()
 
     def paintEvent(self, e):
         if not self._canDrawAcrylic() or self.displayMode != NavigationDisplayMode.MENU:
@@ -780,10 +770,11 @@ class NavigationPanel(QFrame):
         path.setFillRule(Qt.WindingFill)
         path.addRoundedRect(0, 1, self.width() - 1, self.height() - 1, 7, 7)
         path.addRect(0, 1, 8, self.height() - 1)
-        self.acrylicBrush.setClipPath(path)
+        brush = self._ensureAcrylicBrush()
+        brush.setClipPath(path)
 
         self._updateAcrylicColor()
-        self.acrylicBrush.paint()
+        brush.paint()
 
         super().paintEvent(e)
 
@@ -799,4 +790,3 @@ class NavigationItemLayout(QVBoxLayout):
             if isinstance(item.widget(), NavigationSeparator):
                 geo = item.geometry()
                 item.widget().setGeometry(0, geo.y(), geo.width(), geo.height())
-
