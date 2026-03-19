@@ -30,5 +30,3 @@ from .flyout import *
 from .tab_view import *
 from .pips_pager import *
 from .separator import *
-
-__all__ = [name for name in globals() if not name.startswith("_")]

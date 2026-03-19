@@ -24,5 +24,3 @@ from .translator import FluentTranslator
 from .router import qrouter, Router
 from .color import FluentThemeColor, FluentSystemColor
 from .theme_listener import SystemThemeListener
-
-__all__ = [name for name in globals() if not name.startswith("_")]

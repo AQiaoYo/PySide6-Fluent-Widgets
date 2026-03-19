@@ -12,15 +12,13 @@ Examples are available at https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree
 :license: GPLv3 for non-commercial project, see README for more details.
 """
 
-from .components import *
-from .common import *
-from .window import *
-from ._rc import resource
-
 __version__ = "2.0.6"
 __author__ = "AQiaoYo"
 __maintainer__ = "AQiaoYo"
 __maintainer_email__ = "AQiaoYo@qq.com"
 __credits__ = ["zhiyiYo", "AQiaoYo"]
 
-__all__ = [name for name in globals() if not name.startswith("_")]
+from .components import *
+from .common import *
+from .window import *
+from ._rc import resource
