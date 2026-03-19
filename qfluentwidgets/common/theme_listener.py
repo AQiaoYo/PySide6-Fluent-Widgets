@@ -2,7 +2,6 @@
 from PySide6.QtCore import QThread, Signal
 
 from .config import Theme, qconfig
-import darkdetect
 import sys
 
 
@@ -13,8 +12,24 @@ class SystemThemeListener(QThread):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
+        self._darkdetect = None
+
+    def _darkdetectModule(self):
+        if self._darkdetect is None:
+            try:
+                import darkdetect
+            except Exception:
+                self._darkdetect = False
+            else:
+                self._darkdetect = darkdetect
+
+        return self._darkdetect
 
     def run(self):
+        darkdetect = self._darkdetectModule()
+        if not darkdetect:
+            return
+
         if sys.platform == "win32":
             darkdetect.listener(self._onThemeChanged)
             return

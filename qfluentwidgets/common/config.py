@@ -5,11 +5,31 @@ from enum import Enum
 from pathlib import Path
 from typing import List
 
-import darkdetect
 from PySide6.QtCore import QObject, Signal, qVersion
 from PySide6.QtGui import QColor
 
 from .exception_handler import exceptionHandler
+
+
+_darkdetect = None
+
+
+def _resolve_system_theme():
+    global _darkdetect
+
+    if _darkdetect is None:
+        try:
+            import darkdetect as _darkdetect_module
+        except Exception:
+            _darkdetect = False
+        else:
+            _darkdetect = _darkdetect_module
+
+    if not _darkdetect:
+        return Theme.LIGHT
+
+    detected_theme = _darkdetect.theme()
+    return Theme(detected_theme) if detected_theme else Theme.LIGHT
 
 class Theme(Enum):
     """ Theme enumeration """
@@ -394,8 +414,7 @@ class QConfig(QObject):
     def theme(self, t):
         """ chaneg the theme without modifying the config file """
         if t == Theme.AUTO:
-            t = darkdetect.theme()
-            t = Theme(t) if t else Theme.LIGHT
+            t = _resolve_system_theme()
 
         self._cfg._theme = t
 
