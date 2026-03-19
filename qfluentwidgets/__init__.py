@@ -12,7 +12,7 @@ Examples are available at https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree
 :license: GPLv3 for non-commercial project, see README for more details.
 """
 
-__version__ = "2.0.6"
+__version__ = "2.0.7"
 __author__ = "AQiaoYo"
 __maintainer__ = "AQiaoYo"
 __maintainer_email__ = "AQiaoYo@qq.com"
