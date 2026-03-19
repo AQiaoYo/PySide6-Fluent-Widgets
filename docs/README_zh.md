@@ -2,7 +2,7 @@
   <img width="18%" align="center" src="https://raw.githubusercontent.com/zhiyiYo/PyQt-Fluent-Widgets/master/docs/source/_static/logo.png" alt="logo">
 </p>
   <h1 align="center">
-  PySide6-Fluent-Widgets
+  PySide6-Fluent-Widgets-Qiao
 </h1>
 <p align="center">
   基于 PySide6 的 Fluent Design 风格组件库
@@ -11,15 +11,15 @@
 
 <div align="center">
 
-[![Version](https://img.shields.io/pypi/v/pyside6-fluent-widgets?color=%2334D058&label=Version)](https://pypi.org/project/PyQt-Fluent-Widgets)
-[![Download](https://static.pepy.tech/personalized-badge/pyside6-fluent-widgets?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Downloads)]()
+[![Version](https://img.shields.io/pypi/v/pyside6-fluent-widgets-qiao?color=%2334D058&label=Version)](https://pypi.org/project/PySide6-Fluent-Widgets-Qiao/)
+[![Download](https://static.pepy.tech/personalized-badge/pyside6-fluent-widgets-qiao?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Downloads)]()
 [![GPLv3](https://img.shields.io/badge/License-GPLv3-blue?color=#4ec820)](LICENSE)
 [![Platform Win32 | Linux | macOS](https://img.shields.io/badge/Platform-Win32%20|%20Linux%20|%20macOS-blue?color=#4ec820)]()
 
 </div>
 
 <p align="center">
-<a href="../README.md">English</a> | 简体中文 | <a href="https://qfluentwidgets.com/">官网</a>
+<a href="../README.md">English</a> | 简体中文 | <a href="https://github.com/AQiaoYo/PySide6-Fluent-Widgets">GitHub</a>
 </p>
 
 ![Interface](https://raw.githubusercontent.com/zhiyiYo/PyQt-Fluent-Widgets/master/docs/source/_static/Interface.jpg)
@@ -28,26 +28,24 @@
 ## 安装📥
 使用 `uv` 安装轻量版 (亚克力组件不可用)：
 ```shell
-uv add PySide6-Fluent-Widgets
+uv add PySide6-Fluent-Widgets-Qiao
 ```
 安装完整版：
 ```shell
-uv add "PySide6-Fluent-Widgets[full]"
+uv add "PySide6-Fluent-Widgets-Qiao[full]"
 ```
 
 如果你更习惯 `pip`，等价命令是：
 ```shell
-pip install PySide6-Fluent-Widgets -i https://pypi.org/simple/
-pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
+pip install PySide6-Fluent-Widgets-Qiao -i https://pypi.org/simple/
+pip install "PySide6-Fluent-Widgets-Qiao[full]" -i https://pypi.org/simple/
 ```
 
 
-[商用高级版](https://qfluentwidgets.com/zh/pages/pro) 组件库包含更多组件，可从 [发行页面](https://github.com/zhiyiYo/PyQt-Fluent-Widgets/releases) 下载体验编译好的示例程序 `PyQt-Fluent-Widgets-Pro-Gallery.zip`。
-
-C++ QFluentWidgets 组件库非开源，可从 [发行页面](https://github.com/zhiyiYo/PyQt-Fluent-Widgets/releases) 下载体验编译好的示例程序 `C++_QFluentWidgets.zip`，价格见 [官网](https://qfluentwidgets.com/zh/price)。
+这个 fork 保留 `qfluentwidgets` 作为导入包名，但在 PyPI 上发布为 `PySide6-Fluent-Widgets-Qiao`。
 
 > [!Warning]
-> 请勿同时安装 PyQt-Fluent-Widgets、PyQt6-Fluent-Widgets、PySide2-Fluent-Widgets 和 PySide6-Fluent-Widgets，因为他们的包名都是 `qfluentwidgets`
+> 请勿同时安装 `PyQt-Fluent-Widgets`、`PyQt6-Fluent-Widgets`、`PySide2-Fluent-Widgets`、`PySide6-Fluent-Widgets` 和 `PySide6-Fluent-Widgets-Qiao`，因为它们暴露的导入包名都是 `qfluentwidgets`
 
 
 ## 运行示例▶️
@@ -78,23 +76,19 @@ uv build
 uv run sphinx-build -b html docs/source docs/build/html
 ```
 
-仓库后续只维护 `PySide6` 分支。同步上游 `PySide6` 分支的推荐流程：
+推荐发布流程：
 ```shell
-git fetch upstream
-git checkout PySide6
-git rebase upstream/PySide6
-git push --force-with-lease origin PySide6
+git tag v1.11.1
+git push origin v1.11.1
 ```
 
 ## 在线文档📕
-想要了解 PyQt-Fluent-Widgets 的正确使用姿势？请仔细阅读 [帮助文档](https://qfluentwidgets.com/zh/) 👈
+想要了解这个 fork 的使用方式，请直接阅读本仓库中的文档和示例。
 
 ## 许可证📄
-PySide6-Fluent-Widgets 使用双许可证。非商业用途使用 [GPLv3](../LICENSE) 许可证进行授权，商用请购买 [商用许可证](https://qfluentwidgets.com/zh/price) 以获得商用授权。
+PySide6-Fluent-Widgets-Qiao 使用 [GPLv3](../LICENSE) 许可证进行授权。
 
-组件库受软件著作权保护，软著登字第12532763号，任何盗用、破解组件库或未经授权的商业使用均被视为侵权行为。
-
-Copyright © 2021 by zhiyiYo.
+Copyright © 2021 by zhiyiYo，fork 维护与打包变更由 AQiaoYo 完成。
 
 
 

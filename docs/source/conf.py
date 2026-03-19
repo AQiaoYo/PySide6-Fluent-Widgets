@@ -6,10 +6,10 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-project = 'PyQt-Fluent-Widgets'
-copyright = '2023, zhiyiYo, AQiaoYo'
-author = 'zhiyiYo, AQiaoYo'
-release = 'v0.4.0'
+project = 'PySide6-Fluent-Widgets-Qiao'
+copyright = '2026, zhiyiYo, AQiaoYo'
+author = 'AQiaoYo'
+release = 'v1.11.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -38,7 +38,7 @@ html_theme_options = {
 }
 
 html_show_sourcelink = True
-html_title = "PyQt-Fluent-Widgets"
+html_title = "PySide6-Fluent-Widgets-Qiao"
 html_favicon = "_static/logo.png"
 html_css_files = [
     'css/fancybox.css',

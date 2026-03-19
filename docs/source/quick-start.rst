@@ -8,24 +8,24 @@ To install lite version (``AcrylicLabel`` is not available) use ``uv``:
 
 .. code:: shell
 
-   uv add PySide6-Fluent-Widgets
+   uv add PySide6-Fluent-Widgets-Qiao
 
 Or install the full-featured version:
 
 .. code:: shell
 
-   uv add "PySide6-Fluent-Widgets[full]"
+   uv add "PySide6-Fluent-Widgets-Qiao[full]"
 
 If you prefer ``pip``, the equivalent commands are:
 
 .. code:: shell
 
-   pip install PySide6-Fluent-Widgets -i https://pypi.org/simple/
-   pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
+   pip install PySide6-Fluent-Widgets-Qiao -i https://pypi.org/simple/
+   pip install "PySide6-Fluent-Widgets-Qiao[full]" -i https://pypi.org/simple/
 
-This repository maintains the ``PySide6`` branch only.
+This fork publishes to PyPI as ``PySide6-Fluent-Widgets-Qiao`` while keeping the import package name ``qfluentwidgets``.
 
-.. warning:: Don't install PyQt-Fluent-Widgets, PyQt6-Fluent-Widgets, PySide2-Fluent-Widgets and PySide6-Fluent-Widgets at the same time, because their package names are all ``qfluentwidgets``.
+.. warning:: Don't install PyQt-Fluent-Widgets, PyQt6-Fluent-Widgets, PySide2-Fluent-Widgets, PySide6-Fluent-Widgets, and PySide6-Fluent-Widgets-Qiao at the same time, because they all expose the same import package name ``qfluentwidgets``.
 
 Run example
 ~~~~~~~~~~~
