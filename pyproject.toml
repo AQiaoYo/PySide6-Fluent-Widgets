@@ -3,20 +3,15 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "PySide6-Fluent-Widgets"
-version = "1.11.1"
+name = "PySide6-Fluent-Widgets-Qiao"
+version = "0.0.1"
 description = "A fluent design widgets library based on PySide6"
 readme = "README.md"
 requires-python = ">=3.8"
 license = "GPL-3.0-only"
 license-files = ["LICENSE"]
-authors = [
-    { name = "zhiyiYo", email = "shokokawaii@outlook.com" },
-    { name = "AQiaoYo", email = "AQiaoYo@qq.com" },
-]
-maintainers = [
-    { name = "AQiaoYo", email = "AQiaoYo@qq.com" },
-]
+authors = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
+maintainers = [{ name = "AQiaoYo", email = "AQiaoYo@qq.com" }]
 keywords = ["pyside6", "fluent", "widgets"]
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -29,16 +24,12 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-full = [
-    "colorthief",
-    "pillow",
-    "scipy",
-]
+full = ["colorthief", "pillow", "scipy"]
 
 [project.urls]
-Documentation = "https://qfluentwidgets.com/"
-Source = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/tree/PySide6"
-Issues = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/issues"
+Documentation = "https://github.com/AQiaoYo/PySide6-Fluent-Widgets#readme"
+Source = "https://github.com/AQiaoYo/PySide6-Fluent-Widgets"
+Issues = "https://github.com/AQiaoYo/PySide6-Fluent-Widgets/issues"
 
 [dependency-groups]
 docs = [

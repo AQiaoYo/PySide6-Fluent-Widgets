@@ -1,14 +1,14 @@
 """
-PySide6-Fluent-Widgets
-======================
+PySide6-Fluent-Widgets-Qiao
+===========================
 A fluent design widgets library based on PySide6.
 
 Documentation is available in the docstrings and
-online at https://https://qfluentwidgets.com.
+online at https://github.com/AQiaoYo/PySide6-Fluent-Widgets#readme.
 
-Examples are available at https://github.com/zhiyiYo/PyQt-Fluent-Widgets/tree/PySide6/examples.
+Examples are available at https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree/main/examples.
 
-:copyright: (c) 2021 by zhiyiYo.
+:copyright: (c) 2021 by zhiyiYo, fork maintained by AQiaoYo.
 :license: GPLv3 for non-commercial project, see README for more details.
 """
 
@@ -18,7 +18,7 @@ from pathlib import Path
 from ._lazy import LazyExportNames, build_package_exports, export_dir, load_child_module, load_export
 
 __version__ = "1.11.1"
-__author__ = "zhiyiYo"
+__author__ = "AQiaoYo"
 __maintainer__ = "AQiaoYo"
 __maintainer_email__ = "AQiaoYo@qq.com"
 __credits__ = ["zhiyiYo", "AQiaoYo"]
