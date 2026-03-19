@@ -14,6 +14,9 @@ Examples are available at https://github.com/zhiyiYo/PyQt-Fluent-Widgets/tree/Py
 
 __version__ = "1.11.1"
 __author__ = "zhiyiYo"
+__maintainer__ = "AQiaoYo"
+__maintainer_email__ = "AQiaoYo@qq.com"
+__credits__ = ["zhiyiYo", "AQiaoYo"]
 
 from .components import *
 from .common import *

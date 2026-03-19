@@ -12,6 +12,10 @@ license = "GPL-3.0-only"
 license-files = ["LICENSE"]
 authors = [
     { name = "zhiyiYo", email = "shokokawaii@outlook.com" },
+    { name = "AQiaoYo", email = "AQiaoYo@qq.com" },
+]
+maintainers = [
+    { name = "AQiaoYo", email = "AQiaoYo@qq.com" },
 ]
 keywords = ["pyside6", "fluent", "widgets"]
 classifiers = [
