@@ -26,12 +26,18 @@
 
 
 ## 安装📥
-安装轻量版 (亚克力组件不可用)：
+使用 `uv` 安装轻量版 (亚克力组件不可用)：
 ```shell
-pip install PySide6-Fluent-Widgets -i https://pypi.org/simple/
+uv add PySide6-Fluent-Widgets
 ```
 安装完整版：
 ```shell
+uv add "PySide6-Fluent-Widgets[full]"
+```
+
+如果你更习惯 `pip`，等价命令是：
+```shell
+pip install PySide6-Fluent-Widgets -i https://pypi.org/simple/
 pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
 ```
 
@@ -45,13 +51,40 @@ C++ QFluentWidgets 组件库非开源，可从 [发行页面](https://github.com
 
 
 ## 运行示例▶️
-使用 pip 安装好 PySide6-Fluent-Widgets 包并下载好此仓库的代码之后，就可以运行 examples 目录下的任意示例程序，比如：
+克隆此仓库后，推荐使用 `uv` 创建环境并运行示例：
+```shell
+uv sync
+uv run python examples/gallery/demo.py
+```
+
+如果你需要可选依赖或文档构建环境：
+```shell
+uv sync --extra full --group docs
+```
+
+如果你已经从 PyPI 安装了包，也可以像下面这样直接运行仓库里的示例：
 ```shell
 cd examples/gallery
 python demo.py
 ```
 
 如果遇到 `ImportError: cannot import name 'XXX' from 'qfluentwidgets'`，这表明安装的包版本过低。可以按照上面的安装指令将 pypi 源替换为 https://pypi.org/simple 并重新安装.
+
+## 开发命令🛠
+常用的 `uv` 项目命令：
+```shell
+uv lock
+uv build
+uv run sphinx-build -b html docs/source docs/build/html
+```
+
+仓库后续只维护 `PySide6` 分支。同步上游 `PySide6` 分支的推荐流程：
+```shell
+git fetch upstream
+git checkout PySide6
+git rebase upstream/PySide6
+git push --force-with-lease origin PySide6
+```
 
 ## 在线文档📕
 想要了解 PyQt-Fluent-Widgets 的正确使用姿势？请仔细阅读 [帮助文档](https://qfluentwidgets.com/zh/) 👈
@@ -80,4 +113,3 @@ Copyright © 2021 by zhiyiYo.
 ## 参考
 * [**Windows design**: Design guidelines and toolkits for creating native app experiences](https://learn.microsoft.com/zh-cn/windows/apps/design/)
 * [**Microsoft/WinUI-Gallery**: An app demonstrates the controls available in WinUI and the Fluent Design System](https://github.com/microsoft/WinUI-Gallery)
-

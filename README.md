@@ -26,12 +26,19 @@ English | <a href="docs/README_zh.md">简体中文</a> | <a href="https://qfluen
 
 
 ## Install
-To install lite version for PyQt5:
+Use `uv` to install the lite version:
+```shell
+uv add PySide6-Fluent-Widgets
+```
+
+Or install the full-featured version (`AcrylicLabel` is available):
+```shell
+uv add "PySide6-Fluent-Widgets[full]"
+```
+
+If you prefer `pip`, the equivalent commands are:
 ```shell
 pip install PySide6-Fluent-Widgets -i https://pypi.org/simple/
-```
-Or install full-featured version (`AcrylicLabel` is  available):
-```shell
 pip install "PySide6-Fluent-Widgets[full]" -i https://pypi.org/simple/
 ```
 
@@ -44,13 +51,40 @@ C++ QFluentWidgets require purchasing a license from the [official website](http
 
 
 ## Run Example
-After installing PySide6-Fluent-Widgets package using pip, you can run any demo in the examples directory, for example:
+After cloning this repository, use `uv` to create the environment and run examples:
+```shell
+uv sync
+uv run python examples/gallery/demo.py
+```
+
+If you need the optional dependencies or documentation environment:
+```shell
+uv sync --extra full --group docs
+```
+
+You can also work with the package directly after installing it from PyPI. For example:
 ```shell
 cd examples/gallery
 python demo.py
 ```
 
 If you encounter `ImportError: cannot import name 'XXX' from 'qfluentwidgets'`, it indicates that the package version you installed is too low. You can replace the mirror source with https://pypi.org/simple and reinstall again.
+
+## Development
+Common project commands with `uv`:
+```shell
+uv lock
+uv build
+uv run sphinx-build -b html docs/source docs/build/html
+```
+
+This repository now maintains the `PySide6` branch only. To keep your fork in sync with the upstream `PySide6` branch:
+```shell
+git fetch upstream
+git checkout PySide6
+git rebase upstream/PySide6
+git push --force-with-lease origin PySide6
+```
 
 ## Documentation
 Want to know more about PySide6-Fluent-Widgets? Please read the [help document](https://qfluentwidgets.com) 👈
