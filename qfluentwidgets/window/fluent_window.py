@@ -1,5 +1,5 @@
 # coding:utf-8
-from typing import Union
+from typing import TYPE_CHECKING, Union
 import sys
 
 from PySide6.QtCore import Qt, QSize, QRect, QRectF
@@ -12,12 +12,13 @@ from ..common.router import qrouter
 from ..common.style_sheet import FluentStyleSheet, isDarkTheme, setTheme, Theme
 from ..common.animation import BackgroundAnimationWidget
 from ..components.widgets.frameless_window import FramelessWindow
-from ..components.widgets.label import CaptionLabel
-from ..components.navigation import (NavigationInterface, NavigationBar, NavigationItemPosition,
-                                     NavigationBarPushButton, NavigationTreeWidget)
+from ..components.navigation.navigation_types import NavigationItemPosition
 from .stacked_widget import StackedWidget
 
 from qframelesswindow import TitleBar, TitleBarBase, TitleBarButton
+
+if TYPE_CHECKING:
+    from ..components.navigation import NavigationBar, NavigationBarPushButton, NavigationInterface, NavigationTreeWidget
 
 
 class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
@@ -129,7 +130,7 @@ class FluentWindowBase(FluentWidget):
         FluentStyleSheet.FLUENT_WINDOW.apply(self.stackedWidget)
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
-                        position=NavigationItemPosition.TOP):
+                        position=None):
         """ add sub interface """
         raise NotImplementedError
 
@@ -225,6 +226,8 @@ class FluentTitleBar(TitleBar):
         self.window().windowIconChanged.connect(self.setIcon)
 
         # add title label
+        from ..components.widgets.label import CaptionLabel
+
         self.titleLabel = CaptionLabel(self)
         self.hBoxLayout.insertWidget(1, self.titleLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.titleLabel.setObjectName('titleLabel')
@@ -257,6 +260,8 @@ class FluentWindow(FluentWindowBase):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        from ..components.navigation import NavigationInterface
+
         self.setTitleBar(FluentTitleBar(self))
 
         self.navigationInterface = NavigationInterface(self, showReturnButton=True)
@@ -274,7 +279,7 @@ class FluentWindow(FluentWindowBase):
         self.titleBar.raise_()
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
-                        position=NavigationItemPosition.TOP, parent=None, isTransparent=False) -> NavigationTreeWidget:
+                        position=None, parent=None, isTransparent=False) -> 'NavigationTreeWidget':
         """ add sub interface, the object name of `interface` should be set already
         before calling this method
 
@@ -301,6 +306,8 @@ class FluentWindow(FluentWindowBase):
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
+
+        position = position or NavigationItemPosition.TOP
 
         parentRouteKey = parent
         if parent and isinstance(parent, QWidget):
@@ -377,6 +384,8 @@ class MSFluentWindow(FluentWindowBase):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        from ..components.navigation import NavigationBar
+
         self.setTitleBar(MSFluentTitleBar(self))
 
         self.navigationInterface = NavigationBar(self)
@@ -390,7 +399,7 @@ class MSFluentWindow(FluentWindowBase):
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
-                        selectedIcon=None, position=NavigationItemPosition.TOP, isTransparent=False) -> NavigationBarPushButton:
+                        selectedIcon=None, position=None, isTransparent=False) -> 'NavigationBarPushButton':
         """ add sub interface, the object name of `interface` should be set already
         before calling this method
 
@@ -413,6 +422,8 @@ class MSFluentWindow(FluentWindowBase):
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
+
+        position = position or NavigationItemPosition.TOP
 
         interface.setProperty("isStackedTransparent", isTransparent)
         self.stackedWidget.addWidget(interface)
