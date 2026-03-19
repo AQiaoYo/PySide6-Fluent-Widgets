@@ -27,6 +27,7 @@ config.json
 download/
 
 # 忽略构建文件夹
+.venv/
 build/
 dist/
 PyQt_Fluent_Widgets.egg-info/

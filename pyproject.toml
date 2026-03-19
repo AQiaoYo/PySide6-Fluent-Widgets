@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "PySide6-Fluent-Widgets"
+version = "1.11.1"
+description = "A fluent design widgets library based on PySide6"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
+authors = [
+    { name = "zhiyiYo", email = "shokokawaii@outlook.com" },
+]
+keywords = ["pyside6", "fluent", "widgets"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "PySide6>=6.4.2",
+    "PySideSix-Frameless-Window>=0.8.0",
+    "darkdetect",
+]
+
+[project.optional-dependencies]
+full = [
+    "colorthief",
+    "pillow",
+    "scipy",
+]
+
+[project.urls]
+Documentation = "https://qfluentwidgets.com/"
+Source = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/tree/PySide6"
+Issues = "https://github.com/zhiyiYo/PyQt-Fluent-Widgets/issues"
+
+[dependency-groups]
+docs = [
+    "commonmark==0.9.1",
+    "furo",
+    "mock==1.0.1",
+    "recommonmark==0.5.0",
+    "sphinx-autoapi",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "sphinx-intl",
+    "sphinx-markdown-tables==0.0.17",
+    "urllib3<2.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["qfluentwidgets*"]
+
+[tool.uv]
+package = true
