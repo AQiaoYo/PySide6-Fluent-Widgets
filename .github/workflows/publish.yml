@@ -1,19 +1,21 @@
 name: Upload Python Package
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout maintained branch
+    - name: Checkout repository
       uses: actions/checkout@v4
-      with:
-        ref: PySide6
 
     - name: Set up Python
       uses: actions/setup-python@v3
@@ -28,8 +30,27 @@ jobs:
     - name: Build package
       run: uv build
 
-    - name: Publish package
-      uses: pypa/gh-action-pypi-publish@27b31702a0e7fc50959f5ad993c78deac1bdfc29
+    - name: Upload distributions
+      uses: actions/upload-artifact@v4
       with:
-        user: __token__
-        password: ${{ secrets.PYPI_API_TOKEN }}
+        name: python-package-distributions
+        path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/PySide6-Fluent-Widgets-Qiao
+    permissions:
+      id-token: write
+
+    steps:
+    - name: Download distributions
+      uses: actions/download-artifact@v4
+      with:
+        name: python-package-distributions
+        path: dist/
+
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@release/v1
