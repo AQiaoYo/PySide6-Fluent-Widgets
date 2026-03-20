@@ -75,6 +75,8 @@ Common project commands with `uv`:
 ```shell
 uv run python scripts/bump_version.py
 uv run python scripts/bump_version.py 2.1.0
+uv run python scripts/bump_version.py --tag
+uv run python scripts/bump_version.py --tag --push-tag
 uv lock
 uv build
 uv run sphinx-build -b html docs/source docs/build/html
@@ -82,9 +84,7 @@ uv run sphinx-build -b html docs/source docs/build/html
 
 This fork publishes from the current repository. A recommended release flow is:
 ```shell
-uv run python scripts/bump_version.py          # default: patch +1
-git tag v<new-version>
-git push origin v<new-version>
+uv run python scripts/bump_version.py --tag --push-tag
 ```
 
 ## Documentation
