@@ -73,6 +73,8 @@ If you encounter `ImportError: cannot import name 'XXX' from 'qfluentwidgets'`, 
 ## Development
 Common project commands with `uv`:
 ```shell
+uv run python scripts/bump_version.py
+uv run python scripts/bump_version.py 2.1.0
 uv lock
 uv build
 uv run sphinx-build -b html docs/source docs/build/html
@@ -80,8 +82,9 @@ uv run sphinx-build -b html docs/source docs/build/html
 
 This fork publishes from the current repository. A recommended release flow is:
 ```shell
-git tag v1.11.1
-git push origin v1.11.1
+uv run python scripts/bump_version.py          # default: patch +1
+git tag v<new-version>
+git push origin v<new-version>
 ```
 
 ## Documentation

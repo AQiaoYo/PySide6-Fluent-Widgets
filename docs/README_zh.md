@@ -71,6 +71,8 @@ python demo.py
 ## 开发命令🛠
 常用的 `uv` 项目命令：
 ```shell
+uv run python scripts/bump_version.py
+uv run python scripts/bump_version.py 2.1.0
 uv lock
 uv build
 uv run sphinx-build -b html docs/source docs/build/html
@@ -78,8 +80,9 @@ uv run sphinx-build -b html docs/source docs/build/html
 
 推荐发布流程：
 ```shell
-git tag v1.11.1
-git push origin v1.11.1
+uv run python scripts/bump_version.py          # 默认补丁号 +1
+git tag v<new-version>
+git push origin v<new-version>
 ```
 
 ## 在线文档📕
