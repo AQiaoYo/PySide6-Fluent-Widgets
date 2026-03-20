@@ -3,13 +3,29 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+from pathlib import Path
+import re
+
+
+ROOT = Path(__file__).resolve().parents[2]
+VERSION_FILE = ROOT / "qfluentwidgets" / "_version.py"
+VERSION_MATCH = re.search(
+    r'(?m)^__version__ = "(?P<version>\d+\.\d+\.\d+)"$',
+    VERSION_FILE.read_text(encoding="utf-8"),
+)
+if VERSION_MATCH is None:
+    raise RuntimeError(f"Could not read version from {VERSION_FILE}")
+
+PACKAGE_VERSION = VERSION_MATCH.group("version")
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'PySide6-Fluent-Widgets-Qiao'
 copyright = '2026, zhiyiYo, AQiaoYo'
 author = 'AQiaoYo'
-release = 'v1.11.1'
+version = PACKAGE_VERSION
+release = f'v{PACKAGE_VERSION}'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

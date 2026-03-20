@@ -13,7 +13,8 @@ https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree/main/examples
 :license: 非商业项目使用 GPLv3,详见 README.
 """
 
-__version__ = "2.0.8"
+from ._version import __version__
+
 __author__ = "AQiaoYo"
 __maintainer__ = "AQiaoYo"
 __maintainer_email__ = "AQiaoYo@qq.com"
