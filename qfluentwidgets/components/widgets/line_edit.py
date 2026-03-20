@@ -352,7 +352,7 @@ class CompleterMenu(RoundMenu):
             self.view.setMinimumWidth(p.width())
             self.adjustSize()
 
-        # 判断the 动画 type by choosing maximum 高度 的 视图
+        # 根据可用高度选择动画类型.
         x = -self.width()//2 + self.layout().contentsMargins().left() + p.width()//2
         y = p.height() - self.layout().contentsMargins().top() + 2
         pd = p.mapToGlobal(QPoint(x, y))

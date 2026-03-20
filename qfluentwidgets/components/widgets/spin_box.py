@@ -196,7 +196,7 @@ class SpinBoxBase:
 
 
 class InlineSpinBoxBase(SpinBoxBase):
-    """ Inline 微调框 base """
+    """内联微调框基类."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -224,7 +224,7 @@ class InlineSpinBoxBase(SpinBoxBase):
 
 
 class CompactSpinBoxBase(SpinBoxBase):
-    """ 紧凑 微调框 base """
+    """紧凑微调框基类."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -303,4 +303,3 @@ class DateEdit(InlineSpinBoxBase, QDateEdit):
 
 class CompactDateEdit(CompactSpinBoxBase, QDateEdit):
     """ 紧凑 日期 edit """
-

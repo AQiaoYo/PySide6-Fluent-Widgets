@@ -79,26 +79,25 @@ class InfoBar(QFrame):
         参数
         ----------
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            图标 的 信息栏
+            信息栏图标.
 
         title: str
-            标题 的 信息栏
+            信息栏标题.
 
         content: str
-            内容 的 信息栏
+            信息栏内容.
 
         orient: Qt.Orientation
-            布局 方向 的 信息栏, use `Qt.Horizontal` 用于 short 内容
+            信息栏的布局方向. 短内容建议使用 `Qt.Horizontal`.
 
         isClosable: bool
-            是否 到 显示 关闭 按钮
+            是否显示关闭按钮.
 
         duraction: int
-            时间 用于 信息栏 到 display 中的 milliseconds. 如果 持续时间 is less than zero,
-            信息栏 will never disappear.
+            信息栏显示时长, 单位为毫秒. 如果时长小于 0, 信息栏将不会自动消失.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(parent=parent)
         self.title = title
@@ -393,7 +392,7 @@ class InfoBarManager(QObject):
         if slideAni:
             self.slideAnis.remove(slideAni)
 
-        # 调整the 位置 的 remaining info bars
+        # 调整其余信息栏的位置.
         self._updateDropAni(p)
         self.aniGroups[p].start()
 
@@ -441,12 +440,12 @@ class InfoBarManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ 注册 菜单 动画 管理器
+        """注册信息栏位置管理器.
 
         参数
         ----------
         name: Any
-            name 的 管理器, it should be unique
+            管理器名称, 必须唯一.
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -458,7 +457,7 @@ class InfoBarManager(QObject):
 
     @classmethod
     def make(cls, position: InfoBarPosition):
-        """ 遮罩 信息栏 管理器 根据 display 位置 """
+        """根据显示位置创建信息栏管理器."""
         if position not in cls.managers:
             raise ValueError(f'`{position}` is an invalid animation type.')
 

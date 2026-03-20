@@ -71,32 +71,32 @@ class Pivot(QWidget):
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         icon: str
-            图标 的 navigation 项
+            导航项图标.
         """
         return self.insertItem(-1, routeKey, text, onClick, icon)
 
     def addWidget(self, routeKey: str, widget: PivotItem, onClick=None):
-        """ 添加 部件
+        """添加部件.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: PivotItem
-            导航部件
+            导航部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         self.insertWidget(-1, routeKey, widget, onClick)
 
@@ -109,16 +109,16 @@ class Pivot(QWidget):
             插入 位置
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         icon: str
-            图标 的 navigation 项
+            导航项图标.
         """
         if routeKey in self.items:
             return
@@ -131,21 +131,21 @@ class Pivot(QWidget):
         return item
 
     def insertWidget(self, index: int, routeKey: str, widget: PivotItem, onClick=None):
-        """ 插入 项
+        """插入项.
 
         参数
         ----------
         index: int
-            插入 位置
+            插入位置.
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: PivotItem
-            导航部件
+            导航部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         if routeKey in self.items:
             return
@@ -178,7 +178,7 @@ class Pivot(QWidget):
             self._currentRouteKey = None
 
     def clear(self):
-        """ 清空all navigation 项 """
+        """清空所有导航项."""
         for k, w in self.items.items():
             self.hBoxLayout.removeWidget(w)
             qrouter.remove(k)

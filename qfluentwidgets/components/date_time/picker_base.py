@@ -251,7 +251,7 @@ class PickerBase(QPushButton):
 
         self.hBoxLayout.addWidget(button, 0, Qt.AlignLeft)
 
-        # 更新the style 的 按钮
+        # 更新按钮样式.
         for btn in self.columns[:-1]:
             btn.setProperty('hasBorder', True)
             btn.setStyle(QApplication.style())
@@ -337,12 +337,12 @@ class PickerBase(QPushButton):
         button.setAlignment(align)
 
     def clearColumns(self):
-        """ 清空columns """
+        """清空所有列."""
         while self.columns:
             btn = self.columns.pop()
             self.hBoxLayout.removeWidget(btn)
-            # 父部件 的 btn should be explicitly 设置 到 None 到 移除 references 从 its 父部件.
-            # Otherwise, GC will not collect 和 移除 it until end 的 it 父部件 life-cycle
+            # 需要显式断开父子关系, 才能移除对父部件的引用.
+            # 否则对象可能会一直存活到父部件生命周期结束才被回收.
             btn.setParent(None)
             btn.deleteLater()
 
@@ -367,11 +367,11 @@ class PickerBase(QPushButton):
             button.setStyle(QApplication.style())
 
     def panelInitialValue(self):
-        """ initial 值 的 面板 """
+        """返回面板的初始值."""
         return self.value()
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ 设置 是否 到 启用 滚动按钮 auto repeat """
+        """设置是否启用滚动按钮自动重复."""
         self._isScrollButtonRepeatEnabled = isEnabled
 
     def _showPanel(self):
@@ -411,7 +411,7 @@ class PickerBase(QPushButton):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ 设置reset 按钮的可见性 """
+        """设置重置按钮的可见性."""
         self._isResetEnabled = isEnabled
 
 
@@ -515,7 +515,7 @@ class PickerPanel(QWidget):
         self.resetButton.setVisible(isEnabled)
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ 设置 是否 到 启用 滚动按钮 auto repeat """
+        """设置是否启用滚动按钮自动重复."""
         self.scrollButtonRepeatEnabled = isEnabled
         for widget in self.listWidgets:
             widget.setScrollButtonRepeatEnabled(isEnabled)
@@ -595,10 +595,10 @@ class PickerPanel(QWidget):
         参数
         ----------
         pos: QPoint
-            pop-up 位置
+            弹出位置.
 
         ani: bool
-            是否 到 显示 pop-up 动画
+            是否显示弹出动画.
         """
         if self.isVisible():
             return

@@ -143,10 +143,10 @@ class NavigationPushButton(NavigationWidget):
         参数
         ----------
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         text: str
-            文本 的 按钮
+            按钮文本.
         """
         super().__init__(isSelectable=isSelectable, parent=parent)
 
@@ -332,7 +332,7 @@ class NavigationItemHeader(NavigationWidget):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
 
-        # 计算opacity based 上的 高度 用于 fade effect
+        # 根据高度计算透明度, 用于淡入效果.
         opacity = min(1.0, self.height() / max(1, self._targetHeight))
         painter.setOpacity(opacity)
 
@@ -386,11 +386,11 @@ class NavigationTreeItem(NavigationPushButton):
         self._drawDropDownArrow()
 
     def _drawDropDownArrow(self):
-        # 仅 绘制 arrow 上的 inner 项
+        # 仅为非叶子节点且非紧凑模式项绘制箭头.
         if self.isCompacted or self.treeWidget().isLeaf():
             return
 
-        # 绘制drop down arrow
+        # 绘制下拉箭头.
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
@@ -459,25 +459,25 @@ class NavigationTreeWidgetBase(NavigationWidget):
         return True
 
     def setExpanded(self, isExpanded: bool):
-        """ 设置 expanded 状态
+        """设置展开状态.
 
         参数
         ----------
         isExpanded: bool
-            是否 到 展开 node
+            是否展开当前节点.
         """
         raise NotImplementedError
 
     def childItems(self) -> list:
-        """ 返回 child 项 """
+        """返回子项列表."""
         raise NotImplementedError
 
     def setRememberExpandState(self, remember: bool):
-        """ 设置 是否 到 remember 展开 state """
+        """设置是否记住展开状态."""
         raise NotImplementedError
 
     def saveExpandState(self):
-        """ save 当前 展开 state """
+        """保存当前展开状态."""
         raise NotImplementedError
 
     def restoreExpandState(self, ani=True):
@@ -1009,7 +1009,7 @@ class NavigationUserCard(NavigationAvatarWidget):
                              self._subtitle)
 
     def _updateAvatarPosition(self):
-        """ 更新avatar 位置 based 上的 当前 大小 """
+        """根据当前尺寸更新头像位置."""
         if self.isCompacted:
             self.avatar.move(8, 6)
         else:
@@ -1056,15 +1056,15 @@ class NavigationIndicator(QWidget):
         self.scaleSlideAni.finished.connect(self.aniFinished)
 
     def startAnimation(self, startRect: QRectF, endRect: QRectF, useCrossFade=False):
-        """ 开始指示器 动画
+        """启动指示器动画.
 
         参数
         -----------
         endRect: QRectF
-            final 几何区域 的 指示器
+            指示器结束时的几何区域.
 
         useCrossFade: bool
-            是否 到 use cross fade 动画
+            是否使用交叉淡化动画.
         """
         self.setGeometry(startRect.toRect())
         self.show()

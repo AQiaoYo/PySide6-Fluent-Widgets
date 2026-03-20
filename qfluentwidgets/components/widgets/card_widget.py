@@ -323,7 +323,7 @@ class CardGroupWidget(QWidget):
 
 
 class GroupHeaderCardWidget(HeaderCardWidget):
-    """ 分组 header card 部件 """
+    """分组头卡片部件."""
 
     def _postInit(self):
         super()._postInit()
@@ -336,24 +336,24 @@ class GroupHeaderCardWidget(HeaderCardWidget):
         self.viewLayout.addLayout(self.groupLayout)
 
     def addGroup(self, icon: Union[str, FluentIconBase, QIcon], title: str, content: str, widget: QWidget, stretch=0) -> CardGroupWidget:
-        """ 将部件添加到a new 分组
+        """向卡片中添加一个新分组.
 
         参数
         ----------
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         title: str
-            标题 的 card
+            分组标题.
 
         content: str
-            内容 的 card
+            分组内容.
 
         widget: QWidget
-            部件 到 be added
+            要添加的部件.
 
         stretch: int
-            布局 stretch 的 部件
+            部件在布局中的拉伸系数.
         """
         group = CardGroupWidget(icon, title, content, self)
         group.addWidget(widget, stretch=stretch)

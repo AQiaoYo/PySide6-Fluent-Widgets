@@ -233,7 +233,7 @@ class FlipView(QListWidget):
 
         self.scrollToIndex(index)
 
-        # 更新the 可见性 的 滚动按钮
+        # 更新滚动按钮的可见性.
         if index == 0:
             self.preButton.fadeOut()
         elif self.preButton.isTransparent() and self.isHover:
@@ -338,7 +338,7 @@ class FlipView(QListWidget):
             索引 的 图像
 
         load: bool
-            是否 到 load 图像 数据
+            是否加载图像数据.
         """
         if not 0 <= index < self.count():
             return

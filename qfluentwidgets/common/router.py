@@ -95,7 +95,7 @@ class Router(QObject):
             stacked 部件
 
         routeKey: str
-            路由键 的 sub insterface, it should be 对象 name 的 子界面
+            子界面的路由键, 应与该子界面的 `objectName` 一致.
         """
         item = RouteItem(stacked, routeKey)
 

@@ -279,13 +279,13 @@ class HollowHandleStyle(QProxyStyle):
         painter.save()
         painter.translate(grooveRect.topLeft())
 
-        # 绘制the crossed part
+        # 绘制已覆盖部分.
         w = handleRect.x()-grooveRect.x()
         h = self.config['groove.height']
         painter.setBrush(self.config["sub-page.color"])
         painter.drawRect(0, 0, w, h)
 
-        # 绘制the uncrossed part
+        # 绘制未覆盖部分.
         x = w+self.config['handle.size'].width()
         painter.setBrush(self.config["add-page.color"])
         painter.drawRect(x, 0, grooveRect.width()-w, h)

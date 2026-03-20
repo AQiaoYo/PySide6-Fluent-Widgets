@@ -7,21 +7,21 @@ from .config import qconfig
 
 
 def setFontFamilies(families: List[str], save=False):
-    """ 设置 font families used by all 部件
+    """设置所有部件使用的字体族.
 
     参数
     ----------
     families: 列表[str]
-        font family names, default 值 is `['Segoe UI', 'Microsoft YaHei', 'PingFang SC']`
+        字体族名称列表, 默认值为 `['Segoe UI', 'Microsoft YaHei', 'PingFang SC']`.
 
     save: bool
-        是否 到 save 更改 到 配置 file
+        是否将更改保存到配置文件.
     """
     qconfig.set(qconfig.fontFamilies, families, save)
 
 
 def fontFamilies() -> List[str]:
-    """ 返回 font families used by all 部件 """
+    """返回所有部件使用的字体族."""
     return qconfig.get(qconfig.fontFamilies).copy()
 
 

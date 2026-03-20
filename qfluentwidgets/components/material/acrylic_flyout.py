@@ -65,19 +65,19 @@ class AcrylicFlyout(Flyout):
             标题 的 教学提示
 
         content: str
-            内容 的 教学提示
+            浮出层内容.
 
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            图标 的 教学提示
+            浮出层图标.
 
         image: str | QPixmap | QImage
-            图像 的 教学提示
+            浮出层图片.
 
         isClosable: bool
-            是否 到 显示 关闭 按钮
+            是否显示关闭按钮.
 
         target: QWidget | QPoint
-            目标 部件 或 位置 到 显示 浮出层
+            要显示浮出层的目标部件或位置.
 
         parent: QWidget
             父部件 窗口

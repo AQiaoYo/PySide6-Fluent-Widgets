@@ -64,10 +64,10 @@ class CycleListWidget(QListWidget):
             大小 的 项
 
         align: Qt.AlignmentFlag
-            文本 alignment 的 项
+            项文本对齐方式.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(parent=parent)
         self.itemSize = itemSize
@@ -199,7 +199,7 @@ class CycleListWidget(QListWidget):
             self.scrollUp()
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ 设置 是否 到 启用 滚动按钮 auto repeat """
+        """设置是否启用滚动按钮自动重复."""
         if self._scrollButtonRepeatEnabled == isEnabled:
             return
 

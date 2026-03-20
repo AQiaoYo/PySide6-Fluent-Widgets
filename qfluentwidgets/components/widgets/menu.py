@@ -60,7 +60,7 @@ class DWMMenu(QMenu):
 
 
 class MenuAnimationType(Enum):
-    """ 菜单 动画 type """
+    """菜单动画类型."""
 
     NONE = 0
     DROP_DOWN = 1
@@ -71,7 +71,7 @@ class MenuAnimationType(Enum):
 
 
 class SubMenuItemWidget(QWidget):
-    """ Sub 菜单 项 """
+    """子菜单项部件."""
 
     showMenuSig = Signal(QListWidgetItem)
 
@@ -80,13 +80,13 @@ class SubMenuItemWidget(QWidget):
         参数
         ----------
         menu: QMenu | RoundMenu
-            sub 菜单
+            子菜单.
 
         item: QListWidgetItem
-            菜单 项
+            菜单项.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(parent)
         self.menu = menu
@@ -100,13 +100,13 @@ class SubMenuItemWidget(QWidget):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
-        # 绘制right arrow
+        # 绘制向右箭头.
         FIF.CHEVRON_RIGHT.render(painter, QRectF(
             self.width()-10, self.height()/2-9/2, 9, 9))
 
 
 class MenuItemDelegate(QStyledItemDelegate):
-    """ 菜单 项 委托 """
+    """菜单项委托."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -119,7 +119,7 @@ class MenuItemDelegate(QStyledItemDelegate):
         if not self._isSeparator(index):
             return super().paint(painter, option, index)
 
-        # 绘制seperator
+        # 绘制分隔线.
         painter.save()
 
         c = 0 if not isDarkTheme() else 255
@@ -139,14 +139,14 @@ class MenuItemDelegate(QStyledItemDelegate):
 
 
 class ShortcutMenuItemDelegate(MenuItemDelegate):
-    """ Shortcut key 菜单 项 委托 """
+    """带快捷键文本的菜单项委托."""
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
         super().paint(painter, option, index)
         if self._isSeparator(index):
             return
 
-        # 绘制shortcut key
+        # 绘制快捷键文本.
         action = index.data(Qt.UserRole)  # type: QAction
         if not isinstance(action, QAction) or action.shortcut().isEmpty():
             return
@@ -173,12 +173,12 @@ class ShortcutMenuItemDelegate(MenuItemDelegate):
 
 
 class MenuActionListWidget(QListWidget):
-    """ 菜单 action 列表 部件 """
+    """菜单动作列表部件."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._itemHeight = 28
-        self._maxVisibleItems = -1  # 调整可见 项 根据 大小 的 屏幕
+        self._maxVisibleItems = -1  # 根据屏幕尺寸调整可见项数量.
 
         self.setViewportMargins(0, 6, 0, 6)
         self.setTextElideMode(Qt.ElideNone)
@@ -194,17 +194,17 @@ class MenuActionListWidget(QListWidget):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def insertItem(self, row, item):
-        """ inserts 菜单 项 at 位置 中的 列表 given by 行 """
+        """在指定行插入菜单项."""
         super().insertItem(row, item)
         self.adjustSize()
 
     def addItem(self, item):
-        """ 添加 菜单 项 at end """
+        """在列表末尾添加菜单项."""
         super().addItem(item)
         self.adjustSize()
 
     def takeItem(self, row):
-        """ delete 项 从 列表 """
+        """从列表中删除指定项."""
         item = super().takeItem(row)
         self.adjustSize()
         return item
@@ -216,13 +216,13 @@ class MenuActionListWidget(QListWidget):
             size.setWidth(max(s.width(), size.width(), 1))
             size.setHeight(max(1, size.height() + s.height()))
 
-        # 调整the 高度 的 viewport
+        # 调整视口高度.
         w, h = MenuAnimationManager.make(self, aniType).availableViewSize(pos)
 
         # fixes https://github.com/zhiyiYo/PyQt-Fluent-Widgets/issues/844
         # self.viewport().adjustSize()
 
-        # 调整the 高度 的 列表 部件
+        # 调整列表部件高度.
         m = self.viewportMargins()
         size += QSize(m.left()+m.right()+2, m.top()+m.bottom())
         size.setHeight(min(h, size.height()+3))
@@ -248,7 +248,7 @@ class MenuActionListWidget(QListWidget):
         self.adjustSize()
 
     def setMaxVisibleItems(self, num: int):
-        """ 设置 maximum 可见 项 """
+        """设置最大可见项数."""
         self._maxVisibleItems = num
         self.adjustSize()
 
@@ -256,13 +256,13 @@ class MenuActionListWidget(QListWidget):
         return self._maxVisibleItems
 
     def heightForAnimation(self, pos: QPoint, aniType: MenuAnimationType):
-        """ 高度 用于 动画 """
+        """返回动画可用高度."""
         ih = self.itemsHeight()
         _, sh = MenuAnimationManager.make(self, aniType).availableViewSize(pos)
         return min(ih, sh)
 
     def itemsHeight(self):
-        """ 返回 高度 的 all 项 """
+        """返回所有项的总高度."""
         N = self.count() if self.maxVisibleItems() < 0 else min(self.maxVisibleItems(), self.count())
         h = sum(self.item(i).sizeHint().height() for i in range(N))
         m = self.viewportMargins()
@@ -270,7 +270,7 @@ class MenuActionListWidget(QListWidget):
 
 
 class RoundMenu(QMenu):
-    """ Round corner 菜单 """
+    """圆角菜单."""
 
     closedSignal = Signal()
 
@@ -278,7 +278,7 @@ class RoundMenu(QMenu):
         super().__init__(parent=parent)
         self.setTitle(title)
         self._icon = QIcon()
-        self._actions = []  # type: 列表[QAction]
+        self._actions = []  # type: List[QAction]
         self._subMenus = []
 
         self.isSubMenu = False
@@ -320,12 +320,12 @@ class RoundMenu(QMenu):
         self.view.itemEntered.connect(self._onItemEntered)
 
     def setMaxVisibleItems(self, num: int):
-        """ 设置 maximum 可见 项 """
+        """设置最大可见项数."""
         self.view.setMaxVisibleItems(num)
         self.adjustSize()
 
     def setItemHeight(self, height):
-        """ 设置菜单 项的高度 """
+        """设置菜单项高度."""
         if height == self.itemHeight:
             return
 
@@ -333,7 +333,7 @@ class RoundMenu(QMenu):
         self.view.setItemHeight(height)
 
     def setShadowEffect(self, blurRadius=30, offset=(0, 8), color=QColor(0, 0, 0, 30)):
-        """ 将shadow添加到对话框 """
+        """为菜单添加阴影效果."""
         self.shadowEffect = QGraphicsDropShadowEffect(self.view)
         self.shadowEffect.setBlurRadius(blurRadius)
         self.shadowEffect.setOffset(*offset)
@@ -359,7 +359,7 @@ class RoundMenu(QMenu):
         return self._title
 
     def clear(self):
-        """ 清空all actions """
+        """清空所有动作."""
         while self._actions:
             self.removeAction(self._actions[-1])
 
@@ -378,30 +378,30 @@ class RoundMenu(QMenu):
         super().setTitle(title)
 
     def addAction(self, action: Union[QAction, Action]):
-        """ 将action添加到菜单
+        """向菜单中添加动作.
 
         参数
         ----------
         action: QAction
-            菜单 action
+            菜单动作.
         """
         item = self._createActionItem(action)
         self.view.addItem(item)
         self.adjustSize()
 
     def addWidget(self, widget: QWidget, selectable=True, onClick=None):
-        """ 添加 自定义 部件
+        """向菜单中添加自定义部件.
 
         参数
         ----------
         widget: QWidget
-            自定义 部件
+            自定义部件.
 
         selectable: bool
-            是否 菜单 项 is selectable
+            对应菜单项是否可选中.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         action = QAction()
         action.setProperty('selectable', selectable)
@@ -421,7 +421,7 @@ class RoundMenu(QMenu):
         self.adjustSize()
 
     def _createActionItem(self, action: QAction, before=None):
-        """ 创建菜单 action 项  """
+        """创建菜单动作项."""
         if not before:
             self._actions.append(action)
             super().addAction(action)
@@ -435,7 +435,7 @@ class RoundMenu(QMenu):
         item = QListWidgetItem(self._createItemIcon(action), action.text())
         self._adjustItemText(item, action)
 
-        # 禁用项 如果 action is not 已启用
+        # 如果动作不可用, 则禁用对应菜单项.
         if not action.isEnabled():
             item.setFlags(Qt.NoItemFlags)
         if action.text() != action.toolTip():
@@ -450,8 +450,8 @@ class RoundMenu(QMenu):
         return any(not i.icon().isNull() for i in self._actions+self._subMenus)
 
     def _adjustItemText(self, item: QListWidgetItem, action: QAction):
-        """ 调整the 文本 的 项 """
-        # leave some space 用于 shortcut key
+        """调整菜单项文本宽度."""
+        # 为快捷键文本预留一些空间.
         if isinstance(self.view.itemDelegate(), ShortcutMenuItemDelegate):
             sw = self._longestShortcutWidth()
             if sw:
@@ -459,12 +459,12 @@ class RoundMenu(QMenu):
         else:
             sw = 0
 
-        # 调整the 宽度 的 项
+        # 调整菜单项宽度.
         if not self._hasItemIcon():
             item.setText(action.text())
             w = 40 + self.view.fontMetrics().boundingRect(action.text()).width() + sw
         else:
-            # 将a blank character添加到increase space between 图标 和 文本
+            # 添加一个空格, 以增大图标与文本之间的间距.
             item.setText(" " + action.text())
             space = 4 - self.view.fontMetrics().boundingRect(" ").width()
             w = 60 + self.view.fontMetrics().boundingRect(item.text()).width() + sw + space
@@ -473,12 +473,12 @@ class RoundMenu(QMenu):
         return w
 
     def _longestShortcutWidth(self):
-        """ longest shortcut key """
+        """返回最长快捷键文本的宽度."""
         fm = QFontMetrics(getFont(12))
         return max(fm.horizontalAdvance(a.shortcut().toString(QKeySequence.NativeText)) for a in self.menuActions())
 
     def _createItemIcon(self, w):
-        """ 创建the 图标 的 菜单 项 """
+        """创建菜单项图标."""
         hasIcon = self._hasItemIcon()
         icon = QIcon(FluentIconEngine(w.icon()))
 
@@ -492,7 +492,7 @@ class RoundMenu(QMenu):
         return icon
 
     def insertAction(self, before: Union[QAction, Action], action: Union[QAction, Action]):
-        """ inserts action 到 菜单, before action before """
+        """在指定动作前插入动作."""
         if before not in self._actions:
             return
 
@@ -506,27 +506,27 @@ class RoundMenu(QMenu):
         self.adjustSize()
 
     def addActions(self, actions: List[Union[QAction, Action]]):
-        """ 将actions添加到菜单
+        """向菜单中添加多个动作.
 
         参数
         ----------
         actions: Iterable[QAction]
-            菜单 actions
+            菜单动作列表.
         """
         for action in actions:
             self.addAction(action)
 
     def insertActions(self, before: Union[QAction, Action], actions: List[Union[QAction, Action]]):
-        """ inserts actions actions 到 菜单, before action before """
+        """在指定动作前插入多个动作."""
         for action in actions:
             self.insertAction(before, action)
 
     def removeAction(self, action: Union[QAction, Action]):
-        """ 从菜单移除action """
+        """从菜单中移除动作."""
         if action not in self._actions:
             return
 
-        # 移除 action
+        # 移除动作.
         item = action.property("item")
         self._actions.remove(action)
         action.setProperty('item', None)
@@ -534,12 +534,12 @@ class RoundMenu(QMenu):
         if not item:
             return
 
-        # 移除 项
+        # 移除菜单项.
         self._removeItem(item)
         super().removeAction(action)
 
     def removeMenu(self, menu):
-        """ 移除 submenu """
+        """移除子菜单."""
         if menu not in self._subMenus:
             return
 
@@ -548,7 +548,7 @@ class RoundMenu(QMenu):
         self._removeItem(item)
 
     def setDefaultAction(self, action: Union[QAction, Action]):
-        """ 设置 default action """
+        """设置默认动作."""
         if action not in self._actions:
             return
 
@@ -557,12 +557,12 @@ class RoundMenu(QMenu):
             self.view.setCurrentItem(item)
 
     def addMenu(self, menu):
-        """ 添加 sub 菜单
+        """添加子菜单.
 
         参数
         ----------
         menu: RoundMenu
-            sub round 菜单
+            子圆角菜单.
         """
         if not isinstance(menu, RoundMenu):
             raise ValueError('`menu` should be an instance of `RoundMenu`.')
@@ -573,7 +573,7 @@ class RoundMenu(QMenu):
         self.adjustSize()
 
     def insertMenu(self, before: Union[QAction, Action], menu):
-        """ 插入 菜单 before action `before` """
+        """在指定动作前插入子菜单."""
         if not isinstance(menu, RoundMenu):
             raise ValueError('`menu` should be an instance of `RoundMenu`.')
 
@@ -592,11 +592,11 @@ class RoundMenu(QMenu):
         if not self._hasItemIcon():
             w = 60 + self.view.fontMetrics().boundingRect(menu.title()).width()
         else:
-            # 将a blank character添加到increase space between 图标 和 文本
+            # 添加一个空格, 以增大图标与文本之间的间距.
             item.setText(" " + item.text())
             w = 72 + self.view.fontMetrics().boundingRect(item.text()).width()
 
-        # 添加 submenu 项
+        # 添加子菜单项.
         menu._setParentMenu(self, item)
         item.setSizeHint(QSize(w, self.itemHeight))
         item.setData(Qt.UserRole, menu)
@@ -610,16 +610,16 @@ class RoundMenu(QMenu):
         self.view.takeItem(self.view.row(item))
         item.setData(Qt.UserRole, None)
 
-        # delete 部件
+        # 删除关联部件.
         widget = self.view.itemWidget(item)
         if widget:
             widget.deleteLater()
 
     def _showSubMenu(self, item):
-        """ 显示sub 菜单 """
+        """显示子菜单."""
         self.lastHoverItem = item
         self.lastHoverSubMenuItem = item
-        # delay 400 ms 到 anti-shake
+        # 延迟 400 毫秒以避免抖动.
         self.timer.stop()
         self.timer.start()
 
@@ -649,11 +649,11 @@ class RoundMenu(QMenu):
         w.menu.exec(QPoint(x, y))
 
     def addSeparator(self):
-        """ 将seperator添加到菜单 """
+        """向菜单中添加分隔符."""
         m = self.view.viewportMargins()
         w = self.view.width()-m.left()-m.right()
 
-        # 将分隔符添加到列表 部件
+        # 将分隔符添加到列表部件中.
         item = QListWidgetItem()
         item.setFlags(Qt.NoItemFlags)
         item.setSizeHint(QSize(w, 9))
@@ -675,7 +675,7 @@ class RoundMenu(QMenu):
             action.trigger()
             return
 
-        # 关闭 父部件 菜单
+        # 关闭父级菜单.
         self._closeParentMenu()
         action.trigger()
 
@@ -724,11 +724,11 @@ class RoundMenu(QMenu):
         if not self.isSubMenu:
             return
 
-        # 隐藏submenu 当 mouse moves out 的 submenu 项
+        # 鼠标移出子菜单项时隐藏子菜单.
         pos = e.globalPos()
         view = self.parentMenu.view
 
-        # 获取菜单 项的区域
+        # 获取菜单项所在区域.
         margin = view.viewportMargins()
         rect = view.visualItemRect(self.menuItem).translated(view.mapToGlobal(QPoint()))
         rect = rect.translated(margin.left(), margin.top()+2)
@@ -738,7 +738,7 @@ class RoundMenu(QMenu):
             self._hideMenu(False)
 
     def _onActionChanged(self):
-        """ action changed 槽函数 """
+        """动作变更时更新对应菜单项."""
         action = self.sender()  # type: QAction
         item = action.property('item')  # type: QListWidgetItem
         item.setIcon(self._createItemIcon(action))
@@ -762,13 +762,13 @@ class RoundMenu(QMenu):
         参数
         ----------
         pos: QPoint
-            pop-up 位置
+            弹出位置.
 
         ani: bool
-            是否 到 显示 pop-up 动画
+            是否显示弹出动画.
 
         aniType: MenuAnimationType
-            菜单 动画 type
+            菜单动画类型.
         """
         #if self.isVisible():
         #    aniType = MenuAnimationType.NONE
@@ -787,13 +787,13 @@ class RoundMenu(QMenu):
         参数
         ----------
         pos: QPoint
-            pop-up 位置
+            弹出位置.
 
         ani: bool
-            是否 到 显示 pop-up 动画
+            是否显示弹出动画.
 
         aniType: MenuAnimationType
-            菜单 动画 type
+            菜单动画类型.
         """
         self.exec(pos, ani, aniType)
 
@@ -814,7 +814,7 @@ class RoundMenu(QMenu):
 
 
 class MenuAnimationManager(QObject):
-    """ 菜单 动画 管理器 """
+    """菜单动画管理器."""
 
     managers = {}
 
@@ -832,7 +832,7 @@ class MenuAnimationManager(QObject):
         pass
 
     def availableViewSize(self, pos: QPoint):
-        """ 返回 可用 大小 的 视图 """
+        """返回视图可用尺寸."""
         ss = getCurrentScreenGeometry()
         w, h = ss.width() - 100, ss.height() - 100
         return w, h
@@ -863,12 +863,12 @@ class MenuAnimationManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ 注册 菜单 动画 管理器
+        """注册菜单动画管理器.
 
         参数
         ----------
         name: Any
-            name 的 管理器, it should be unique
+            管理器名称, 必须唯一.
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -888,7 +888,7 @@ class MenuAnimationManager(QObject):
 
 @MenuAnimationManager.register(MenuAnimationType.NONE)
 class DummyMenuAnimationManager(MenuAnimationManager):
-    """ Dummy 菜单 动画 管理器 """
+    """空菜单动画管理器."""
 
     def exec(self, pos: QPoint):
         self.menu.move(self._endPosition(pos))
@@ -896,7 +896,7 @@ class DummyMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.DROP_DOWN)
 class DropDownMenuAnimationManager(MenuAnimationManager):
-    """ Drop down 菜单 动画 管理器 """
+    """下拉菜单动画管理器."""
 
     def exec(self, pos):
         pos = self._endPosition(pos)
@@ -918,7 +918,7 @@ class DropDownMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.PULL_UP)
 class PullUpMenuAnimationManager(MenuAnimationManager):
-    """ Pull up 菜单 动画 管理器 """
+    """上拉菜单动画管理器."""
 
     def _endPosition(self, pos):
         m = self.menu
@@ -948,7 +948,7 @@ class PullUpMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.FADE_IN_DROP_DOWN)
 class FadeInDropDownMenuAnimationManager(MenuAnimationManager):
-    """ Fade 中的 drop down 菜单 动画 管理器 """
+    """淡入下拉菜单动画管理器."""
 
     def __init__(self, menu: RoundMenu):
         super().__init__(menu)
@@ -979,7 +979,7 @@ class FadeInDropDownMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.FADE_IN_PULL_UP)
 class FadeInPullUpMenuAnimationManager(MenuAnimationManager):
-    """ Fade 中的 pull up 菜单 动画 管理器 """
+    """淡入上拉菜单动画管理器."""
 
     def __init__(self, menu: RoundMenu):
         super().__init__(menu)
@@ -1016,7 +1016,7 @@ class FadeInPullUpMenuAnimationManager(MenuAnimationManager):
 
 
 class EditMenu(RoundMenu):
-    """ Edit 菜单 """
+    """编辑菜单."""
 
     def createActions(self):
         self.cutAct = QAction(
@@ -1128,7 +1128,7 @@ class LineEditMenu(EditMenu):
 
 
 class TextEditMenu(EditMenu):
-    """ 文本 edit 菜单 """
+    """文本编辑菜单."""
 
     def __init__(self, parent: QTextEdit):
         super().__init__("", parent)
@@ -1156,7 +1156,7 @@ class TextEditMenu(EditMenu):
 
 
 class IndicatorMenuItemDelegate(MenuItemDelegate):
-    """ 菜单 项 委托 使用 指示器 """
+    """带指示器的菜单项委托."""
 
     def paint(self, painter: QPainter, option, index):
         super().paint(painter, option, index)
@@ -1175,7 +1175,7 @@ class IndicatorMenuItemDelegate(MenuItemDelegate):
 
 
 class CheckableMenuItemDelegate(ShortcutMenuItemDelegate):
-    """ Checkable 菜单 项 委托 """
+    """可选中菜单项委托."""
 
     def _drawIndicator(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
         raise NotImplementedError
@@ -1194,7 +1194,7 @@ class CheckableMenuItemDelegate(ShortcutMenuItemDelegate):
 
 
 class RadioIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
-    """ Checkable 菜单 项 委托 使用 radio 指示器 """
+    """带单选指示器的可选中菜单项委托."""
 
     def _drawIndicator(self, painter, option, index):
         rect = option.rect
@@ -1212,7 +1212,7 @@ class RadioIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
 
 
 class CheckIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
-    """ Checkable 菜单 项 委托 使用 check 指示器 """
+    """带复选指示器的可选中菜单项委托."""
 
     def _drawIndicator(self, painter, option, index):
         rect = option.rect
@@ -1228,13 +1228,13 @@ class CheckIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
 
 
 class MenuIndicatorType(Enum):
-    """ 菜单 指示器 type """
+    """菜单指示器类型."""
     CHECK = 0
     RADIO = 1
 
 
 def createCheckableMenuItemDelegate(style: MenuIndicatorType):
-    """ 创建checkable 菜单 项 委托 """
+    """创建可选中菜单项委托."""
     if style == MenuIndicatorType.RADIO:
         return RadioIndicatorMenuItemDelegate()
     if style == MenuIndicatorType.CHECK:
@@ -1278,7 +1278,7 @@ class CheckableSystemTrayMenu(CheckableMenu):
 
 
 class LabelContextMenu(RoundMenu):
-    """ 标签 context 菜单 """
+    """标签上下文菜单."""
 
     def __init__(self, parent: QLabel):
         super().__init__("", parent)

@@ -280,8 +280,9 @@ class FluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         position=None, parent=None, isTransparent=False) -> 'NavigationTreeWidget':
-        """ 添加 子界面, 对象 name 的 `interface` should be 设置 already
-        before calling this method
+        """添加子界面.
+
+        调用此方法前, 必须先为 `interface` 设置 `objectName`.
 
         参数
         ----------
@@ -400,8 +401,9 @@ class MSFluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         selectedIcon=None, position=None, isTransparent=False) -> 'NavigationBarPushButton':
-        """ 添加 子界面, 对象 name 的 `interface` should be 设置 already
-        before calling this method
+        """添加子界面.
+
+        调用此方法前, 必须先为 `interface` 设置 `objectName`.
 
         参数
         ----------
@@ -501,6 +503,6 @@ class SplitFluentWindow(FluentWindow):
 
 
 class FluentBackgroundTheme:
-    """ Fluent 背景主题 """
+    """Fluent 背景主题."""
     DEFAULT = (QColor(243, 243, 243), QColor(32, 32, 32))   # 亮色, 暗色
     DEFAULT_BLUE = (QColor(240, 244, 249), QColor(25, 33, 42))

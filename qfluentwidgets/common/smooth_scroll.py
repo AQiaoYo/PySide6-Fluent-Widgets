@@ -9,20 +9,20 @@ from PySide6.QtWidgets import QApplication, QScrollArea, QAbstractScrollArea
 
 
 class SmoothScroll:
-    """ 滚动 smoothly """
+    """平滑滚动控制器."""
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical, dynamicEngineEnabled=True):
         """
         参数
         ----------
         widget: QScrollArea
-            滚动区域 到 滚动 smoothly
+            需要平滑滚动的滚动区域.
 
         orient: Orientation
-            滚动 orientation
+            滚动方向.
 
         dynamicEngineEnabled: bool
-            是否 到 choose 滚动 engine dynamically based 上的 屏幕 dpi
+            是否根据屏幕 DPI 动态选择滚动引擎.
         """
         self.widget = widget
         self.orient = orient
@@ -35,7 +35,7 @@ class SmoothScroll:
         self.adaptiveScrollEngine = AdaptiveSmoothScrollEngine(widget, orient)
 
     def setDynamicEngineEnabled(self, isEnabled: bool):
-        """ 设置 是否 到 use dynamic engine """
+        """设置是否使用动态滚动引擎."""
         self.dynamicEngineEnabled = isEnabled
 
     def setSmoothMode(self, smoothMode):
@@ -139,40 +139,40 @@ class SmoothScrollEngineBase(QObject):
 
 
 class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
-    """ 滚动 smoothly (fixed step) """
+    """固定步长平滑滚动引擎."""
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
-        # push 当前 时间 到 queque
+        # 将当前时间压入队列.
         now = QDateTime.currentDateTime().toMSecsSinceEpoch()
         self.scrollStamps.append(now)
         while now - self.scrollStamps[0] > 500:
             self.scrollStamps.popleft()
 
-        # 调整the acceration ratio based 上的 unprocessed 事件
+        # 根据未处理事件数量调整加速度系数.
         accerationRatio = min(len(self.scrollStamps) / 15, 1)
         self.lastWheelPos = e.position()
         self.lastWheelGlobalPos = e.globalPosition()
 
-        # 获取steps的number
+        # 获取总步数.
         self.stepsTotal = self.fps * self.duration / 1000
 
-        # 获取 moving distance corresponding 到 each 事件
+        # 计算当前事件对应的滚动距离.
         delta = delta * self.stepRatio
         if self.acceleration > 0:
             delta += delta * self.acceleration * accerationRatio
 
-        # form 列表 的 moving distances 和 steps, 和 插入 it into 队列 用于 processing.
+        # 将滚动距离和步数加入待处理队列.
         self.stepsLeftQueue.append([delta, self.stepsTotal])
 
-        # 溢出 时间 的 timer: 1000ms/frames
+        # 定时器间隔为 1000ms / frames.
         self.smoothMoveTimer.start(int(1000 / self.fps))
 
     def _getTotalDelta(self):
-        """ 滚动 smoothly 当 定时器 时间 out """
+        """在定时器触发时计算总滚动距离."""
         totalDelta = 0
 
-        # 计算the scrolling distance 的 all unprocessed 事件,
-        # 定时器 will reduce number 的 steps by 1 each 时间 it overflows.
+        # 计算所有未处理事件的滚动距离.
+        # 每次定时器触发后, 剩余步数减 1.
         for i in self.stepsLeftQueue:
             totalDelta += self._subDelta(i[0], i[1])
             i[1] -= 1
@@ -204,7 +204,10 @@ class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
 
 
 class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
-    """ 滚动 smoothly (time-based, adaptive, HiDPI friendly) """
+    """自适应平滑滚动引擎.
+
+    基于时间计算, 支持自适应调整, 并兼顾 HiDPI 场景.
+    """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
         super().__init__(widget, orient)
@@ -227,7 +230,7 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         self.lastWheelPos = e.position()
         self.lastWheelGlobalPos = e.globalPosition()
 
-        # 计算adaptive 持续时间 based 上的 队列 pressure
+        # 根据队列压力计算自适应持续时间.
         queuePressure = len(self.stepsLeftQueue)
         pressureRatio = min(queuePressure / self.maxQueueSize, 1)
 

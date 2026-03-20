@@ -58,8 +58,8 @@ def fromqpixmap(im: Union[QImage, QPixmap]):
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.ReadWrite)
 
-    # 保留 透明通道 channel 使用 png
-    # otherwise ppm is more friendly 使用 图像.打开
+    # 需要保留透明通道时使用 png.
+    # 否则使用更适合 Image.open() 读取的 ppm.
     if im.hasAlphaChannel():
         im.save(buffer, "png")
     else:
@@ -74,35 +74,35 @@ def fromqpixmap(im: Union[QImage, QPixmap]):
 
 
 class DominantColor:
-    """ Dominant 颜色 类 """
+    """主色提取工具类."""
 
     @classmethod
     @exceptionHandler((24, 24, 24))
     def getDominantColor(cls, imagePath):
-        """ extract dominant 颜色 从 图像
+        """从图像中提取主色.
 
         参数
         ----------
         imagePath: str
-            图像 path
+            图像路径.
 
         返回
         -------
         r, g, b: int
-            灰度 值 的 each 颜色 channel
+            各颜色通道的 RGB 值.
         """
         if imagePath.startswith(':'):
             return (24, 24, 24)
 
         colorThief = ColorThief(imagePath)
 
-        # scale 图像 到 speed up computation speed
+        # 缩放图像以加快计算.
         if max(colorThief.image.size) > 400:
             colorThief.image = colorThief.image.resize((400, 400))
 
         palette = colorThief.get_palette(quality=9)
 
-        # 调整the 亮度 的 palette
+        # 调整调色板亮度.
         palette = cls.__adjustPaletteValue(palette)
         for rgb in palette[:]:
             h, s, v = cls.rgb2hsv(rgb)
@@ -118,7 +118,7 @@ class DominantColor:
 
     @classmethod
     def __adjustPaletteValue(cls, palette):
-        """ 调整the 亮度 的 palette """
+        """调整调色板亮度."""
         newPalette = []
         for rgb in palette:
             h, s, v = cls.rgb2hsv(rgb)
@@ -194,5 +194,4 @@ class DominantColor:
         mean_root = np.sqrt((rg_mean ** 2) + (yb_mean ** 2))
 
         return std_root + (0.3 * mean_root)
-
 

@@ -88,10 +88,10 @@ class TextWrap:
             文本 到 be wrapped
 
         width: int
-            maximum length 的 single line, length 的 Chinese characters is 2
+            单行允许的最大长度, 中文字符按 2 个字符计算.
 
         once: bool
-            是否 到 wrap 仅 once
+            是否只执行一次换行.
 
         返回
         -------

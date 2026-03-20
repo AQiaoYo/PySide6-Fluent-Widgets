@@ -407,44 +407,44 @@ class TabBar(SingleDirectionScrollArea):
         self.addButton.setVisible(isVisible)
 
     def addTab(self, routeKey: str, text: str, icon: Union[QIcon, str, FluentIconBase] = None, onClick=None):
-        """ 添加 tab
+        """添加标签页.
 
         参数
         ----------
         routeKey: str
-            unique name 的 tab 项
+            标签页的唯一标识.
 
         text: str
-            文本 的 tab 项
+            标签页文本.
 
-        text: str
-            图标 的 tab 项
+        icon: str | QIcon | FluentIconBase
+            标签页图标.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         return self.insertTab(-1, routeKey, text, icon, onClick)
 
     def insertTab(self, index: int, routeKey: str, text: str, icon: Union[QIcon, str, FluentIconBase] = None,
                   onClick=None):
-        """ 插入 tab
+        """插入标签页.
 
         参数
         ----------
         index: int
-            插入 位置 的 tab 项
+            标签页插入位置.
 
         routeKey: str
-            unique name 的 tab 项
+            标签页的唯一标识.
 
         text: str
-            文本 的 tab 项
+            标签页文本.
 
-        text: str
-            图标 的 tab 项
+        icon: str | QIcon | FluentIconBase
+            标签页图标.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         if routeKey in self.itemMap:
             raise ValueError(f"The route key `{routeKey}` is duplicated.")
@@ -569,12 +569,12 @@ class TabBar(SingleDirectionScrollArea):
         return self.itemMap.get(routeKey, None)
 
     def tabRegion(self) -> QRect:
-        """ 返回all tabs的bounding 区域 """
+        """返回所有标签页的边界区域."""
         return self.itemLayout.geometry()
 
     @checkIndex()
     def tabRect(self, index: int):
-        """ 返回the tab at 位置 索引的visual rectangle """
+        """返回指定索引标签页的可视区域."""
         x = 0
         for i in range(index):
             x += self.tabItem(i).width()
@@ -655,12 +655,12 @@ class TabBar(SingleDirectionScrollArea):
 
     @checkIndex()
     def setTabTextColor(self, index: int, color: QColor):
-        """ 设置tab 项的文本 颜色 """
+        """设置标签页文本颜色."""
         self.tabItem(index).setTextColor(color)
 
     @checkIndex()
     def setTabToolTip(self, index: int, toolTip: str):
-        """ 设置 工具提示 的 tab """
+        """设置标签页工具提示."""
         self.tabItem(index).setToolTip(toolTip)
 
     def setTabSelectedBackgroundColor(self, light: QColor, dark: QColor):
@@ -873,67 +873,67 @@ class TabWidget(QWidget):
         参数
         ----------
         widget: QWidget
-            部件 中的 new tab
+            新标签页对应的部件.
 
         label: str
-            标题 的 tab
+            标签页标题.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 tab
+            标签页图标.
 
         routeKey: str
-            路由键 的 new tab, 如果 not provided, unique uuid will be generated as 路由键
+            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
 
         返回
         -------
         index: int
-            索引 的 tab
+            标签页索引.
         """
         return self.insertTab(-1, widget, label, icon, routeKey)
 
     def addTab(self, widget: QWidget, label: str, icon: Union[QIcon, str, FluentIconBase] = None, routeKey=None) -> int:
-        """ Adds tab 使用 given 页面, 图标, 和 标签 到 标签部件, 和 返回 索引 的 tab 中的 tab 栏.
+        """添加标签页并返回其索引.
 
         参数
         ----------
         widget: QWidget
-            部件 中的 new tab
+            新标签页对应的部件.
 
         label: str
-            标题 的 tab
+            标签页标题.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 tab
+            标签页图标.
 
         routeKey: str
-            路由键 的 new tab, 如果 not provided, unique uuid will be generated as 路由键
+            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
 
         返回
         -------
         index: int
-            索引 的 tab
+            标签页索引.
         """
         return self.insertTab(-1, widget, label, icon, routeKey)
 
     def insertTab(self, index: int, widget: QWidget, label: str, icon: Union[QIcon, str, FluentIconBase] = None, routeKey=None) -> int:
-        """ Inserts tab 使用 given 标签 和 页面 into 标签部件 at specified 索引, 和 返回 索引 的 inserted tab 中的 tab 栏.
+        """在指定位置插入标签页并返回其索引.
 
         参数
         ----------
         index: int
-            索引 的 new tab 到 be inserted
+            新标签页的插入索引.
 
         widget: QWidget
-            部件 中的 new tab
+            新标签页对应的部件.
 
         label: str
-            标题 的 tab
+            标签页标题.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 tab
+            标签页图标.
 
         routeKey: str
-            路由键 的 new tab, 如果 not provided, unique uuid will be generated as 路由键
+            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
 
         返回
         -------
@@ -947,7 +947,7 @@ class TabWidget(QWidget):
         routeKey = routeKey or uuid1().hex
         widget.setProperty('routeKey', routeKey)
 
-        # 创建a new tab
+        # 创建新标签页.
         self.tabBar.insertTab(index, routeKey, label, icon)
         self.stackedWidget.insertWidget(index, widget)
 
@@ -975,15 +975,15 @@ class TabWidget(QWidget):
         self.tabBar.clear()
 
     def widget(self, index: int):
-        """ 返回 tab 页面 at 索引 位置 索引 或 `None` 如果 索引 is out 的 range. """
+        """返回指定索引的标签页, 如果索引越界则返回 `None`."""
         return self.stackedWidget.widget(index)
 
     def currentWidget(self) -> QWidget:
-        "" "Returns a pointer to the page currently being displayed. """
+        """返回当前显示的页面."""
         return self.stackedWidget.currentWidget()
 
     def currentIndex(self):
-        """ 返回 索引 位置 的 当前 tab 页面, 返回 -1 如果 there is no 当前 部件. """
+        """返回当前标签页索引. 如果没有当前部件, 则返回 -1."""
         return self.stackedWidget.currentIndex()
 
     def setTabBar(self, tabBar):
@@ -1086,7 +1086,7 @@ class TabWidget(QWidget):
         self.stackedWidget.setCurrentIndex(index)
 
     def setCurrentWidget(self, widget: QWidget):
-        """ 设置 当前 tab 到 tab which contains given 部件. """
+        """将当前标签页切换到包含该部件的标签."""
         index = self.stackedWidget.indexOf(widget)
         if index != -1:
             self.setCurrentIndex(index)
@@ -1111,4 +1111,3 @@ class TabWidget(QWidget):
     def _onCurrentTabChanged(self, index: int):
         self.stackedWidget.setCurrentIndex(index)
         self.currentChanged.emit(index)
-

@@ -40,7 +40,7 @@ class FolderItem(QWidget):
         self.hBoxLayout.addWidget(self.removeButton, 0, Qt.AlignRight)
         self.hBoxLayout.setAlignment(Qt.AlignVCenter)
 
-        # 设置 对象 name 到 apply theme-aware 颜色 style
+        # 设置对象名称, 以应用主题感知颜色样式.
         self.folderLabel.setObjectName('titleLabel')
 
         self.removeButton.clicked.connect(
@@ -48,7 +48,7 @@ class FolderItem(QWidget):
 
 
 class FolderListSettingCard(ExpandSettingCard):
-    """ 文件夹 列表 setting card """
+    """文件夹列表设置卡片."""
 
     folderChanged = Signal(list)
 
@@ -57,19 +57,19 @@ class FolderListSettingCard(ExpandSettingCard):
         参数
         ----------
         configItem: RangeConfigItem
-            configuration 项 operated by card
+            由卡片操作的配置项.
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         directory: str
-            working directory 的 file 对话框
+            文件对话框的工作目录.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(FIF.FOLDER, title, content, parent)
         self.configItem = configItem

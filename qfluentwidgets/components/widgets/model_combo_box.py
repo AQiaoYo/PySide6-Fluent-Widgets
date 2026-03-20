@@ -17,7 +17,7 @@ from ...common.style_sheet import FluentStyleSheet
 
 
 class ModelComboBoxBase:
-    """ Abstract 组合框 build 中的 数据 model """
+    """组合框的抽象数据模型."""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -88,7 +88,7 @@ class ModelComboBoxBase:
         return super().eventFilter(obj, e)
 
     def insertItem(self, index: int, text: str, userData=None, icon: QIcon = None):
-        """ Inserts 项 into combobox at given 索引. """
+        """在给定索引处插入项."""
         values = {}
         values[Qt.ItemDataRole.EditRole] = text
 
@@ -106,7 +106,7 @@ class ModelComboBoxBase:
         return modelIndex
 
     def insertItems(self, index: int, texts: Iterable[str]):
-        """ Inserts 项 into combobox, starting at 索引 specified. """
+        """从给定索引开始批量插入项."""
         self.blockSignals(True)
 
         row = index
@@ -143,12 +143,12 @@ class ModelComboBoxBase:
         return ret
 
     def addItem(self, text: str, userData=None, icon: QIcon = None):
-        """ 添加 项
+        """添加项.
 
         参数
         ----------
         text: str
-            文本 的 项
+            项文本.
 
         icon: str | QIcon | FluentIconBase
         """
@@ -157,19 +157,20 @@ class ModelComboBoxBase:
             self.setCurrentIndex(0)
 
     def addItems(self, texts: Iterable[str]):
-        """ 添加 项
+        """添加多个项.
 
         参数
         ----------
         text: Iterable[str]
-            文本 的 项
+            项文本列表.
         """
         for text in texts:
             self.addItem(text)
 
     def removeItem(self, index: int):
-        """ Removes 项 at given 索引 从 combobox.
-        This will 更新 当前索引 如果 索引 is removed.
+        """移除给定索引处的项.
+
+        如果移除了当前项, 会同步更新当前索引.
         """
         if not self._isValidIndex(index):
             return
@@ -226,13 +227,14 @@ class ModelComboBoxBase:
         return self.itemData(self.currentIndex())
 
     def setCurrentText(self, text):
-        """ 设置 当前文本 displayed 中的 组合框,
-        文本 should be 中的 项 列表
+        """设置组合框当前显示的文本.
+
+        文本应存在于项列表中.
 
         参数
         ----------
         text: str
-            文本 displayed 中的 组合框
+            组合框中显示的文本.
         """
         if text == self.currentText():
             return
@@ -247,10 +249,10 @@ class ModelComboBoxBase:
         参数
         ----------
         index: int
-            索引 的 项
+            项索引.
 
         text: str
-            new 文本 的 项
+            新项文本.
         """
         if not self._isValidIndex(index):
             return
@@ -263,15 +265,15 @@ class ModelComboBoxBase:
                 self.currentTextChanged.emit(text)
 
     def itemData(self, index: int):
-        """ 返回 数据 中的 given 索引 """
+        """返回给定索引处的数据."""
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.UserRole)
 
     def itemText(self, index: int):
-        """ 返回 文本 中的 given 索引 """
+        """返回给定索引处的文本."""
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.EditRole) or ""
 
     def itemIcon(self, index: int):
-        """ 返回 图标 中的 given 索引 """
+        """返回给定索引处的图标."""
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.DecorationRole) or QIcon()
 
     def setItemData(self, index: int, value, role=Qt.ItemDataRole.UserRole):
@@ -279,14 +281,14 @@ class ModelComboBoxBase:
             self.model().setData(self.model().index(index, 0), value, role)
 
     def setItemIcon(self, index: int, icon: Union[str, QIcon, FluentIconBase]):
-        """ 设置 数据 角色 用于 项 上的 given 索引 """
+        """设置给定索引处项的图标."""
         self.setItemData(index, icon, Qt.ItemDataRole.DecorationRole)
 
     def _isValidIndex(self, index: int):
         return 0 <= index < self.count()
 
     def findData(self, data, role=Qt.ItemDataRole.UserRole, flags=Qt.MatchFlag.MatchExactly) -> int:
-        """ 返回 索引 的 项 containing given 数据 用于 given 角色; otherwise 返回 -1. """
+        """返回包含给定数据的项索引, 不存在则返回 -1."""
         mi = self.model().index(0, 0)
         result = self.model().match(mi, role, data, -1, flags | Qt.MatchFlag.MatchRecursive)
         for i in result:
@@ -295,11 +297,11 @@ class ModelComboBoxBase:
         return -1
 
     def findText(self, text: str, flags=Qt.MatchFlag.MatchExactly):
-        """ 返回 索引 的 项 containing given 文本; otherwise 返回 -1. """
+        """返回包含给定文本的项索引, 不存在则返回 -1."""
         return self.findData(text, Qt.ItemDataRole.EditRole, flags)
 
     def clear(self):
-        """ Clears combobox, removing all 项. """
+        """清空组合框中的所有项."""
         if self.currentIndex() >= 0:
             self.setText('')
 
@@ -309,15 +311,15 @@ class ModelComboBoxBase:
         self.model().blockSignals(False)
 
     def count(self):
-        """ 返回 number 的 项 中的 combobox """
+        """返回组合框中的项数."""
         return self.model().rowCount()
 
     def setMaxVisibleItems(self, num: int):
-        """ 设置the 组合框, measured 中的 项, 设置 到 -1 indicates no restriction的maximum allowed 大小 上的 屏幕 """
+        """设置测量组合框项宽度时允许使用的最大屏幕宽度."""
         self._maxVisibleItems = num
 
     def maxVisibleItems(self):
-        """ 返回 maximum allowed 大小 上的 屏幕 的 组合框, measured 中的 项 """
+        """返回测量组合框项宽度时允许使用的最大屏幕宽度."""
         return self._maxVisibleItems
 
     def _closeComboMenu(self):
@@ -366,7 +368,7 @@ class ModelComboBoxBase:
         if self.currentIndex() >= 0:
             menu.setDefaultAction(menu.actions()[self.currentIndex()])
 
-        # 判断the 动画 type by choosing maximum 高度 的 视图
+        # 根据可用高度选择动画类型.
         x = -menu.width()//2 + menu.layout().contentsMargins().left() + self.width()//2
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)
@@ -396,7 +398,7 @@ class ModelComboBoxBase:
 
 
 class ModelComboBox(QPushButton, ModelComboBoxBase):
-    """ 组合框 build 中的 数据 model """
+    """组合框数据模型."""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -488,7 +490,7 @@ class ModelComboBox(QPushButton, ModelComboBoxBase):
 
 
 class EditableModelComboBox(LineEdit, ModelComboBoxBase):
-    """ Editable 组合框 build 中的 数据 model """
+    """可编辑组合框数据模型."""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)

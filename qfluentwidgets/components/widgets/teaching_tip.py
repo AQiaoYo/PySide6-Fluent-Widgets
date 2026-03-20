@@ -128,14 +128,13 @@ class TeachingTip(QWidget):
             教学提示 视图
 
         duration: int
-            时间 用于 教学提示 到 display 中的 milliseconds. 如果 持续时间 is less than zero,
-            教学提示 will never disappear.
+            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
 
         tailPosition: TeachingTipTailPosition
-            位置 的 bubble tail
+            气泡尾巴的位置.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         isDeleteOnClose: bool
             是否 delete 浮出层 automatically 当 浮出层 is closed
@@ -206,7 +205,7 @@ class TeachingTip(QWidget):
         return super().eventFilter(obj, e)
 
     def addWidget(self, widget: QWidget, stretch=0, align=Qt.AlignLeft):
-        """ 将部件添加到teaching tip """
+        """向 teaching tip 中添加部件."""
         self.view.addSpacing(8)
         self.view.addWidget(widget, stretch, align)
 
@@ -230,17 +229,16 @@ class TeachingTip(QWidget):
             目标 部件 到 显示 tip
 
         duration: int
-            时间 用于 教学提示 到 display 中的 milliseconds. 如果 持续时间 is less than zero,
-            教学提示 will never disappear.
+            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
 
         tailPosition: TeachingTipTailPosition
-            位置 的 bubble tail
+            气泡尾巴的位置.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         isDeleteOnClose: bool
-            是否 delete 浮出层 automatically 当 浮出层 is closed
+            浮出层关闭后是否自动删除.
         """
         w = cls(view, target, duration, tailPosition, parent, isDeleteOnClose)
         w.show()
@@ -254,29 +252,28 @@ class TeachingTip(QWidget):
         参数
         ----------
         target: QWidget
-            目标 部件 到 显示 tip
+            要显示提示的目标部件.
 
         title: str
-            标题 的 教学提示
+            教学提示标题.
 
         content: str
-            内容 的 教学提示
+            教学提示内容.
 
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            图标 的 教学提示
+            教学提示图标.
 
         image: str | QPixmap | QImage
-            图像 的 教学提示
+            教学提示图片.
 
         isClosable: bool
-            是否 到 显示 关闭 按钮
+            是否显示关闭按钮.
 
         duraction: int
-            时间 用于 教学提示 到 display 中的 milliseconds. 如果 持续时间 is less than zero,
-            教学提示 will never disappear.
+            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         isDeleteOnClose: bool
             是否 delete 浮出层 automatically 当 浮出层 is closed
@@ -320,7 +317,7 @@ class TeachingTipManager(QObject):
         return QPoint(x, y)
 
     def draw(self, tip: TeachTipBubble, painter: QPainter):
-        """ 绘制the shape 的 bubble """
+        """绘制气泡外形."""
         rect = tip.rect().adjusted(1, 1, -1, -1)
         painter.drawRoundedRect(rect, 8, 8)
 
@@ -330,7 +327,7 @@ class TeachingTipManager(QObject):
 
     @staticmethod
     def make(position: TeachingTipTailPosition):
-        """ 遮罩 教学提示 管理器 根据 display 位置 """
+        """根据显示位置创建教学提示尾部管理器."""
         managers = {
             TeachingTipTailPosition.TOP: TopTailTeachingTipManager,
             TeachingTipTailPosition.BOTTOM: BottomTailTeachingTipManager,

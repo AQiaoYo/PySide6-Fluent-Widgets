@@ -13,13 +13,13 @@ class FlowLayout(QLayout):
         参数
         ----------
         parent:
-            父部件 窗口 或 布局
+            父窗口或父布局.
 
         needAni: bool
-            是否 到 添加 moving 动画
+            是否启用移动动画.
 
         isTight: bool
-            是否 到 use tight 布局 当 部件 are hidden
+            当部件隐藏时是否使用紧凑布局.
         """
         super().__init__(parent)
         self._items = []    # type: 列表[QLayoutItem]

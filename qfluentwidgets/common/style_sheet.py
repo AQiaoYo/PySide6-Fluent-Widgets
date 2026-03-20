@@ -29,10 +29,10 @@ class StyleSheetManager(QObject):
             * `StyleSheetBase`: 样式表 instance
 
         widget: QWidget
-            部件 到 设置 样式表
+            要设置样式表的部件.
 
         reset: bool
-            是否 到 reset qss 源
+            是否重置 QSS 源.
         """
         if isinstance(source, str):
             source = StyleSheetFile(source)
@@ -73,13 +73,13 @@ class QssTemplate(Template):
 
 
 def applyThemeColor(qss: str):
-    """ apply 主题 颜色 到 样式表
+    """将主题色应用到样式表.
 
     参数
     ----------
     qss: str
-        样式表 string 到 apply 主题 颜色, substituted variable
-        should be equal 到 值 的 `ThemeColor` 和 starts 宽度 `--`, i.e `--ThemeColorPrimary`
+        需要应用主题色的样式表字符串.
+        被替换的变量应当与 `ThemeColor` 的值一致, 并以 `--` 开头, 例如 `--ThemeColorPrimary`.
     """
     template = QssTemplate(qss)
     mappings = {c.value: c.name() for c in ThemeColor._member_map_.values()}
@@ -87,13 +87,13 @@ def applyThemeColor(qss: str):
 
 
 def renderQss(qss: str):
-    """ render font 和 主题 颜色 到 样式表
+    """将字体和主题色渲染到样式表.
 
     参数
     ----------
     qss: str
-        样式表 string 到 apply 主题 颜色, substituted variable
-        should be equal 到 值 的 `ThemeColor` 和 starts 宽度 `--`, i.e `--ThemeColorPrimary`
+        需要渲染主题色的样式表字符串.
+        被替换的变量应当与 `ThemeColor` 的值一致, 并以 `--` 开头, 例如 `--ThemeColorPrimary`.
     """
     template = QssTemplate(qss)
     mappings = {c.value: c.name() for c in ThemeColor._member_map_.values()}
@@ -102,18 +102,18 @@ def renderQss(qss: str):
 
 
 class StyleSheetBase:
-    """ 样式表 基类 """
+    """样式表基类."""
 
     def path(self, theme=Theme.AUTO):
-        """ 获取style sheet的path """
+        """获取样式表路径."""
         raise NotImplementedError
 
     def content(self, theme=Theme.AUTO):
-        """ 获取style sheet的内容 """
+        """获取样式表内容."""
         return getStyleSheetFromFile(self.path(theme))
 
     def apply(self, widget: QWidget, theme=Theme.AUTO):
-        """ apply 样式表 到 部件 """
+        """将样式表应用到部件."""
         setStyleSheet(widget, self, theme)
 
 
@@ -317,24 +317,23 @@ def getStyleSheet(source: Union[str, StyleSheetBase], theme=Theme.AUTO):
 
 
 def setStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=Theme.AUTO, register=True):
-    """ 设置部件的style sheet
+    """设置部件的样式表.
 
     参数
     ----------
     widget: QWidget
-        部件 到 设置 样式表
+        要设置样式表的部件.
 
     source: str | StyleSheetBase
-        qss 源, it could be:
-          * `str`: qss file path
-          * `StyleSheetBase`: 样式表 instance
+        QSS 源, 可以是:
+          * `str`: QSS 文件路径
+          * `StyleSheetBase`: 样式表实例
 
     theme: 主题
-        主题 的 样式表
+        主题样式表.
 
     register: bool
-        是否 到 注册 部件 到 style 管理器. 如果 `注册=True`, style of
-        部件 will be updated automatically 当 主题 changes
+        是否将部件注册到样式管理器. 如果 `register=True`, 部件样式会在主题切换时自动更新.
     """
     if register:
         styleSheetManager.register(source, widget)
@@ -360,24 +359,23 @@ def setCustomStyleSheet(widget: QWidget, lightQss: str, darkQss: str):
 
 
 def addStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=Theme.AUTO, register=True):
-    """ 将style sheet添加到部件
+    """为部件追加样式表.
 
     参数
     ----------
     widget: QWidget
-        部件 到 设置 样式表
+        要设置样式表的部件.
 
     source: str | StyleSheetBase
-        qss 源, it could be:
-          * `str`: qss file path
-          * `StyleSheetBase`: 样式表 instance
+        QSS 源, 可以是:
+          * `str`: QSS 文件路径
+          * `StyleSheetBase`: 样式表实例
 
     theme: 主题
-        主题 的 样式表
+        主题样式表.
 
     register: bool
-        是否 到 注册 部件 到 style 管理器. 如果 `注册=True`, style of
-        部件 will be updated automatically 当 主题 changes
+        是否将部件注册到样式管理器. 如果 `register=True`, 部件样式会在主题切换时自动更新.
     """
     if register:
         styleSheetManager.register(source, widget, reset=False)
@@ -390,12 +388,12 @@ def addStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=The
 
 
 def updateStyleSheet(lazy=False):
-    """ 更新the 样式表 的 all fluent 部件
+    """更新所有 Fluent 部件的样式表.
 
     参数
     ----------
     lazy: bool
-        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
+        是否延迟更新样式表. 设为 `True` 可加快主题切换速度.
     """
     removes = []
     for widget, file in list(styleSheetManager.items()):
@@ -413,18 +411,18 @@ def updateStyleSheet(lazy=False):
 
 
 def setTheme(theme: Theme, save=False, lazy=False):
-    """ 设置application的主题
+    """设置应用主题.
 
     参数
     ----------
     theme: 主题
-        主题 模式
+        主题模式.
 
     save: bool
-        是否 到 save 更改 到 配置 file
+        是否将更改保存到配置文件.
 
     lazy: bool
-        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
+        是否延迟更新样式表. 设为 `True` 可加快主题切换速度.
     """
     qconfig.set(qconfig.themeMode, theme, save)
     updateStyleSheet(lazy)
@@ -432,15 +430,15 @@ def setTheme(theme: Theme, save=False, lazy=False):
 
 
 def toggleTheme(save=False, lazy=False):
-    """ 切换the 主题 的 application
+    """切换应用主题.
 
     参数
     ----------
     save: bool
-        是否 到 save 更改 到 配置 file
+        是否将更改保存到配置文件.
 
     lazy: bool
-        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
+        是否延迟更新样式表. 设为 `True` 可加快主题切换速度.
     """
     theme = Theme.LIGHT if isDarkTheme() else Theme.DARK
     setTheme(theme, save, lazy)
@@ -515,13 +513,13 @@ def setThemeColor(color, save=False, lazy=False):
     参数
     ----------
     color: QColor | Qt.GlobalColor | str
-        主题 颜色
+        主题颜色.
 
     save: bool
-        是否 到 save 到 更改 到 配置 file
+        是否将更改保存到配置文件.
 
     lazy: bool
-        是否 到 更新 样式表 lazily
+        是否延迟更新样式表.
     """
     color = QColor(color)
     qconfig.set(qconfig.themeColor, color, save=save)
@@ -529,7 +527,7 @@ def setThemeColor(color, save=False, lazy=False):
 
 
 def updateDynamicStyle(widget: QWidget):
-    """ 更新the dynamic style 的 部件 """
+    """更新部件的动态样式."""
     if sys.platform != "win32" or QT_VERSION < (6, 8, 0):
         widget.setStyle(QApplication.style())
     else:

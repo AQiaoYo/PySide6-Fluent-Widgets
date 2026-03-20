@@ -570,7 +570,7 @@ class DropDownButtonBase:
         menu.view.adjustSize()
         menu.adjustSize()
 
-        # 判断the 动画 type by choosing maximum 高度 的 视图
+        # 根据可用高度选择动画类型.
         x = -menu.width()//2 + menu.layout().contentsMargins().left() + self.width()//2
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)
@@ -629,7 +629,7 @@ class DropDownPushButton(DropDownButtonBase, PushButton):
 
 
 class TransparentDropDownPushButton(DropDownPushButton):
-    """ 透明 drop down 按钮
+    """透明下拉按钮.
 
     构造函数
     ------------
@@ -673,7 +673,7 @@ class TransparentDropDownToolButton(DropDownToolButton):
 
 
 class PrimaryDropDownButtonBase(DropDownButtonBase):
-    """ 主题色 颜色 drop down 按钮 基类 """
+    """主题色下拉按钮基类."""
 
     def _drawDropDownIcon(self, painter, rect):
         theme = Theme.DARK if not isDarkTheme() else Theme.LIGHT
@@ -701,7 +701,7 @@ class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
 
 
 class PrimaryDropDownToolButton(PrimaryDropDownButtonBase, PrimaryToolButton):
-    """ 主题色 drop down 工具按钮
+    """主题色下拉工具按钮.
 
     构造函数
     ------------
@@ -789,11 +789,11 @@ class SplitWidgetBase(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def setWidget(self, widget: QWidget):
-        """ 设置 部件 上的 left side """
+        """设置左侧主按钮部件."""
         self.hBoxLayout.insertWidget(0, widget, 1, Qt.AlignLeft)
 
     def setDropButton(self, button):
-        """ 设置 drop dow 按钮 """
+        """设置下拉按钮."""
         self.hBoxLayout.removeWidget(self.dropButton)
         self.dropButton.deleteLater()
 
@@ -803,22 +803,22 @@ class SplitWidgetBase(QWidget):
         self.hBoxLayout.addWidget(button)
 
     def setDropIcon(self, icon: Union[str, QIcon, FluentIconBase]):
-        """ 设置drop down 按钮的图标 """
+        """设置下拉按钮的图标."""
         self.dropButton.setIcon(icon)
         self.dropButton.removeEventFilter(self.dropButton.arrowAni)
 
     def setDropIconSize(self, size: QSize):
-        """ 设置drop down 按钮的图标 大小 """
+        """设置下拉按钮的图标大小."""
         self.dropButton.setIconSize(size)
 
     def setFlyout(self, flyout):
-        """ 设置 部件 pops up 当 drop down 按钮 is clicked
+        """设置点击下拉按钮时弹出的部件.
 
         参数
         ----------
         flyout: QWidget
-            部件 pops up 当 drop down 按钮 is clicked.
-            It should contain `exec(pos: QPoint)` method
+            点击下拉按钮时弹出的部件.
+            该部件应提供 `exec(pos: QPoint)` 方法.
         """
         self.flyout = flyout
 
@@ -841,7 +841,7 @@ class SplitWidgetBase(QWidget):
 
 
 class SplitPushButton(SplitWidgetBase):
-    """ 分离式按钮
+    """分离式按钮.
 
     构造函数
     ------------
@@ -898,7 +898,7 @@ class SplitPushButton(SplitWidgetBase):
 
 
 class PrimarySplitPushButton(SplitPushButton):
-    """ 主题色分离式按钮
+    """主题色分离式按钮.
 
     构造函数
     ------------
@@ -921,7 +921,7 @@ class PrimarySplitPushButton(SplitPushButton):
 
 
 class SplitToolButton(SplitWidgetBase):
-    """ 分离式工具按钮
+    """分离式工具按钮.
 
     构造函数
     ------------
@@ -971,7 +971,7 @@ class SplitToolButton(SplitWidgetBase):
 
 
 class PrimarySplitToolButton(SplitToolButton):
-    """ 主题色分离式按钮
+    """主题色分离式工具按钮.
 
     构造函数
     ------------

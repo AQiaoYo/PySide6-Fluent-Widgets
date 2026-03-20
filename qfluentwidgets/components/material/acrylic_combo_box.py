@@ -47,29 +47,29 @@ class AcrylicEditableComboBox(AcrylicLineEditBase, EditableComboBox):
 
 
 class AcrylicComboBoxSettingCard(SettingCard):
-    """ Setting card 使用 组合框 """
+    """使用组合框的设置卡片."""
 
     def __init__(self, configItem: OptionsConfigItem, icon, title, content=None, texts=None, parent=None):
         """
         参数
         ----------
         configItem: OptionsConfigItem
-            configuration 项 operated by card
+            由卡片操作的配置项.
 
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         texts: 列表[str]
-            文本 的 项
+            选项文本列表.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem

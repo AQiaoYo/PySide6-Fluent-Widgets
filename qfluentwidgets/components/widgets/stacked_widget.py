@@ -122,19 +122,19 @@ class PopUpAniStackedWidget(QStackedWidget):
         参数
         ----------
         index: int
-            索引 的 部件 到 display
+            要显示的部件索引.
 
         isNeedPopOut: bool
-            need pop up 动画 或 not
+            是否需要弹出动画.
 
         showNextWidgetDirectly: bool
-            是否 到 显示 next 部件 directly 当 动画 started
+            动画开始时是否直接显示下一个部件.
 
         duration: int
-            动画 持续时间
+            动画持续时间.
 
         easingCurve: QEasingCurve
-            interpolation 模式 的 动画
+            动画的缓动曲线.
         """
         if index < 0 or index >= self.count():
             raise Exception(f'The index `{index}` is illegal')
@@ -149,10 +149,10 @@ class PopUpAniStackedWidget(QStackedWidget):
             self._ani.stop()
             self.__onAniFinished()
 
-        # 获取部件 到 be displayed的索引
+        # 获取待显示部件的索引.
         self._nextIndex = index
 
-        # 获取 动画
+        # 获取动画对象.
         nextAniInfo = self.aniInfos[index]
         currentAniInfo = self.aniInfos[self.currentIndex()]
 
@@ -179,24 +179,24 @@ class PopUpAniStackedWidget(QStackedWidget):
 
     def setCurrentWidget(self, widget, needPopOut: bool = False, showNextWidgetDirectly: bool = True,
                          duration: int = 250, easingCurve=QEasingCurve.OutQuad):
-        """ 设置 currect 部件
+        """设置当前部件.
 
         参数
         ----------
         widget:
-            部件 到 be displayed
+            要显示的部件.
 
         isNeedPopOut: bool
-            need pop up 动画 或 not
+            是否需要弹出动画.
 
         showNextWidgetDirectly: bool
-            是否 到 显示 next 部件 directly 当 动画 started
+            动画开始时是否直接显示下一个部件.
 
         duration: int
-            动画 持续时间
+            动画持续时间.
 
         easingCurve: QEasingCurve
-            interpolation 模式 的 动画
+            动画的缓动曲线.
         """
         self.setCurrentIndex(
             self.indexOf(widget), needPopOut, showNextWidgetDirectly, duration, easingCurve)
@@ -373,14 +373,14 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
             self._renderSnapshot(currentWidget, self._currentSnapshot)
             currentWidget.hide()
 
-            # fade out 当前 部件
+            # 淡出当前部件.
             self.currentFadeOutAni.setDuration(self.outDuration)
             self.currentFadeOutAni.setStartValue(1.0)
             self.currentFadeOutAni.setEndValue(0.0)
             self.currentFadeOutAni.setEasingCurve(outCurve)
             self._aniGroup.addAnimation(self.currentFadeOutAni)
 
-            # slide out 当前 部件
+            # 滑出当前部件.
             if isBack:
                 self.currentSlideOutAni.setDuration(self.outDuration)
                 self.currentSlideOutAni.setStartValue(QPoint(0, 0))
@@ -451,7 +451,7 @@ class DrillInTransitionStackedWidget(TransitionStackedWidget):
             self._currentSnapshot.setScaledContents(True)
             currentWidget.hide()
 
-            # scale out 当前 部件
+            # 缩放退出当前部件.
             outW = int(rect.width() * outScale)
             outH = int(rect.height() * outScale)
             outX = (rect.width() - outW) // 2
@@ -464,7 +464,7 @@ class DrillInTransitionStackedWidget(TransitionStackedWidget):
             self.currentScaleOutAni.setEasingCurve(scaleCurve)
             self._aniGroup.addAnimation(self.currentScaleOutAni)
 
-            # fade out 当前 部件
+            # 淡出当前部件.
             self.currentFadeOutAni.setDuration(outDuration)
             self.currentFadeOutAni.setStartValue(1.0)
             self.currentFadeOutAni.setEndValue(0.0)

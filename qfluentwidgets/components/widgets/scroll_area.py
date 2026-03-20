@@ -45,7 +45,7 @@ class SingleDirectionScrollArea(QScrollArea):
         参数
         ----------
         parent: QWidget
-            父部件 部件
+            父部件.
 
         orient: Orientation
             滚动 orientation

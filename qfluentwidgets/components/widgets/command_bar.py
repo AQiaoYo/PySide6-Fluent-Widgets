@@ -496,11 +496,11 @@ class CommandViewBar(CommandBar):
         menu = CommandViewMenu(self)
         menu.addActions(actions)
 
-        # 调整the shape 的 视图
+        # 调整视图形状.
         view = self.parent()  # type: CommandBarView
         view.setMenuVisible(True)
 
-        # 调整the shape 的 菜单
+        # 调整菜单形状.
         menu.closedSignal.connect(lambda: view.setMenuVisible(False))
         menu.setDropDown(self.isMenuDropDown(), menu.view.width() > view.width()+5)
 

@@ -225,13 +225,13 @@ class ColorDialog(MaskDialogBase):
             initial 颜色
 
         title: str
-            标题 的 对话框
+            对话框标题.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         enableAlpha: bool
-            是否 到 启用 透明通道 channel
+            是否启用透明通道.
         """
         super().__init__(parent)
         self.enableAlpha = enableAlpha
@@ -386,7 +386,7 @@ class ColorDialog(MaskDialogBase):
             self.colorChanged.emit(self.color)
 
     def updateStyle(self):
-        """ 更新style sheet """
+        """更新样式表."""
         self.setStyle(QApplication.style())
         self.titleLabel.adjustSize()
         self.editLabel.adjustSize()

@@ -153,10 +153,10 @@ class SwitchButton(QWidget):
         参数
         ----------
         parent: QWidget
-            父部件 部件
+            父部件.
 
         indicatorPosition: IndicatorPosition
-            位置 的 指示器
+            指示器位置.
         """
         super().__init__(parent=parent)
         self._text = self.tr('Off')
@@ -179,10 +179,10 @@ class SwitchButton(QWidget):
         参数
         ----------
         text: str
-            文本 的 开关按钮
+            开关按钮文本.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         indicatorPosition: IndicatorPosition
             位置 的 指示器

@@ -16,24 +16,24 @@ from ...common.style_sheet import FluentStyleSheet
 
 
 class ComboItem:
-    """ 组合框 项 """
+    """组合框项."""
 
     def __init__(self, text: str, icon: Union[str, QIcon, FluentIconBase] = None, userData=None, isEnabled=True):
-        """ 添加 项
+        """添加项.
 
         参数
         ----------
         text: str
-            文本 的 项
+            项文本.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 项
+            项图标.
 
         userData: Any
-            user 数据
+            用户数据.
 
         isEnabled: bool
-            是否 到 启用 项
+            是否启用该项.
         """
         self.text = text
         self.userData = userData
@@ -56,7 +56,7 @@ class ComboItem:
 
 
 class ComboBoxBase:
-    """ 组合框 base """
+    """组合框基类."""
     activated = Signal(int)
     textActivated = Signal(str)
 
@@ -76,12 +76,12 @@ class ComboBoxBase:
         self.installEventFilter(self)
 
     def addItem(self, text, icon: Union[str, QIcon, FluentIconBase] = None, userData=None):
-        """ 添加 项
+        """添加项.
 
         参数
         ----------
         text: str
-            文本 的 项
+            项文本.
 
         icon: str | QIcon | FluentIconBase
         """
@@ -91,19 +91,20 @@ class ComboBoxBase:
             self.setCurrentIndex(0)
 
     def addItems(self, texts: Iterable[str]):
-        """ 添加 项
+        """添加多个项.
 
         参数
         ----------
         text: Iterable[str]
-            文本 的 项
+            项文本列表.
         """
         for text in texts:
             self.addItem(text)
 
     def removeItem(self, index: int):
-        """ Removes 项 at given 索引 从 combobox.
-        This will 更新 当前索引 如果 索引 is removed.
+        """移除给定索引处的项.
+
+        如果移除了当前项, 会同步更新当前索引.
         """
         if not 0 <= index < len(self.items):
             return
@@ -127,12 +128,12 @@ class ComboBoxBase:
         return self._currentIndex
 
     def setCurrentIndex(self, index: int):
-        """ 设置当前索引
+        """设置当前索引.
 
         参数
         ----------
         index: int
-            当前索引
+            当前索引.
         """
         if not 0 <= index < len(self.items) or index == self.currentIndex():
             return
@@ -164,13 +165,12 @@ class ComboBoxBase:
         return self.items[self.currentIndex()].userData
 
     def setCurrentText(self, text):
-        """ 设置 当前文本 displayed 中的 组合框,
-        文本 should be 中的 项 列表
+        """设置组合框当前显示的文本.
 
         参数
         ----------
         text: str
-            文本 displayed 中的 组合框
+            要显示的文本, 必须存在于项列表中.
         """
         if text == self.currentText():
             return
@@ -185,10 +185,10 @@ class ComboBoxBase:
         参数
         ----------
         index: int
-            索引 的 项
+            项索引.
 
         text: str
-            new 文本 的 项
+            新项文本.
         """
         if not 0 <= index < len(self.items):
             return
@@ -198,43 +198,43 @@ class ComboBoxBase:
             self.setText(text)
 
     def itemData(self, index: int):
-        """ 返回 数据 中的 given 索引 """
+        """返回给定索引处的数据."""
         if not 0 <= index < len(self.items):
             return None
 
         return self.items[index].userData
 
     def itemText(self, index: int):
-        """ 返回 文本 中的 given 索引 """
+        """返回给定索引处的文本."""
         if not 0 <= index < len(self.items):
             return ''
 
         return self.items[index].text
 
     def itemIcon(self, index: int):
-        """ 返回 图标 中的 given 索引 """
+        """返回给定索引处的图标."""
         if not 0 <= index < len(self.items):
             return QIcon()
 
         return self.items[index].icon
 
     def setItemData(self, index: int, value):
-        """ 设置 数据 角色 用于 项 上的 given 索引 """
+        """设置给定索引处项的数据."""
         if 0 <= index < len(self.items):
             self.items[index].userData = value
 
     def setItemIcon(self, index: int, icon: Union[str, QIcon, FluentIconBase]):
-        """ 设置 数据 角色 用于 项 上的 given 索引 """
+        """设置给定索引处项的图标."""
         if 0 <= index < len(self.items):
             self.items[index].icon = icon
 
     def setItemEnabled(self, index: int, isEnabled: bool):
-        """ 设置 已启用 状态 的 项 上的 given 索引 """
+        """设置给定索引处项的启用状态."""
         if 0 <= index < len(self.items):
             self.items[index].isEnabled = isEnabled
 
     def findData(self, data):
-        """ 返回 索引 的 项 containing given 数据, otherwise 返回 -1 """
+        """返回包含给定数据的项索引, 不存在则返回 -1."""
         for i, item in enumerate(self.items):
             if item.userData == data:
                 return i
@@ -242,7 +242,7 @@ class ComboBoxBase:
         return -1
 
     def findText(self, text: str):
-        """ 返回 索引 的 项 containing given 文本; otherwise 返回 -1. """
+        """返回包含给定文本的项索引, 不存在则返回 -1."""
         for i, item in enumerate(self.items):
             if item.text == text:
                 return i
@@ -250,7 +250,7 @@ class ComboBoxBase:
         return -1
 
     def clear(self):
-        """ Clears combobox, removing all 项. """
+        """清空组合框中的所有项."""
         if self.currentIndex() >= 0:
             self.setText('')
 
@@ -258,11 +258,11 @@ class ComboBoxBase:
         self._currentIndex = -1
 
     def count(self):
-        """ 返回 number 的 项 中的 combobox """
+        """返回组合框中的项数."""
         return len(self.items)
 
     def insertItem(self, index: int, text: str, icon: Union[str, QIcon, FluentIconBase] = None, userData=None):
-        """ Inserts 项 into combobox at given 索引. """
+        """在给定索引处插入项."""
         item = ComboItem(text, icon, userData)
         self.items.insert(index, item)
 
@@ -270,7 +270,7 @@ class ComboBoxBase:
             self.setCurrentIndex(self.currentIndex() + 1)
 
     def insertItems(self, index: int, texts: Iterable[str]):
-        """ Inserts 项 into combobox, starting at 索引 specified. """
+        """从给定索引开始批量插入项."""
         pos = index
         for text in texts:
             item = ComboItem(text)
@@ -290,7 +290,7 @@ class ComboBoxBase:
         if not self.dropMenu:
             return
 
-        # drop 菜单 could be deleted before this method
+        # 下拉菜单可能会在调用前被删除.
         try:
             self.dropMenu.close()
         except:
@@ -335,7 +335,7 @@ class ComboBoxBase:
         if self.currentIndex() >= 0 and self.items:
             menu.setDefaultAction(menu.actions()[self.currentIndex()])
 
-        # 判断the 动画 type by choosing maximum 高度 的 视图
+        # 根据可用高度选择动画类型.
         x = -menu.width()//2 + menu.layout().contentsMargins().left() + self.width()//2
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)
@@ -368,7 +368,7 @@ class ComboBoxBase:
 
 
 class ComboBox(QPushButton, ComboBoxBase):
-    """ 组合框 """
+    """组合框."""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -437,7 +437,7 @@ class ComboBox(QPushButton, ComboBoxBase):
 
 
 class EditableComboBox(LineEdit, ComboBoxBase):
-    """ Editable 组合框 """
+    """可编辑组合框."""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -538,7 +538,7 @@ class EditableComboBox(LineEdit, ComboBoxBase):
 
 
 class ComboBoxMenu(RoundMenu):
-    """ 组合框 菜单 """
+    """组合框菜单."""
 
     def __init__(self, parent=None):
         super().__init__(title="", parent=parent)

@@ -48,7 +48,7 @@ class StateCloseButton(QToolButton):
 
 
 class StateToolTip(QWidget):
-    """ State tooltip """
+    """状态工具提示."""
 
     closedSignal = Signal()
 
@@ -57,10 +57,10 @@ class StateToolTip(QWidget):
         参数
         ----------
         title: str
-            标题 的 tooltip
+            工具提示标题.
 
         content: str
-            内容 的 tooltip
+            工具提示内容.
 
         parant:
             父部件 窗口
@@ -119,13 +119,13 @@ class StateToolTip(QWidget):
         self.contentLabel.adjustSize()
 
     def setTitle(self, title: str):
-        """ 设置tooltip的标题 """
+        """设置工具提示标题."""
         self.title = title
         self.titleLabel.setText(title)
         self.titleLabel.adjustSize()
 
     def setContent(self, content: str):
-        """ 设置tooltip的内容 """
+        """设置工具提示内容."""
         self.content = content
         self.contentLabel.setText(content)
 
@@ -133,7 +133,7 @@ class StateToolTip(QWidget):
         self.contentLabel.adjustSize()
 
     def setState(self, isDone=False):
-        """ 设置tooltip的state """
+        """设置工具提示状态."""
         self.isDone = isDone
         self.update()
         if isDone:
@@ -172,7 +172,7 @@ class StateToolTip(QWidget):
         return pos
 
     def paintEvent(self, e):
-        """ 绘制state tooltip """
+        """绘制状态工具提示."""
         super().paintEvent(e)
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
@@ -185,4 +185,3 @@ class StateToolTip(QWidget):
             FIF.SYNC.render(painter, QRectF(-8, -8, 16, 16), theme)
         else:
             FIF.COMPLETED.render(painter, QRectF(11, 10, 16, 16), theme)
-

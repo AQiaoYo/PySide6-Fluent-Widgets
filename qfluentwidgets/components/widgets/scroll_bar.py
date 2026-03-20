@@ -262,7 +262,7 @@ class ScrollBar(QWidget):
         self._value = value
         self.valueChanged.emit(value)
 
-        # 调整the 位置 的 处理
+        # 调整滑块位置.
         self._adjustHandlePos()
 
     def minimum(self):
@@ -406,7 +406,7 @@ class ScrollBar(QWidget):
         if obj is not self.parent():
             return super().eventFilter(obj, e)
 
-        # 调整the 位置 的 slider
+        # 调整滑块位置.
         if e.type() == QEvent.Resize:
             self._adjustPos(e.size())
 
@@ -513,7 +513,7 @@ class ScrollBar(QWidget):
         self._adjustHandlePos()
 
     def setForceHidden(self, isHidden: bool):
-        """ 是否 到 force scrollbar 到 be hidden """
+        """设置是否强制隐藏滚动条."""
         self._isForceHidden = isHidden
         self.setVisible(self.maximum() > 0 and not isHidden)
 
@@ -546,7 +546,7 @@ class SmoothScrollBar(ScrollBar):
             self.val = value
             return
 
-        # 调整the 持续时间
+        # 调整动画时长.
         dv = abs(value - self.value())
         if dv < 50:
             self.ani.setDuration(int(self.duration * dv / 70))
@@ -608,10 +608,10 @@ class SmoothScrollDelegate(QObject):
         参数
         ----------
         parent: QAbstractScrollArea
-            scrolling area being delegated
+            被代理的滚动区域.
 
         useAni: bool
-            是否 到 use `QPropertyAnimation` 到 achieve smooth scrolling
+            是否使用 `QPropertyAnimation` 实现平滑滚动.
         """
         super().__init__(parent)
         self.useAni = useAni
@@ -667,4 +667,3 @@ class SmoothScrollDelegate(QObject):
     def setHorizontalScrollBarPolicy(self, policy):
         QAbstractScrollArea.setHorizontalScrollBarPolicy(self.parent(), Qt.ScrollBarAlwaysOff)
         self.hScrollBar.setForceHidden(policy == Qt.ScrollBarAlwaysOff)
-

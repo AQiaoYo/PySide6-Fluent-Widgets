@@ -138,10 +138,10 @@ class SegmentedToolWidget(SegmentedWidget):
             unique name 的 项
 
         icon: str | QIcon | FluentIconBase
-            图标 的 navigation 项
+            导航项图标.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
         """
         return self.insertItem(-1, routeKey, icon, onClick)
 

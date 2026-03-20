@@ -10,7 +10,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class MessageBoxBase(MaskDialogBase):
-    """ Message box base """
+    """消息框基类."""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -89,4 +89,3 @@ class MessageBoxBase(MaskDialogBase):
     def hideCancelButton(self):
         self.cancelButton.hide()
         self.buttonLayout.insertStretch(0, 1)
-

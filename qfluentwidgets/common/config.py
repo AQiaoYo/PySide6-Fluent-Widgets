@@ -241,7 +241,7 @@ class RangeConfigItem(ConfigItem):
 
     @property
     def range(self):
-        """ 获取配置的可用 range """
+        """获取配置项允许的取值范围."""
         return self.validator.range
 
     def __str__(self):

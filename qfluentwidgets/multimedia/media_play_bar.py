@@ -199,7 +199,7 @@ class MediaPlayBarBase(QWidget):
         self.playButton.setPlay(self.player.isPlaying())
 
     def togglePlayState(self):
-        """ 切换the play state 的 媒体播放器 """
+        """切换媒体播放器的播放状态."""
         if self.player.isPlaying():
             self.player.pause()
         else:
@@ -239,7 +239,7 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.setMediaPlayer(MediaPlayer(self))
 
     def addButton(self, button: MediaPlayBarButton):
-        """ 将按钮添加到the right side 的 播放栏 """
+        """将按钮添加到播放栏右侧."""
         self.hBoxLayout.addWidget(button, 0)
 
 

@@ -233,81 +233,81 @@ class NavigationBar(QWidget):
 
     def addItem(self, routeKey: str, icon: Union[str, QIcon, FluentIconBase], text: str, onClick=None,
                 selectable=True, selectedIcon=None, position=NavigationItemPosition.TOP):
-        """ 添加 navigation 项
+        """添加导航项.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 navigation 项
+            导航项图标.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         selectable: bool
-            是否 项 is selectable
+            导航项是否可选中.
 
         selectedIcon: str | QIcon | FluentIconBase
-            图标 的 navigation 项 中的 selected state
+            导航项在选中状态下的图标.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            导航项的插入位置.
         """
         return self.insertItem(-1, routeKey, icon, text, onClick, selectable, selectedIcon, position)
 
     def addWidget(self, routeKey: str, widget: NavigationWidget, onClick=None, position=NavigationItemPosition.TOP):
-        """ 添加 自定义 部件
+        """添加自定义导航部件.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: NavigationWidget
-            自定义 部件 到 be added
+            要添加的自定义部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            部件的插入位置.
         """
         self.insertWidget(-1, routeKey, widget, onClick, position)
 
     def insertItem(self, index: int, routeKey: str, icon: Union[str, QIcon, FluentIconBase], text: str, onClick=None,
                    selectable=True, selectedIcon=None, position=NavigationItemPosition.TOP):
-        """ 插入 navigation tree 项
+        """插入导航项.
 
         参数
         ----------
         index: int
-            插入 位置 的 父部件 部件
+            插入位置.
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 navigation 项
+            导航项图标.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         selectable: bool
-            是否 项 is selectable
+            导航项是否可选中.
 
         selectedIcon: str | QIcon | FluentIconBase
-            图标 的 navigation 项 中的 selected state
+            导航项在选中状态下的图标.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            导航项的插入位置.
         """
         if routeKey in self.items:
             return
@@ -320,24 +320,24 @@ class NavigationBar(QWidget):
 
     def insertWidget(self, index: int, routeKey: str, widget: NavigationWidget, onClick=None,
                      position=NavigationItemPosition.TOP):
-        """ 插入 自定义 部件
+        """插入自定义导航部件.
 
         参数
         ----------
         index: int
-            插入 位置
+            插入位置.
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: NavigationWidget
-            自定义 部件 到 be added
+            要插入的自定义部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            部件的插入位置.
         """
         if routeKey in self.items:
             return
@@ -373,12 +373,12 @@ class NavigationBar(QWidget):
         widget.show()
 
     def removeWidget(self, routeKey: str):
-        """ 移除 部件
+        """移除导航部件.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
         """
         if routeKey not in self.items:
             return
@@ -391,12 +391,12 @@ class NavigationBar(QWidget):
         return self.widget(self._currentRouteKey) if self._currentRouteKey else None
 
     def setCurrentItem(self, routeKey: str):
-        """ 设置 当前 选中项
+        """设置当前选中项.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
         """
         if routeKey not in self.items or routeKey == self._currentRouteKey:
             return
@@ -406,14 +406,14 @@ class NavigationBar(QWidget):
         prevItem = self.currentItem()
         self._currentRouteKey = routeKey
 
-        # early 返回 如果 指示器 is not 已启用 或 previous 选中项 is None
+        # 如果未启用指示器动画, 或没有上一个选中项, 则直接更新选中状态.
         if not self.isIndicatorAnimationEnabled() or prevItem is None:
             for k, widget in self.items.items():
                 widget.setSelected(k == routeKey)
 
             return
 
-        # 计算the 开始 和 final 几何区域 用于 动画
+        # 计算动画的起始和结束几何区域.
         newItem = self.currentItem()
         preIndicatorRect = self._getIndicatorRect(prevItem)
         newIndicatorRect = self._getIndicatorRect(newItem)
@@ -426,14 +426,14 @@ class NavigationBar(QWidget):
         self.indicator.startAnimation(preIndicatorRect, newIndicatorRect)
 
     def setFont(self, font: QFont):
-        """ 设置navigation 项的font """
+        """设置导航项字体."""
         super().setFont(font)
 
         for widget in self.buttons():
             widget.setFont(font)
 
     def setSelectedTextVisible(self, isVisible: bool):
-        """ 设置 是否 文本 is 可见 当 按钮 is selected """
+        """设置选中按钮时是否显示文本."""
         if isVisible == self._isSelectedTextVisible:
             return
 
@@ -445,7 +445,7 @@ class NavigationBar(QWidget):
         return self._isSelectedTextVisible
 
     def setSelectedColor(self, light, dark):
-        """ 设置all 项的selected 颜色 """
+        """设置所有项的选中色."""
         self.lightSelectedColor = QColor(light)
         self.darkSelectedColor = QColor(dark)
         for button in self.buttons():

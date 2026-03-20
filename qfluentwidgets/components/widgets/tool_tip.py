@@ -39,10 +39,10 @@ class ToolTip(QFrame):
         参数
         ----------
         text: str
-            文本 的 工具提示
+            工具提示文本.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(parent=parent)
         self.__text = text
@@ -86,7 +86,7 @@ class ToolTip(QFrame):
         return self.__text
 
     def setText(self, text):
-        """ 设置 文本 上的 tooltip """
+        """设置工具提示文本."""
         self.__text = text
         self.label.setText(text)
         self.container.adjustSize()
@@ -96,12 +96,12 @@ class ToolTip(QFrame):
         return self.__duration
 
     def setDuration(self, duration: int):
-        """ 设置 tooltip 持续时间 中的 milliseconds
+        """设置工具提示持续时间.
 
         参数
         ----------
         duration: int
-            display 持续时间 中的 milliseconds, 如果 `持续时间 <= 0`, tooltip won't disappear automatically
+            显示时长, 单位为毫秒. 如果 `持续时间 <= 0`, 工具提示不会自动消失.
         """
         self.__duration = duration
 
@@ -132,13 +132,13 @@ class ToolTip(QFrame):
         super().hideEvent(e)
 
     def adjustPos(self, widget, position: ToolTipPosition):
-        """ 调整the 位置 的 tooltip relative 到 部件 """
+        """根据部件位置调整工具提示位置."""
         manager = ToolTipPositionManager.make(position)
         self.move(manager.position(self, widget))
 
 
 class ToolTipPositionManager:
-    """ Tooltip 位置 管理器 """
+    """工具提示位置管理器."""
 
     def position(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = self._pos(tooltip, parent)
@@ -155,7 +155,7 @@ class ToolTipPositionManager:
 
     @staticmethod
     def make(position: ToolTipPosition):
-        """ 遮罩 信息栏 管理器 根据 display 位置 """
+        """根据显示位置创建工具提示管理器."""
         managers = {
             ToolTipPosition.TOP: TopToolTipManager,
             ToolTipPosition.BOTTOM: BottomToolTipManager,
@@ -174,7 +174,7 @@ class ToolTipPositionManager:
 
 
 class TopToolTipManager(ToolTipPositionManager):
-    """ Top tooltip 位置 管理器 """
+    """顶部工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget):
         pos = parent.mapToGlobal(QPoint())
@@ -184,7 +184,7 @@ class TopToolTipManager(ToolTipPositionManager):
 
 
 class BottomToolTipManager(ToolTipPositionManager):
-    """ Bottom tooltip 位置 管理器 """
+    """底部工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -194,7 +194,7 @@ class BottomToolTipManager(ToolTipPositionManager):
 
 
 class LeftToolTipManager(ToolTipPositionManager):
-    """ Left tooltip 位置 管理器 """
+    """左侧工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -204,7 +204,7 @@ class LeftToolTipManager(ToolTipPositionManager):
 
 
 class RightToolTipManager(ToolTipPositionManager):
-    """ Right tooltip 位置 管理器 """
+    """右侧工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -214,7 +214,7 @@ class RightToolTipManager(ToolTipPositionManager):
 
 
 class TopRightToolTipManager(ToolTipPositionManager):
-    """ Top right tooltip 位置 管理器 """
+    """右上工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -225,7 +225,7 @@ class TopRightToolTipManager(ToolTipPositionManager):
 
 
 class TopLeftToolTipManager(ToolTipPositionManager):
-    """ Top left tooltip 位置 管理器 """
+    """左上工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -235,7 +235,7 @@ class TopLeftToolTipManager(ToolTipPositionManager):
 
 
 class BottomRightToolTipManager(ToolTipPositionManager):
-    """ Bottom right tooltip 位置 管理器 """
+    """右下工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -246,7 +246,7 @@ class BottomRightToolTipManager(ToolTipPositionManager):
 
 
 class BottomLeftToolTipManager(ToolTipPositionManager):
-    """ Bottom left tooltip 位置 管理器 """
+    """左下工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -256,7 +256,7 @@ class BottomLeftToolTipManager(ToolTipPositionManager):
 
 
 class ItemViewToolTipManager(ToolTipPositionManager):
-    """ 项 视图 tooltip 位置 管理器 """
+    """项视图工具提示位置管理器."""
 
     def __init__(self, itemRect=QRect()):
         super().__init__()
@@ -270,7 +270,7 @@ class ItemViewToolTipManager(ToolTipPositionManager):
 
     @staticmethod
     def make(tipType: ItemViewToolTipType, itemRect: QRect):
-        """ 遮罩 信息栏 管理器 根据 display tipType """
+        """根据显示类型创建项视图工具提示管理器."""
         managers = {
             ItemViewToolTipType.LIST: ItemViewToolTipManager,
             ItemViewToolTipType.TABLE: TableItemToolTipManager,
@@ -283,7 +283,7 @@ class ItemViewToolTipManager(ToolTipPositionManager):
 
 
 class TableItemToolTipManager(ItemViewToolTipManager):
-    """ Table 项 视图 tooltip 位置 管理器 """
+    """表格项工具提示位置管理器."""
 
     def _pos(self, tooltip: ToolTip, view: QTableView) -> QPoint:
         pos = view.mapToGlobal(self.itemRect.topLeft())
@@ -294,20 +294,20 @@ class TableItemToolTipManager(ItemViewToolTipManager):
 
 
 class ToolTipFilter(QObject):
-    """ 工具按钮 使用 工具提示 """
+    """为部件提供工具提示过滤器."""
 
     def __init__(self, parent: QWidget, showDelay=300, position=ToolTipPosition.TOP):
         """
         参数
         ----------
         parent: QWidget
-            部件 到 install 工具提示
+            要安装工具提示的部件.
 
         showDelay: int
-            显示tool tip after how long mouse hovers 中的 milliseconds
+            鼠标悬停多久后显示工具提示, 单位为毫秒.
 
         position: TooltipPosition
-            where 到 显示 tooltip
+            工具提示显示位置.
         """
         super().__init__(parent=parent)
         self.isEnter = False
@@ -333,7 +333,7 @@ class ToolTipFilter(QObject):
                 t = parent.toolTipDuration() if parent.toolTipDuration() > 0 else -1
                 self._tooltip.setDuration(t)
 
-                # 显示the 工具提示 after delay
+                # 延迟显示工具提示.
                 self.timer.start(self._tooltipDelay)
         elif e.type() == QEvent.MouseButtonPress:
             self.hideToolTip()
@@ -455,7 +455,7 @@ class ItemViewToolTipDelegate(ToolTipFilter):
                 self._tooltip = self._createToolTip()
                 self._tooltip.setDuration(self.tooltipDuration)
 
-            # 显示the 工具提示 after delay
+            # 延迟显示工具提示.
             self.timer.start(self._tooltipDelay)
 
         return True

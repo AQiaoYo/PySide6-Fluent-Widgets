@@ -179,94 +179,94 @@ class NavigationPanel(QFrame):
 
     def addItem(self, routeKey: str, icon: Union[str, QIcon, FluentIconBase], text: str, onClick=None, selectable=True,
                 position=NavigationItemPosition.TOP, tooltip: str = None, parentRouteKey: str = None):
-        """ 添加 navigation 项
+        """添加导航项.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 navigation 项
+            导航项图标.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            导航项的插入位置.
 
         selectable: bool
-            是否 项 is selectable
+            导航项是否可选中.
 
         tooltip: str
-            tooltip 的 项
+            导航项提示文本.
 
         parentRouteKey: str
-            路由键 的 父部件 项, 父部件 部件 should be `NavigationTreeWidget`
+            父级导航项的路由键, 其对应项应为 `NavigationTreeWidget`.
         """
         return self.insertItem(-1, routeKey, icon, text, onClick, selectable, position, tooltip, parentRouteKey)
 
     def addWidget(self, routeKey: str, widget: NavigationWidget, onClick=None, position=NavigationItemPosition.TOP,
                   tooltip: str = None, parentRouteKey: str = None):
-        """ 添加 自定义 部件
+        """添加自定义导航部件.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: NavigationWidget
-            自定义 部件 到 be added
+            要添加的自定义部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            部件的插入位置.
 
         tooltip: str
-            tooltip 的 部件
+            部件提示文本.
 
         parentRouteKey: str
-            路由键 的 父部件 项, 父部件 项 should be `NavigationTreeWidget`
+            父级导航项的路由键, 其对应项应为 `NavigationTreeWidget`.
         """
         self.insertWidget(-1, routeKey, widget, onClick, position, tooltip, parentRouteKey)
 
     def insertItem(self, index: int, routeKey: str, icon: Union[str, QIcon, FluentIconBase], text: str, onClick=None,
                    selectable=True, position=NavigationItemPosition.TOP, tooltip: str = None, parentRouteKey=None):
-        """ 插入 navigation tree 项
+        """插入导航树项.
 
         参数
         ----------
         index: int
-            插入 位置 的 父部件 部件
+            插入位置.
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         icon: str | QIcon | FluentIconBase
-            图标 的 navigation 项
+            导航项图标.
 
         text: str
-            文本 的 navigation 项
+            导航项文本.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            导航项的插入位置.
 
         selectable: bool
-            是否 项 is selectable
+            导航项是否可选中.
 
         tooltip: str
-            tooltip 的 项
+            导航项提示文本.
 
         parentRouteKey: str
-            路由键 的 父部件 项, 父部件 项 should be `NavigationTreeWidget`
+            父级导航项的路由键, 其对应项应为 `NavigationTreeWidget`.
         """
         if routeKey in self.items:
             return
@@ -277,30 +277,30 @@ class NavigationPanel(QFrame):
 
     def insertWidget(self, index: int, routeKey: str, widget: NavigationWidget, onClick=None,
                      position=NavigationItemPosition.TOP, tooltip: str = None, parentRouteKey: str = None):
-        """ 插入 自定义 部件
+        """插入自定义导航部件.
 
         参数
         ----------
         index: int
-            插入 位置
+            插入位置.
 
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
 
         widget: NavigationWidget
-            自定义 部件 到 be added
+            要插入的自定义部件.
 
         onClick: callable
-            槽函数 connected 到 项 clicked 信号
+            连接到点击信号的槽函数.
 
         position: NavigationItemPosition
-            where 按钮 is added
+            部件的插入位置.
 
         tooltip: str
-            tooltip 的 部件
+            部件提示文本.
 
         parentRouteKey: str
-            路由键 的 父部件 项, 父部件 项 should be `NavigationTreeWidget`
+            父级导航项的路由键, 其对应项应为 `NavigationTreeWidget`.
         """
         if routeKey in self.items:
             return
@@ -312,77 +312,77 @@ class NavigationPanel(QFrame):
             self._insertWidgetToLayout(index, widget, position)
 
     def addSeparator(self, position=NavigationItemPosition.TOP):
-        """ 添加 分隔符
+        """添加分隔符.
 
         参数
         ----------
         position: NavigationPostion
-            where 到 添加 分隔符
+            分隔符的插入区域.
         """
         self.insertSeparator(-1, position)
 
     def insertSeparator(self, index: int, position=NavigationItemPosition.TOP):
-        """ 添加 分隔符
+        """插入分隔符.
 
         参数
         ----------
         index: int
-            插入 位置
+            插入位置.
 
         position: NavigationPostion
-            where 到 添加 分隔符
+            分隔符的插入区域.
         """
         separator = NavigationSeparator(self)
         self._insertWidgetToLayout(index, separator, position)
 
     def addItemHeader(self, text: str, position=NavigationItemPosition.TOP):
-        """ 添加 项 header
+        """添加导航分组标题.
 
         参数
         ----------
         text: str
-            header 文本
+            标题文本.
 
         position: NavigationItemPosition
-            where 到 添加 header
+            标题的插入位置.
 
         返回
         -------
         NavigationItemHeader
-            created header 部件
+            创建出的标题部件.
         """
         return self.insertItemHeader(-1, text, position)
 
     def insertItemHeader(self, index: int, text: str, position=NavigationItemPosition.TOP):
-        """ 插入 项 header
+        """插入导航分组标题.
 
         参数
         ----------
         index: int
-            插入 位置
+            插入位置.
 
         text: str
-            header 文本
+            标题文本.
 
         position: NavigationItemPosition
-            where 到 添加 header
+            标题的插入位置.
 
         返回
         -------
         NavigationItemHeader
-            created header 部件
+            创建出的标题部件.
         """
         header = NavigationItemHeader(text, self)
         self._insertWidgetToLayout(index, header, position)
 
-        # 设置 compacted state based 上的 当前 display 模式
+        # 根据当前显示模式设置紧凑状态.
         isCompacted = self.displayMode not in [NavigationDisplayMode.EXPAND, NavigationDisplayMode.MENU]
         header.setCompacted(isCompacted)
 
         return header
 
     def _registerWidget(self, routeKey: str, parentRouteKey: str, widget: NavigationWidget, onClick, tooltip: str):
-        """ 注册 部件 """
+        """注册导航部件."""
         widget.clicked.connect(self._onWidgetClicked)
 
         if onClick is not None:
@@ -400,7 +400,7 @@ class NavigationPanel(QFrame):
             widget.installEventFilter(NavigationToolTipFilter(widget, 1000))
 
     def _insertWidgetToLayout(self, index: int, widget: NavigationWidget, position: NavigationItemPosition):
-        """ 插入 部件 到 布局 """
+        """将部件插入布局."""
         if position == NavigationItemPosition.TOP:
             widget.setParent(self)
             self.topLayout.insertWidget(index, widget, 0, Qt.AlignTop)
@@ -414,12 +414,12 @@ class NavigationPanel(QFrame):
         widget.show()
 
     def removeWidget(self, routeKey: str):
-        """ 移除 部件
+        """移除导航部件.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
         """
         if routeKey not in self.items:
             return
@@ -446,12 +446,12 @@ class NavigationPanel(QFrame):
         self.history.remove(routeKey)
 
     def setMenuButtonVisible(self, isVisible: bool):
-        """ 设置 是否 菜单 按钮 is 可见 """
+        """设置菜单按钮是否可见."""
         self._isMenuButtonVisible = isVisible
         self.menuButton.setVisible(isVisible)
 
     def setReturnButtonVisible(self, isVisible: bool):
-        """ 设置 是否 返回 按钮 is 可见 """
+        """设置返回按钮是否可见."""
         self._isReturnButtonVisible = isVisible
         self.returnButton.setVisible(isVisible)
 
@@ -461,7 +461,7 @@ class NavigationPanel(QFrame):
             self.expand(False)
 
     def setExpandWidth(self, width: int):
-        """ 设置 maximum 宽度 """
+        """设置导航面板的展开宽度上限."""
         if width <= 42:
             return
 
@@ -469,7 +469,7 @@ class NavigationPanel(QFrame):
         NavigationWidget.EXPAND_WIDTH = width - 10
 
     def setMinimumExpandWidth(self, width: int):
-        """ 设置 最小窗口宽度 that allows 面板 到 be expanded """
+        """设置允许面板展开的最小窗口宽度."""
         self.minimumExpandWidth = width
 
     def setAcrylicEnabled(self, isEnabled: bool):
@@ -482,18 +482,18 @@ class NavigationPanel(QFrame):
         self.update()
 
     def isAcrylicEnabled(self):
-        """ 是否 亚克力 effect is 已启用 """
+        """返回是否已启用亚克力效果."""
         return self._isAcrylicEnabled
 
     def expand(self, useAni=True):
-        """ 展开导航面板 """
+        """展开导航面板."""
         self._stopIndicatorAnimation()
         self._setWidgetCompacted(False)
         self._restoreTreeExpandState(useAni)
         self.expandAni.setProperty('expand', True)
         self.menuButton.setToolTip(self.tr('Close Navigation'))
 
-        # 判断the display 模式 根据 宽度 的 窗口
+        # 根据窗口宽度判断显示模式.
         # https://learn.microsoft.com/en-us/windows/apps/design/controls/navigationview#default
         expandWidth = self.minimumExpandWidth + self.expandWidth - 322
         if (self.window().width() >= expandWidth and not self.isMinimalEnabled) or not self._isCollapsible:
@@ -503,7 +503,7 @@ class NavigationPanel(QFrame):
             self.setStyle(QApplication.style())
             self.displayMode = NavigationDisplayMode.MENU
 
-            # grab 亚克力 图像
+            # 捕获亚克力背景图像.
             if self._canDrawAcrylic():
                 self._ensureAcrylicBrush().grabImage(
                     QRect(self.mapToGlobal(QPoint()), QSize(self.expandWidth, self.height())))
@@ -527,8 +527,8 @@ class NavigationPanel(QFrame):
             self._onExpandAniFinished()
 
     def collapse(self):
-        """ 折叠navigation 面板 """
-        # 停止动画 如果 当前 选中项 is not root node
+        """折叠导航面板."""
+        # 如果当前选中项不是根节点, 则停止指示器动画.
         if self.currentItem() and self.currentItem().property('parentRouteKey'):
             self._stopIndicatorAnimation()
 
@@ -561,19 +561,19 @@ class NavigationPanel(QFrame):
                 w.restoreExpandState(useAni)
 
     def toggle(self):
-        """ 切换导航面板 """
+        """切换导航面板的展开状态."""
         if self.displayMode in [NavigationDisplayMode.COMPACT, NavigationDisplayMode.MINIMAL]:
             self.expand()
         else:
             self.collapse()
 
     def setCurrentItem(self, routeKey: str):
-        """ 设置 当前 选中项
+        """设置当前选中项.
 
         参数
         ----------
         routeKey: str
-            unique name 的 项
+            导航项的唯一标识.
         """
         if routeKey not in self.items or routeKey == self._currentRouteKey:
             return
@@ -581,19 +581,19 @@ class NavigationPanel(QFrame):
         prevItem = self.currentItem()
         self._currentRouteKey = routeKey
 
-        # find 项 到 display 指示器 动画
+        # 查找需要参与指示器动画的目标项.
         newItem = self.currentItem()
         newIndicatorItem = self._findIndicatorItem(newItem)
         prevIndicatorItem = self._findIndicatorItem(prevItem)
 
-        # early 返回 如果 指示器 is not 已启用 或 previous 选中项 is None
+        # 如果未启用指示器动画, 或无法取得有效的前后项, 则直接更新选中状态.
         if not (self.isIndicatorAnimationEnabled() and prevItem and prevIndicatorItem and newIndicatorItem):
             for k, item in self.items.items():
                 item.widget.setSelected(k == routeKey)
 
             return
 
-        # 计算the 开始 和 final 几何区域 用于 动画
+        # 计算动画的起始和结束几何区域.
         preIndicatorRect = self._getIndicatorRect(prevIndicatorItem)
         newIndicatorRect = self._getIndicatorRect(newIndicatorItem)
 
@@ -652,7 +652,7 @@ class NavigationPanel(QFrame):
             self._showFlyoutNavigationMenu(widget)
 
     def _showFlyoutNavigationMenu(self, widget: NavigationTreeWidget):
-        """ 显示浮出层 navigation 菜单 """
+        """显示导航浮出菜单."""
         if not (self.isCollapsed() and isinstance(widget, NavigationTreeWidget)):
             return
 
@@ -674,12 +674,12 @@ class NavigationPanel(QFrame):
             view.setLayout(layout)
             flyout = Flyout(view, self.window())
 
-        # 将navigation 菜单添加到浮出层
+        # 将导航菜单添加到浮出层.
         menu = NavigationFlyoutMenu(widget, view)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.addWidget(menu)
 
-        # execuse 浮出层 动画
+        # 执行浮出层动画.
         flyout.resize(flyout.sizeHint())
         pos = SlideRightFlyoutAnimationManager(flyout).position(widget)
         flyout.exec(pos, FlyoutAnimationType.SLIDE_RIGHT)
@@ -747,7 +747,7 @@ class NavigationPanel(QFrame):
                 self.show()
 
     def _setWidgetCompacted(self, isCompacted: bool):
-        """ 设置 是否 导航部件 is compacted """
+        """设置导航部件是否为紧凑模式."""
         for item in self.findChildren(NavigationWidget):
             item.setCompacted(isCompacted)
 

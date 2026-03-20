@@ -73,10 +73,10 @@ class DatePicker(DatePickerBase):
         参数
         ----------
         parent: QWidget
-            父部件 部件
+            父部件.
 
         format: int
-            format 的 日期, could be `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`
+            日期格式, 可选 `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`.
 
         isMonthTight: bool
             is 月份 列 tight

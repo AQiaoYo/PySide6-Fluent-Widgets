@@ -83,22 +83,22 @@ class FlyoutView(FlyoutViewBase):
         Parameters
         ----------
         title: str
-            the title of teaching tip
+            浮出卡片标题.
 
         content: str
-            the content of teaching tip
+            浮出卡片内容.
 
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            the icon of teaching tip
+            浮出卡片图标.
 
         image: str | QPixmap | QImage
-            the image of teaching tip
+            浮出卡片图片.
 
         isClosable: bool
-            whether to show the close button
+            是否显示关闭按钮.
 
         parent: QWidget
-            parent widget
+            父部件.
         """
         self.icon = icon
         self.title = title
@@ -314,16 +314,16 @@ class Flyout(QWidget):
             标题 的 教学提示
 
         content: str
-            内容 的 教学提示
+            浮出层内容.
 
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            图标 的 教学提示
+            浮出层图标.
 
         image: str | QPixmap | QImage
-            图像 的 教学提示
+            浮出层图片.
 
         isClosable: bool
-            是否 到 显示 关闭 按钮
+            是否显示关闭按钮.
 
         target: QWidget | QPoint
             目标 部件 或 位置 到 显示 浮出层
@@ -376,12 +376,12 @@ class FlyoutAnimationManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ 注册 菜单 动画 管理器
+        """注册浮出层动画管理器.
 
         参数
         ----------
         name: Any
-            name 的 管理器, it should be unique
+            管理器名称, 必须唯一.
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -491,7 +491,7 @@ class SlideRightFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.FADE_IN)
 class FadeInFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Fade 中的 浮出层 动画 管理器 """
+    """淡入浮出层动画管理器."""
 
     def position(self, target: QWidget):
         w = self.flyout

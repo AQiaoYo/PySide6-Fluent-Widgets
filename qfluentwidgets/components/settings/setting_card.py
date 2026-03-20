@@ -41,13 +41,13 @@ class SettingCard(QFrame):
             图标 到 be drawn
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(parent=parent)
         self.iconLabel = SettingIconWidget(icon, self)
@@ -135,10 +135,10 @@ class SwitchSettingCard(SettingCard):
             内容 的 card
 
         configItem: ConfigItem
-            configuration 项 operated by card
+            由卡片操作的配置项.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -149,7 +149,7 @@ class SwitchSettingCard(SettingCard):
             self.setValue(qconfig.get(configItem))
             configItem.valueChanged.connect(self.setValue)
 
-        # 将switch 按钮添加到布局
+        # 将开关按钮添加到布局.
         self.hBoxLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
@@ -191,13 +191,13 @@ class RangeSettingCard(SettingCard):
             图标 到 be drawn
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -242,19 +242,19 @@ class PushSettingCard(SettingCard):
         参数
         ----------
         text: str
-            文本 的 按钮
+            按钮文本.
 
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.button = QPushButton(text, self)
@@ -264,7 +264,7 @@ class PushSettingCard(SettingCard):
 
 
 class PrimaryPushSettingCard(PushSettingCard):
-    """ Push setting card 使用 主题色 颜色 """
+    """使用主题色按钮的设置卡片."""
 
     def __init__(self, text, icon, title, content=None, parent=None):
         super().__init__(text, icon, title, content, parent)
@@ -272,32 +272,32 @@ class PrimaryPushSettingCard(PushSettingCard):
 
 
 class HyperlinkCard(SettingCard):
-    """ Hyperlink card """
+    """超链接设置卡片."""
 
     def __init__(self, url, text, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
         """
         参数
         ----------
         url: str
-            url 到 be opened
+            要打开的链接地址.
 
         text: str
-            文本 的 url
+            链接文本.
 
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         text: str
-            文本 的 按钮
+            按钮文本.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.linkButton = HyperlinkButton(url, text, self)
@@ -369,16 +369,16 @@ class ColorSettingCard(SettingCard):
             图标 到 be drawn
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         parent: QWidget
-            父部件 部件
+            父部件.
 
         enableAlpha: bool
-            是否 到 启用 透明通道 channel
+            是否启用透明通道.
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -399,29 +399,29 @@ class ColorSettingCard(SettingCard):
 
 
 class ComboBoxSettingCard(SettingCard):
-    """ Setting card 使用 组合框 """
+    """使用组合框的设置卡片."""
 
     def __init__(self, configItem: OptionsConfigItem, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
         """
         参数
         ----------
         configItem: OptionsConfigItem
-            configuration 项 operated by card
+            由卡片操作的配置项.
 
         icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
+            要绘制的图标.
 
         title: str
-            标题 的 card
+            卡片标题.
 
         content: str
-            内容 的 card
+            卡片内容.
 
         texts: 列表[str]
-            文本 的 项
+            选项文本列表.
 
         parent: QWidget
-            父部件 部件
+            父部件.
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
