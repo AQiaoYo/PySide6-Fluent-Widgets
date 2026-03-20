@@ -51,6 +51,16 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip running `uv lock` after updating version files.",
     )
+    parser.add_argument(
+        "--tag",
+        action="store_true",
+        help="Create a git tag named `v<version>` after the version update.",
+    )
+    parser.add_argument(
+        "--push-tag",
+        action="store_true",
+        help="Push the created tag to `origin` after tagging.",
+    )
     return parser.parse_args()
 
 
@@ -96,8 +106,28 @@ def run_uv_lock() -> None:
         raise ValueError(f"`uv lock` failed with exit code {exc.returncode}") from exc
 
 
+def run_git_tag(tag_name: str) -> None:
+    try:
+        subprocess.run(["git", "tag", tag_name], cwd=ROOT, check=True)
+    except FileNotFoundError as exc:
+        raise ValueError("`git` was not found, so the tag could not be created") from exc
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(f"`git tag` failed with exit code {exc.returncode}") from exc
+
+
+def run_git_push_tag(tag_name: str) -> None:
+    try:
+        subprocess.run(["git", "push", "origin", tag_name], cwd=ROOT, check=True)
+    except FileNotFoundError as exc:
+        raise ValueError("`git` was not found, so the tag could not be pushed") from exc
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(f"`git push origin {tag_name}` failed with exit code {exc.returncode}") from exc
+
+
 def main() -> int:
     args = parse_args()
+    if args.push_tag and not args.tag:
+        args.tag = True
 
     loaded = []
     discovered_versions: dict[str, str] = {}
@@ -112,6 +142,7 @@ def main() -> int:
         if args.version
         else bump_version(current_version, args.part)
     )
+    tag_name = f"v{target_version}"
     should_lock = (ROOT / "uv.lock").exists() and not args.no_lock
 
     print(f"Current version: {current_version}")
@@ -138,6 +169,12 @@ def main() -> int:
 
     if args.dry_run:
         print("Dry run: no files were written.")
+        if should_lock:
+            print("Dry run: would run `uv lock`.")
+        if args.tag:
+            print(f"Dry run: would create git tag `{tag_name}`.")
+        if args.push_tag:
+            print(f"Dry run: would push git tag `{tag_name}` to `origin`.")
     else:
         if changed_files:
             print("Updated files:")
@@ -151,10 +188,17 @@ def main() -> int:
             run_uv_lock()
             print("Updated file:")
             print("  uv.lock")
-    if args.dry_run and should_lock:
-        print("Dry run: would run `uv lock`.")
 
-    print(f"Suggested tag: v{target_version}")
+        if args.tag:
+            print(f"Creating git tag `{tag_name}`...")
+            run_git_tag(tag_name)
+            print(f"Created git tag: {tag_name}")
+
+        if args.push_tag:
+            print(f"Pushing git tag `{tag_name}` to `origin`...")
+            run_git_push_tag(tag_name)
+
+    print(f"Suggested tag: {tag_name}")
     return 0
 
 
