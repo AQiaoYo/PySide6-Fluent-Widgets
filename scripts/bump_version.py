@@ -54,12 +54,17 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--tag",
         action="store_true",
-        help="Create a git tag named `v<version>` after the version update.",
+        help="Create a git tag named `v<version>` after committing the version update.",
     )
     parser.add_argument(
         "--push-tag",
         action="store_true",
         help="Push the created tag to `origin` after tagging.",
+    )
+    parser.add_argument(
+        "--commit",
+        action="store_true",
+        help="Create a version bump commit after updating managed files.",
     )
     return parser.parse_args()
 
@@ -115,6 +120,16 @@ def run_git_tag(tag_name: str) -> None:
         raise ValueError(f"`git tag` failed with exit code {exc.returncode}") from exc
 
 
+def run_git_commit(paths: list[str], message: str) -> None:
+    try:
+        subprocess.run(["git", "add", "--", *paths], cwd=ROOT, check=True)
+        subprocess.run(["git", "commit", "-m", message], cwd=ROOT, check=True)
+    except FileNotFoundError as exc:
+        raise ValueError("`git` was not found, so the commit could not be created") from exc
+    except subprocess.CalledProcessError as exc:
+        raise ValueError(f"`git commit` failed with exit code {exc.returncode}") from exc
+
+
 def run_git_push_tag(tag_name: str) -> None:
     try:
         subprocess.run(["git", "push", "origin", tag_name], cwd=ROOT, check=True)
@@ -124,10 +139,43 @@ def run_git_push_tag(tag_name: str) -> None:
         raise ValueError(f"`git push origin {tag_name}` failed with exit code {exc.returncode}") from exc
 
 
+def tag_exists(tag_name: str) -> bool:
+    result = subprocess.run(
+        ["git", "rev-parse", "-q", "--verify", f"refs/tags/{tag_name}"],
+        cwd=ROOT,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        check=False,
+    )
+    return result.returncode == 0
+
+
+def collect_modified_paths(paths: list[str]) -> list[str]:
+    if not paths:
+        return []
+
+    result = subprocess.run(
+        ["git", "status", "--short", "--", *paths],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    modified = []
+    for line in result.stdout.splitlines():
+        if not line:
+            continue
+        modified.append(line[3:])
+    return modified
+
+
 def main() -> int:
     args = parse_args()
-    if args.push_tag and not args.tag:
+    if args.tag:
+        args.commit = True
+    if args.push_tag:
         args.tag = True
+        args.commit = True
 
     loaded = []
     discovered_versions: dict[str, str] = {}
@@ -144,9 +192,16 @@ def main() -> int:
     )
     tag_name = f"v{target_version}"
     should_lock = (ROOT / "uv.lock").exists() and not args.no_lock
+    commit_message = f"chore(version): 更新版本号至 {target_version}"
+    managed_paths = [path.relative_to(ROOT).as_posix() for path, _ in TARGETS]
+    if should_lock:
+        managed_paths.append("uv.lock")
 
     print(f"Current version: {current_version}")
     print(f"Target version:  {target_version}")
+
+    if args.tag and tag_exists(tag_name):
+        raise ValueError(f"Git tag `{tag_name}` already exists")
 
     mismatched = {
         path: version
@@ -171,6 +226,8 @@ def main() -> int:
         print("Dry run: no files were written.")
         if should_lock:
             print("Dry run: would run `uv lock`.")
+        if args.commit:
+            print(f"Dry run: would create commit `{commit_message}`.")
         if args.tag:
             print(f"Dry run: would create git tag `{tag_name}`.")
         if args.push_tag:
@@ -188,6 +245,16 @@ def main() -> int:
             run_uv_lock()
             print("Updated file:")
             print("  uv.lock")
+
+        commit_paths = collect_modified_paths(managed_paths)
+
+        if args.commit:
+            if commit_paths:
+                print(f"Creating commit `{commit_message}`...")
+                run_git_commit(commit_paths, commit_message)
+                print(f"Created commit: {commit_message}")
+            else:
+                print("No managed file changes were available to commit.")
 
         if args.tag:
             print(f"Creating git tag `{tag_name}`...")

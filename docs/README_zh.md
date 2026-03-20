@@ -73,6 +73,7 @@ python demo.py
 ```shell
 uv run python scripts/bump_version.py
 uv run python scripts/bump_version.py 2.1.0
+uv run python scripts/bump_version.py --commit
 uv run python scripts/bump_version.py --tag
 uv run python scripts/bump_version.py --tag --push-tag
 uv lock
@@ -82,7 +83,7 @@ uv run sphinx-build -b html docs/source docs/build/html
 
 推荐发布流程：
 ```shell
-uv run python scripts/bump_version.py --tag --push-tag
+uv run python scripts/bump_version.py --tag --push-tag  # bump + commit + tag + push tag
 ```
 
 ## 在线文档📕
