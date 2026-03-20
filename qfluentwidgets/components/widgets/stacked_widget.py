@@ -1,5 +1,4 @@
 # coding: utf-8
-from enum import Enum
 from typing import List
 
 from PySide6.QtCore import (QAbstractAnimation, QEasingCurve, QPoint, QPropertyAnimation,
@@ -60,11 +59,11 @@ class OpacityAniStackedWidget(QStackedWidget):
 class PopUpAniInfo:
     """ Pop up ani info """
 
-    def __init__(self, widget: QWidget, deltaX: int, deltaY, ani: QPropertyAnimation):
+    def __init__(self, widget: QWidget, deltaX: int, deltaY: int, effect: QGraphicsOpacityEffect):
         self.widget = widget
         self.deltaX = deltaX
         self.deltaY = deltaY
-        self.ani = ani
+        self.effect = effect
 
 
 class PopUpAniStackedWidget(QStackedWidget):
@@ -77,6 +76,7 @@ class PopUpAniStackedWidget(QStackedWidget):
         super().__init__(parent)
         self.aniInfos = []  # type: 列表[PopUpAniInfo]
         self.isAnimationEnabled = True
+        self._currentIndex = None
         self._nextIndex = None
         self._ani = None
 
@@ -96,11 +96,15 @@ class PopUpAniStackedWidget(QStackedWidget):
         """
         super().addWidget(widget)
 
+        effect = QGraphicsOpacityEffect(widget)
+        effect.setOpacity(1)
+        widget.setGraphicsEffect(effect)
+
         self.aniInfos.append(PopUpAniInfo(
             widget=widget,
             deltaX=deltaX,
             deltaY=deltaY,
-            ani=QPropertyAnimation(widget, b'pos'),
+            effect=effect,
         ))
 
     def removeWidget(self, widget: QWidget):
@@ -149,31 +153,34 @@ class PopUpAniStackedWidget(QStackedWidget):
             self._ani.stop()
             self.__onAniFinished()
 
-        # 获取待显示部件的索引.
+        self._currentIndex = self.currentIndex()
         self._nextIndex = index
 
-        # 获取动画对象.
         nextAniInfo = self.aniInfos[index]
-        currentAniInfo = self.aniInfos[self.currentIndex()]
+        currentAniInfo = self.aniInfos[self._currentIndex]
 
-        currentWidget = self.currentWidget()
-        nextWidget = nextAniInfo.widget
-        ani = currentAniInfo.ani if needPopOut else nextAniInfo.ani
-        self._ani = ani
+        self.__resetWidgetState(currentAniInfo)
+        self.__resetWidgetState(nextAniInfo)
 
-        if needPopOut:
-            deltaX, deltaY = currentAniInfo.deltaX, currentAniInfo.deltaY
-            pos = currentWidget.pos() + QPoint(deltaX, deltaY)
-            self.__setAnimation(ani, currentWidget.pos(), pos, duration, easingCurve)
-            nextWidget.setVisible(showNextWidgetDirectly)
+        exitDuration = max(100, duration // 2)
+        enterDuration = max(160, duration)
+
+        ani = QSequentialAnimationGroup(self)
+        exitAni = self.__createExitAnimationGroup(
+            currentAniInfo, needPopOut, exitDuration, easingCurve)
+        enterAni = self.__createEnterAnimationGroup(
+            nextAniInfo, enterDuration, easingCurve)
+
+        if exitAni.animationCount() > 0:
+            exitAni.finished.connect(
+                lambda: self.__switchToNextWidget(nextAniInfo, showNextWidgetDirectly))
+            ani.addAnimation(exitAni)
         else:
-            deltaX, deltaY = nextAniInfo.deltaX, nextAniInfo.deltaY
-            pos = nextWidget.pos() + QPoint(deltaX, deltaY)
-            self.__setAnimation(ani, pos, QPoint(nextWidget.x(), 0), duration, easingCurve)
-            super().setCurrentIndex(index)
+            self.__switchToNextWidget(nextAniInfo, showNextWidgetDirectly)
 
-        # 开始动画
+        ani.addAnimation(enterAni)
         ani.finished.connect(self.__onAniFinished)
+        self._ani = ani
         ani.start()
         self.aniStart.emit()
 
@@ -201,17 +208,75 @@ class PopUpAniStackedWidget(QStackedWidget):
         self.setCurrentIndex(
             self.indexOf(widget), needPopOut, showNextWidgetDirectly, duration, easingCurve)
 
-    def __setAnimation(self, ani, startValue, endValue, duration, easingCurve=QEasingCurve.Linear):
-        """ 设置动画的配置 """
-        ani.setEasingCurve(easingCurve)
+    def __createPositionAnimation(self, widget: QWidget, startValue: QPoint, endValue: QPoint,
+                                  duration: int, easingCurve=QEasingCurve.Linear):
+        ani = QPropertyAnimation(widget, b'pos', self)
         ani.setStartValue(startValue)
         ani.setEndValue(endValue)
         ani.setDuration(duration)
+        ani.setEasingCurve(easingCurve)
+        return ani
+
+    def __createOpacityAnimation(self, effect: QGraphicsOpacityEffect, startValue: float,
+                                 endValue: float, duration: int,
+                                 easingCurve=QEasingCurve.Linear):
+        ani = QPropertyAnimation(effect, b'opacity', self)
+        ani.setStartValue(startValue)
+        ani.setEndValue(endValue)
+        ani.setDuration(duration)
+        ani.setEasingCurve(easingCurve)
+        return ani
+
+    def __createExitAnimationGroup(self, aniInfo: PopUpAniInfo, needPopOut: bool,
+                                   duration: int, easingCurve):
+        aniGroup = QParallelAnimationGroup(self)
+        aniGroup.addAnimation(self.__createOpacityAnimation(
+            aniInfo.effect, 1.0, 0.0, duration))
+
+        if needPopOut:
+            startPos = aniInfo.widget.pos()
+            endPos = startPos + QPoint(aniInfo.deltaX, aniInfo.deltaY)
+            aniGroup.addAnimation(self.__createPositionAnimation(
+                aniInfo.widget, startPos, endPos, duration, easingCurve))
+
+        return aniGroup
+
+    def __createEnterAnimationGroup(self, aniInfo: PopUpAniInfo, duration: int, easingCurve):
+        aniGroup = QParallelAnimationGroup(self)
+        startPos = QPoint(aniInfo.widget.x(), aniInfo.widget.y()) + QPoint(aniInfo.deltaX, aniInfo.deltaY)
+        endPos = QPoint(aniInfo.widget.x(), aniInfo.widget.y())
+
+        aniGroup.addAnimation(self.__createPositionAnimation(
+            aniInfo.widget, startPos, endPos, duration, easingCurve))
+        aniGroup.addAnimation(self.__createOpacityAnimation(
+            aniInfo.effect, 0.0, 1.0, max(100, duration // 2)))
+        return aniGroup
+
+    def __switchToNextWidget(self, aniInfo: PopUpAniInfo, showNextWidgetDirectly: bool):
+        super().setCurrentIndex(self._nextIndex)
+        if showNextWidgetDirectly:
+            aniInfo.widget.show()
+        aniInfo.widget.raise_()
+
+    def __resetWidgetState(self, aniInfo: PopUpAniInfo):
+        aniInfo.effect.setOpacity(1.0)
+        aniInfo.widget.move(0, 0)
+        aniInfo.widget.resize(self.size())
 
     def __onAniFinished(self):
         """ 动画 finished 槽函数 """
-        self._ani.finished.disconnect()
+        if self._ani:
+            try:
+                self._ani.finished.disconnect(self.__onAniFinished)
+            except (RuntimeError, TypeError):
+                pass
+
         super().setCurrentIndex(self._nextIndex)
+        self.__resetWidgetState(self.aniInfos[self._nextIndex])
+        if self._currentIndex is not None and self._currentIndex < len(self.aniInfos):
+            self.__resetWidgetState(self.aniInfos[self._currentIndex])
+
+        self._ani = None
         self.aniFinished.emit()
 
 
