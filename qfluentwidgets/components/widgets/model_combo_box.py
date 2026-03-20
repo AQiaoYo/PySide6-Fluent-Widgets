@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 import sys
 from typing import Union, List, Iterable
 
@@ -17,7 +17,7 @@ from ...common.style_sheet import FluentStyleSheet
 
 
 class ModelComboBoxBase:
-    """ Abstract combo box build in data model """
+    """ Abstract 组合框 build 中的 数据 model """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -88,7 +88,7 @@ class ModelComboBoxBase:
         return super().eventFilter(obj, e)
 
     def insertItem(self, index: int, text: str, userData=None, icon: QIcon = None):
-        """ Inserts item into the combobox at the given index. """
+        """ Inserts 项 into combobox at given 索引. """
         values = {}
         values[Qt.ItemDataRole.EditRole] = text
 
@@ -106,7 +106,7 @@ class ModelComboBoxBase:
         return modelIndex
 
     def insertItems(self, index: int, texts: Iterable[str]):
-        """ Inserts items into the combobox, starting at the index specified. """
+        """ Inserts 项 into combobox, starting at 索引 specified. """
         self.blockSignals(True)
 
         row = index
@@ -143,12 +143,12 @@ class ModelComboBoxBase:
         return ret
 
     def addItem(self, text: str, userData=None, icon: QIcon = None):
-        """ add item
+        """ 添加 项
 
-        Parameters
+        参数
         ----------
         text: str
-            the text of item
+            文本 的 项
 
         icon: str | QIcon | FluentIconBase
         """
@@ -157,19 +157,19 @@ class ModelComboBoxBase:
             self.setCurrentIndex(0)
 
     def addItems(self, texts: Iterable[str]):
-        """ add items
+        """ 添加 项
 
-        Parameters
+        参数
         ----------
         text: Iterable[str]
-            the text of item
+            文本 的 项
         """
         for text in texts:
             self.addItem(text)
 
     def removeItem(self, index: int):
-        """ Removes the item at the given index from the combobox.
-        This will update the current index if the index is removed.
+        """ Removes 项 at given 索引 从 combobox.
+        This will 更新 当前索引 如果 索引 is removed.
         """
         if not self._isValidIndex(index):
             return
@@ -195,12 +195,12 @@ class ModelComboBoxBase:
         return self._currentIndex
 
     def setCurrentIndex(self, index: int):
-        """ set current index
+        """ 设置当前索引
 
-        Parameters
+        参数
         ----------
         index: int
-            current index
+            当前索引
         """
         if not self._isValidIndex(index) or index == self.currentIndex():
             return
@@ -226,13 +226,13 @@ class ModelComboBoxBase:
         return self.itemData(self.currentIndex())
 
     def setCurrentText(self, text):
-        """ set the current text displayed in combo box,
-        text should be in the item list
+        """ 设置 当前文本 displayed 中的 组合框,
+        文本 should be 中的 项 列表
 
-        Parameters
+        参数
         ----------
         text: str
-            text displayed in combo box
+            文本 displayed 中的 组合框
         """
         if text == self.currentText():
             return
@@ -242,15 +242,15 @@ class ModelComboBoxBase:
             self.setCurrentIndex(index)
 
     def setItemText(self, index: int, text: str):
-        """ set the text of item
+        """ 设置项的文本
 
-        Parameters
+        参数
         ----------
         index: int
-            the index of item
+            索引 的 项
 
         text: str
-            new text of item
+            new 文本 的 项
         """
         if not self._isValidIndex(index):
             return
@@ -263,15 +263,15 @@ class ModelComboBoxBase:
                 self.currentTextChanged.emit(text)
 
     def itemData(self, index: int):
-        """ Returns the data in the given index """
+        """ 返回 数据 中的 given 索引 """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.UserRole)
 
     def itemText(self, index: int):
-        """ Returns the text in the given index """
+        """ 返回 文本 中的 given 索引 """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.EditRole) or ""
 
     def itemIcon(self, index: int):
-        """ Returns the icon in the given index """
+        """ 返回 图标 中的 given 索引 """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.DecorationRole) or QIcon()
 
     def setItemData(self, index: int, value, role=Qt.ItemDataRole.UserRole):
@@ -279,14 +279,14 @@ class ModelComboBoxBase:
             self.model().setData(self.model().index(index, 0), value, role)
 
     def setItemIcon(self, index: int, icon: Union[str, QIcon, FluentIconBase]):
-        """ Sets the data role for the item on the given index """
+        """ 设置 数据 角色 用于 项 上的 given 索引 """
         self.setItemData(index, icon, Qt.ItemDataRole.DecorationRole)
 
     def _isValidIndex(self, index: int):
         return 0 <= index < self.count()
 
     def findData(self, data, role=Qt.ItemDataRole.UserRole, flags=Qt.MatchFlag.MatchExactly) -> int:
-        """ Returns the index of the item containing the given data for the given role; otherwise returns -1. """
+        """ 返回 索引 的 项 containing given 数据 用于 given 角色; otherwise 返回 -1. """
         mi = self.model().index(0, 0)
         result = self.model().match(mi, role, data, -1, flags | Qt.MatchFlag.MatchRecursive)
         for i in result:
@@ -295,11 +295,11 @@ class ModelComboBoxBase:
         return -1
 
     def findText(self, text: str, flags=Qt.MatchFlag.MatchExactly):
-        """ Returns the index of the item containing the given text; otherwise returns -1. """
+        """ 返回 索引 的 项 containing given 文本; otherwise 返回 -1. """
         return self.findData(text, Qt.ItemDataRole.EditRole, flags)
 
     def clear(self):
-        """ Clears the combobox, removing all items. """
+        """ Clears combobox, removing all 项. """
         if self.currentIndex() >= 0:
             self.setText('')
 
@@ -309,22 +309,22 @@ class ModelComboBoxBase:
         self.model().blockSignals(False)
 
     def count(self):
-        """ Returns the number of items in the combobox """
+        """ 返回 number 的 项 中的 combobox """
         return self.model().rowCount()
 
     def setMaxVisibleItems(self, num: int):
-        """ Set the maximum allowed size on screen of the combo box, measured in items, set to -1 indicates no restriction """
+        """ 设置the 组合框, measured 中的 项, 设置 到 -1 indicates no restriction的maximum allowed 大小 上的 屏幕 """
         self._maxVisibleItems = num
 
     def maxVisibleItems(self):
-        """ Returns the maximum allowed size on screen of the combo box, measured in items """
+        """ 返回 maximum allowed 大小 上的 屏幕 的 组合框, measured 中的 项 """
         return self._maxVisibleItems
 
     def _closeComboMenu(self):
         if not self.dropMenu:
             return
 
-        # drop menu could be deleted before this method
+        # drop 菜单 could be deleted before this method
         try:
             self.dropMenu.close()
         except:
@@ -362,11 +362,11 @@ class ModelComboBoxBase:
         menu.closedSignal.connect(self._onDropMenuClosed)
         self.dropMenu = menu
 
-        # set the selected item
+        # 设置 选中项
         if self.currentIndex() >= 0:
             menu.setDefaultAction(menu.actions()[self.currentIndex()])
 
-        # determine the animation type by choosing the maximum height of view
+        # 判断the 动画 type by choosing maximum 高度 的 视图
         x = -menu.width()//2 + menu.layout().contentsMargins().left() + self.width()//2
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)
@@ -396,7 +396,7 @@ class ModelComboBoxBase:
 
 
 class ModelComboBox(QPushButton, ModelComboBoxBase):
-    """ Combo box build in data model """
+    """ 组合框 build 中的 数据 model """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -488,7 +488,7 @@ class ModelComboBox(QPushButton, ModelComboBoxBase):
 
 
 class EditableModelComboBox(LineEdit, ModelComboBoxBase):
-    """ Editable combo box build in data model """
+    """ Editable 组合框 build 中的 数据 model """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)

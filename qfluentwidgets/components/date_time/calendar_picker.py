@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 
 from PySide6.QtCore import Qt, Signal, QRectF, QDate, QPoint, Property
@@ -13,7 +13,7 @@ from .fast_calendar_view import FastCalendarView
 
 
 class CalendarPicker(QPushButton):
-    """ Calendar picker """
+    """ 日历选择器 """
 
     dateChanged = Signal(QDate)
 
@@ -32,11 +32,11 @@ class CalendarPicker(QPushButton):
         return self._date
 
     def setDate(self, date: QDate):
-        """ set the selected date """
+        """ 设置 选中日期 """
         self._onDateChanged(date)
 
     def reset(self):
-        """ reset date """
+        """ reset 日期 """
         self._date = QDate()
         self.setText(self.tr('Pick a date'))
         self.setProperty('hasDate', False)
@@ -55,7 +55,7 @@ class CalendarPicker(QPushButton):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ set the visibility of reset button """
+        """ 设置reset 按钮的可见性 """
         self._isResetEnabled = isEnabled
 
     def _showCalendarView(self):
@@ -98,7 +98,7 @@ class CalendarPicker(QPushButton):
 
 
 class FastCalendarPicker(CalendarPicker):
-    """ Pro calendar picker """
+    """ Pro 日历选择器 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List
 from pathlib import Path
 
@@ -17,7 +17,7 @@ from .expand_setting_card import ExpandSettingCard
 
 
 class FolderItem(QWidget):
-    """ Folder item """
+    """ 文件夹 项 """
 
     removed = Signal(QWidget)
 
@@ -40,7 +40,7 @@ class FolderItem(QWidget):
         self.hBoxLayout.addWidget(self.removeButton, 0, Qt.AlignRight)
         self.hBoxLayout.setAlignment(Qt.AlignVCenter)
 
-        # Set object name to apply theme-aware color style
+        # 设置 对象 name 到 apply theme-aware 颜色 style
         self.folderLabel.setObjectName('titleLabel')
 
         self.removeButton.clicked.connect(
@@ -48,28 +48,28 @@ class FolderItem(QWidget):
 
 
 class FolderListSettingCard(ExpandSettingCard):
-    """ Folder list setting card """
+    """ 文件夹 列表 setting card """
 
     folderChanged = Signal(list)
 
     def __init__(self, configItem: ConfigItem, title: str, content: str = None, directory="./", parent=None):
         """
-        Parameters
+        参数
         ----------
         configItem: RangeConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         directory: str
-            working directory of file dialog
+            working directory 的 file 对话框
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(FIF.FOLDER, title, content, parent)
         self.configItem = configItem
@@ -82,7 +82,7 @@ class FolderListSettingCard(ExpandSettingCard):
     def __initWidget(self):
         self.addWidget(self.addFolderButton)
 
-        # initialize layout
+        # 初始化布局
         self.viewLayout.setSpacing(0)
         self.viewLayout.setAlignment(Qt.AlignTop)
         self.viewLayout.setContentsMargins(0, 0, 0, 0)
@@ -92,7 +92,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self.addFolderButton.clicked.connect(self.__showFolderDialog)
 
     def __showFolderDialog(self):
-        """ show folder dialog """
+        """ 显示文件夹 对话框 """
         folder = QFileDialog.getExistingDirectory(
             self, self.tr("Choose folder"), self._dialogDirectory)
 
@@ -105,7 +105,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self.folderChanged.emit(self.folders)
 
     def __addFolderItem(self, folder: str):
-        """ add folder item """
+        """ 添加 文件夹 项 """
         item = FolderItem(folder, self.view)
         item.removed.connect(self.__showConfirmDialog)
         self.viewLayout.addWidget(item)
@@ -113,7 +113,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self._adjustViewSize()
 
     def __showConfirmDialog(self, item: FolderItem):
-        """ show confirm dialog """
+        """ 显示confirm 对话框 """
         name = Path(item.folder).name
         title = self.tr('Are you sure you want to delete the folder?')
         content = self.tr("If you delete the ") + f'"{name}"' + \
@@ -124,7 +124,7 @@ class FolderListSettingCard(ExpandSettingCard):
         w.exec_()
 
     def __removeFolder(self, item: FolderItem):
-        """ remove folder """
+        """ 移除 文件夹 """
         if item.folder not in self.folders:
             return
 

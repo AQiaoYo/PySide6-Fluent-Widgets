@@ -8,7 +8,7 @@ from .config import qconfig
 
 
 class AnimationBase(QObject):
-    """ Animation base class """
+    """ 动画基类 """
 
     def __init__(self, parent: QWidget):
         super().__init__(parent=parent)
@@ -41,6 +41,7 @@ class AnimationBase(QObject):
 
 
 class TranslateYAnimation(AnimationBase):
+    """Y 轴位移动画."""
 
     valueChanged = Signal(float)
 
@@ -59,14 +60,14 @@ class TranslateYAnimation(AnimationBase):
         self.valueChanged.emit(y)
 
     def _onPress(self, e):
-        """ arrow down """
+        """ 向下位移 """
         self.ani.setEndValue(self.maxOffset)
         self.ani.setEasingCurve(QEasingCurve.OutQuad)
         self.ani.setDuration(150)
         self.ani.start()
 
     def _onRelease(self, e):
-        """ arrow up """
+        """回到初始位置."""
         self.ani.setEndValue(0)
         self.ani.setDuration(500)
         self.ani.setEasingCurve(QEasingCurve.OutElastic)
@@ -77,7 +78,7 @@ class TranslateYAnimation(AnimationBase):
 
 
 class BackgroundAnimationWidget:
-    """ Background animation widget """
+    """ 带背景动画的部件 """
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -166,7 +167,7 @@ class BackgroundAnimationWidget:
 
 
 class BackgroundColorObject(QObject):
-    """ Background color object """
+    """ 背景色对象 """
 
     def __init__(self, parent: BackgroundAnimationWidget):
         super().__init__(parent)
@@ -182,7 +183,7 @@ class BackgroundColorObject(QObject):
         self.parent().update()
 
 class DropShadowAnimation(QPropertyAnimation):
-    """ Drop shadow animation """
+    """ 阴影动画 """
 
     def __init__(self, parent: QWidget, normalColor=QColor(0, 0, 0, 0), hoverColor=QColor(0, 0, 0, 75)):
         super().__init__(parent=parent)
@@ -251,14 +252,14 @@ class DropShadowAnimation(QPropertyAnimation):
 
 
 class FluentAnimationSpeed(Enum):
-    """ Fluent animation speed """
+    """Fluent 动画速度."""
     FAST = 0
     MEDIUM = 1
     SLOW = 2
 
 
 class FluentAnimationType(Enum):
-    """ Fluent animation type """
+    """Fluent 动画类型."""
     FAST_INVOKE = 0
     STRONG_INVOKE = 1
     FAST_DISMISS = 2
@@ -268,7 +269,7 @@ class FluentAnimationType(Enum):
 
 
 class FluentAnimationProperty(Enum):
-    """ Fluent animation property """
+    """Fluent 动画属性."""
     POSITION = "position"
     SCALE = "scale"
     ANGLE = "angle"
@@ -277,7 +278,7 @@ class FluentAnimationProperty(Enum):
 
 
 class FluentAnimationProperObject(QObject):
-    """ Fluent animation property object """
+    """Fluent 动画属性对象."""
 
     objects = {}
 
@@ -292,12 +293,12 @@ class FluentAnimationProperObject(QObject):
 
     @classmethod
     def register(cls, name):
-        """ register menu animation manager
+        """注册动画属性对象.
 
-        Parameters
+        参数
         ----------
         name: Any
-            the name of manager, it should be unique
+            属性对象名称,必须唯一.
         """
         def wrapper(Manager):
             if name not in cls.objects:
@@ -317,7 +318,7 @@ class FluentAnimationProperObject(QObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.POSITION)
 class PositionObject(FluentAnimationProperObject):
-    """ Position object """
+    """ 位置 对象 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -335,7 +336,7 @@ class PositionObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.SCALE)
 class ScaleObject(FluentAnimationProperObject):
-    """ Scale object """
+    """缩放对象."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -353,7 +354,7 @@ class ScaleObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.ANGLE)
 class AngleObject(FluentAnimationProperObject):
-    """ Angle object """
+    """角度对象."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -371,7 +372,7 @@ class AngleObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.OPACITY)
 class OpacityObject(FluentAnimationProperObject):
-    """ Opacity object """
+    """透明度对象."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -388,7 +389,7 @@ class OpacityObject(FluentAnimationProperObject):
 
 
 class FluentAnimation(QPropertyAnimation):
-    """ Fluent animation base """
+    """Fluent 动画基类."""
 
     animations = {}
 
@@ -408,7 +409,7 @@ class FluentAnimation(QPropertyAnimation):
         return cls.createBezierCurve(0, 0, 1, 1)
 
     def setSpeed(self, speed: FluentAnimationSpeed):
-        """ set the speed of animation """
+        """设置动画速度."""
         self.setDuration(self.speedToDuration(speed))
 
     def speedToDuration(self, speed: FluentAnimationSpeed):
@@ -433,12 +434,12 @@ class FluentAnimation(QPropertyAnimation):
 
     @classmethod
     def register(cls, name):
-        """ register menu animation manager
+        """注册动画管理器.
 
-        Parameters
+        参数
         ----------
         name: Any
-            the name of manager, it should be unique
+            动画类型名称,必须唯一.
         """
         def wrapper(Manager):
             if name not in cls.animations:
@@ -469,7 +470,7 @@ class FluentAnimation(QPropertyAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FAST_INVOKE)
 class FastInvokeAnimation(FluentAnimation):
-    """ Fast invoke animation """
+    """快速调用动画."""
 
     @classmethod
     def curve(cls):
@@ -486,7 +487,7 @@ class FastInvokeAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.STRONG_INVOKE)
 class StrongInvokeAnimation(FluentAnimation):
-    """ Strong invoke animation """
+    """强调用动画."""
 
     @classmethod
     def curve(cls):
@@ -498,12 +499,12 @@ class StrongInvokeAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FAST_DISMISS)
 class FastDismissAnimation(FastInvokeAnimation):
-    """ Fast dismiss animation """
+    """快速消失动画."""
 
 
 @FluentAnimation.register(FluentAnimationType.SOFT_DISMISS)
 class SoftDismissAnimation(FluentAnimation):
-    """ Soft dismiss animation """
+    """柔和消失动画."""
 
     @classmethod
     def curve(cls):
@@ -515,7 +516,7 @@ class SoftDismissAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.POINT_TO_POINT)
 class PointToPointAnimation(FastDismissAnimation):
-    """ Point to point animation """
+    """点到点动画."""
 
     @classmethod
     def curve(cls):
@@ -524,7 +525,7 @@ class PointToPointAnimation(FastDismissAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FADE_IN_OUT)
 class FadeInOutAnimation(FluentAnimation):
-    """ Fade in/out animation """
+    """淡入淡出动画."""
 
     def speedToDuration(self, speed: FluentAnimationSpeed):
         return 83
@@ -532,7 +533,7 @@ class FadeInOutAnimation(FluentAnimation):
 
 
 class ScaleSlideAnimation(QObject):
-    """ Scale and slide animation """
+    """缩放与滑移动画."""
 
     valueChanged = Signal(QRectF)
     finished = Signal()
@@ -574,7 +575,7 @@ class ScaleSlideAnimation(QObject):
 
         startRect = QRectF(self.geometry)
 
-        # Determine if same level
+        # 判断新旧指示器是否位于同一层级.
         if self.isHorizontal():
             sameLevel = abs(startRect.y() - endRect.y()) < 1
             dim = startRect.width()
@@ -596,12 +597,7 @@ class ScaleSlideAnimation(QObject):
         self.crossAniGroup.stop()
 
     def _startSlideAnimation(self, startRect, endRect, from_, to, dimension):
-        """ Animate the indicator using WinUI 3 squash and stretch logic
-
-        Key algorithm:
-        1. middleScale = abs(to - from) / dimension + (from < to ? endScale : beginScale)
-        2. At 33% progress, the indicator stretches to cover the distance between two items
-        """
+        """使用 WinUI 3 的拉伸逻辑为指示器执行滑移动画."""
         self.currentAni = self.slideAniGroup
         self.slidePosAni1.setDuration(200)
         self.slidePosAni2.setDuration(400)
@@ -621,27 +617,23 @@ class ScaleSlideAnimation(QObject):
         endPos = endRect.topLeft()
 
         if isForward:
-            # A--B   ----M--->    A'--B'
-            # 0->0.33: B moves to M (len increases)
+            # 前进方向:先拉长,再把起点移动到目标位置.
             self.slidePosAni1.setStartValue(startPos)
             self.slidePosAni1.setEndValue(startPos)
             self.slideLengthAni1.setStartValue(dimension)
             self.slideLengthAni1.setEndValue(midLength)
 
-            # 0.33->1.0:  A moves to A', B (at M) moves to B'
             self.slidePosAni2.setStartValue(startPos)
             self.slidePosAni2.setEndValue(endPos)
             self.slideLengthAni2.setStartValue(midLength)
             self.slideLengthAni2.setEndValue(dimension)
         else:
-            # A'--B'   <----M----    A--B
-            # 0->0.33: A moves to M (len increases)
+            # 后退方向:先向前扩展到中间态,再收缩回目标长度.
             self.slidePosAni1.setStartValue(startPos)
             self.slidePosAni1.setEndValue(endPos)
             self.slideLengthAni1.setStartValue(dimension)
             self.slideLengthAni1.setEndValue(midLength)
 
-            # 0.33->1.0: A (at M) moves to A', B moves to B'
             self.slidePosAni2.setStartValue(endPos)
             self.slidePosAni2.setEndValue(endPos)
             self.slideLengthAni2.setStartValue(midLength)
@@ -653,8 +645,7 @@ class ScaleSlideAnimation(QObject):
         self.currentAni = self.crossAniGroup
         self.setGeometry(endRect)
 
-        # Determine growth direction based on relative position
-        # WinUI 3 logic: Grow from top/bottom edge depending on direction
+        # 根据相对位置判断扩张方向,保持与 WinUI 3 一致的生长效果.
         isNextBelow = endRect.y() > startRect.y() if not self.isHorizontal() else endRect.x() > startRect.x()
 
         if self.isHorizontal():

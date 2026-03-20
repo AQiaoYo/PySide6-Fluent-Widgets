@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List
 from PySide6.QtCore import Qt, QRect, QRectF, QSize
 from PySide6.QtGui import QPainter, QColor, QPainterPath, QAction
@@ -40,7 +40,7 @@ class AcrylicMenuActionListWidget(MenuActionListWidget):
         return 6
 
     def setItemHeight(self, height: int):
-        """ set the height of item """
+        """ 设置项的高度 """
         if height == self._itemHeight:
             return
 
@@ -102,7 +102,7 @@ class AcrylicMenuBase:
 
 
 class AcrylicMenu(AcrylicMenuBase, RoundMenu):
-    """ Acrylic menu """
+    """ 亚克力 菜单 """
 
     def __init__(self, title="", parent=None):
         super().__init__(title, parent)
@@ -130,7 +130,7 @@ class AcrylicCompleterMenuActionListWidget(AcrylicMenuActionListWidget):
 
 
 class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
-    """ Acrylic completer menu """
+    """ 亚克力 completer 菜单 """
 
     def __init__(self, lineEdit: LineEdit):
         super().__init__(lineEdit)
@@ -149,7 +149,7 @@ class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
         return super().exec(pos, ani, aniType)
 
     def setItems(self, items):
-        """ set completion items """
+        """ 设置 completion 项 """
         self.view.clear()
 
         self.items = items
@@ -165,7 +165,7 @@ class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
 
 
 class AcrylicLineEditMenu(AcrylicMenuBase, LineEditMenu):
-    """ Acrylic line edit menu """
+    """ 亚克力 行编辑器 菜单 """
 
     def __init__(self, parent: QLineEdit):
         super().__init__(parent)
@@ -176,7 +176,7 @@ class AcrylicLineEditMenu(AcrylicMenuBase, LineEditMenu):
 
 
 class AcrylicCheckableMenu(AcrylicMenuBase, CheckableMenu):
-    """ Checkable menu """
+    """ 可选中菜单 """
 
     def __init__(self, title="", parent=None, indicatorType=MenuIndicatorType.CHECK):
         super().__init__(title, parent, indicatorType)
@@ -188,7 +188,7 @@ class AcrylicCheckableMenu(AcrylicMenuBase, CheckableMenu):
 
 
 class AcrylicSystemTrayMenu(AcrylicMenu):
-    """ System tray menu """
+    """ 系统托盘菜单 """
 
     def showEvent(self, e):
         super().showEvent(e)
@@ -197,7 +197,7 @@ class AcrylicSystemTrayMenu(AcrylicMenu):
 
 
 class AcrylicCheckableSystemTrayMenu(AcrylicCheckableMenu):
-    """ Checkable system tray menu """
+    """ 可选中系统托盘菜单 """
 
     def showEvent(self, e):
         super().showEvent(e)

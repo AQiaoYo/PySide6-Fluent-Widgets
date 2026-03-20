@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 
 from PySide6.QtCore import Qt, Signal
@@ -35,19 +35,19 @@ class SettingCard(QFrame):
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(parent=parent)
         self.iconLabel = SettingIconWidget(icon, self)
@@ -62,7 +62,7 @@ class SettingCard(QFrame):
         self.setFixedHeight(70 if content else 50)
         self.iconLabel.setFixedSize(16, 16)
 
-        # initialize layout
+        # 初始化布局
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(16, 0, 0, 0)
         self.hBoxLayout.setAlignment(Qt.AlignVCenter)
@@ -84,20 +84,20 @@ class SettingCard(QFrame):
         FluentStyleSheet.SETTING_CARD.apply(self)
 
     def setTitle(self, title: str):
-        """ set the title of card """
+        """ 设置card的标题 """
         self.titleLabel.setText(title)
 
     def setContent(self, content: str):
-        """ set the content of card """
+        """ 设置card的内容 """
         self.contentLabel.setText(content)
         self.contentLabel.setVisible(bool(content))
 
     def setValue(self, value):
-        """ set the value of config item """
+        """ 设置配置 项的值 """
         pass
 
     def setIconSize(self, width: int, height: int):
-        """ set the icon fixed size """
+        """ 设置 图标 固定大小 """
         self.iconLabel.setFixedSize(width, height)
 
     def paintEvent(self, e):
@@ -116,29 +116,29 @@ class SettingCard(QFrame):
 
 
 class SwitchSettingCard(SettingCard):
-    """ Setting card with switch button """
+    """ Setting card 使用 开关按钮 """
 
     checkedChanged = Signal(bool)
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], title, content=None,
                  configItem: ConfigItem = None, parent=None):
         """
-        Parameters
+        参数
         ----------
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         configItem: ConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -149,14 +149,14 @@ class SwitchSettingCard(SettingCard):
             self.setValue(qconfig.get(configItem))
             configItem.valueChanged.connect(self.setValue)
 
-        # add switch button to layout
+        # 将switch 按钮添加到布局
         self.hBoxLayout.addWidget(self.switchButton, 0, Qt.AlignRight)
         self.hBoxLayout.addSpacing(16)
 
         self.switchButton.checkedChanged.connect(self.__onCheckedChanged)
 
     def __onCheckedChanged(self, isChecked: bool):
-        """ switch button checked state changed slot """
+        """ 开关按钮 选中 state changed 槽函数 """
         self.setValue(isChecked)
         self.checkedChanged.emit(isChecked)
 
@@ -176,28 +176,28 @@ class SwitchSettingCard(SettingCard):
 
 
 class RangeSettingCard(SettingCard):
-    """ Setting card with a slider """
+    """ Setting card 使用 slider """
 
     valueChanged = Signal(int)
 
     def __init__(self, configItem, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         configItem: RangeConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -221,7 +221,7 @@ class RangeSettingCard(SettingCard):
         self.slider.valueChanged.connect(self.__onValueChanged)
 
     def __onValueChanged(self, value: int):
-        """ slider value changed slot """
+        """ slider 值 changed 槽函数 """
         self.setValue(value)
         self.valueChanged.emit(value)
 
@@ -233,28 +233,28 @@ class RangeSettingCard(SettingCard):
 
 
 class PushSettingCard(SettingCard):
-    """ Setting card with a push button """
+    """ Setting card 使用 按钮 """
 
     clicked = Signal()
 
     def __init__(self, text, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         text: str
-            the text of push button
+            文本 的 按钮
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.button = QPushButton(text, self)
@@ -264,7 +264,7 @@ class PushSettingCard(SettingCard):
 
 
 class PrimaryPushSettingCard(PushSettingCard):
-    """ Push setting card with primary color """
+    """ Push setting card 使用 主题色 颜色 """
 
     def __init__(self, text, icon, title, content=None, parent=None):
         super().__init__(text, icon, title, content, parent)
@@ -276,28 +276,28 @@ class HyperlinkCard(SettingCard):
 
     def __init__(self, url, text, icon: Union[str, QIcon, FluentIconBase], title, content=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         url: str
-            the url to be opened
+            url 到 be opened
 
         text: str
-            text of url
+            文本 的 url
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         text: str
-            the text of push button
+            文本 的 按钮
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.linkButton = HyperlinkButton(url, text, self)
@@ -306,7 +306,7 @@ class HyperlinkCard(SettingCard):
 
 
 class ColorPickerButton(QToolButton):
-    """ Color picker button """
+    """ 颜色 picker 按钮 """
 
     colorChanged = Signal(QColor)
 
@@ -322,19 +322,19 @@ class ColorPickerButton(QToolButton):
         self.clicked.connect(self.__showColorDialog)
 
     def __showColorDialog(self):
-        """ show color dialog """
+        """ 显示颜色对话框 """
         w = ColorDialog(self.color, self.tr(
             'Choose ')+self.title, self.window(), self.enableAlpha)
         w.colorChanged.connect(self.__onColorChanged)
         w.exec()
 
     def __onColorChanged(self, color):
-        """ color changed slot """
+        """ 颜色 changed 槽函数 """
         self.setColor(color)
         self.colorChanged.emit(color)
 
     def setColor(self, color):
-        """ set color """
+        """ 设置颜色 """
         self.color = QColor(color)
         self.update()
 
@@ -353,32 +353,32 @@ class ColorPickerButton(QToolButton):
 
 
 class ColorSettingCard(SettingCard):
-    """ Setting card with color picker """
+    """ Setting card 使用 颜色 picker """
 
     colorChanged = Signal(QColor)
 
     def __init__(self, configItem, icon: Union[str, QIcon, FluentIconBase],
                  title: str, content: str = None, parent=None, enableAlpha=False):
         """
-        Parameters
+        参数
         ----------
         configItem: RangeConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         parent: QWidget
-            parent widget
+            父部件 部件
 
         enableAlpha: bool
-            whether to enable the alpha channel
+            是否 到 启用 透明通道 channel
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem
@@ -399,29 +399,29 @@ class ColorSettingCard(SettingCard):
 
 
 class ComboBoxSettingCard(SettingCard):
-    """ Setting card with a combo box """
+    """ Setting card 使用 组合框 """
 
     def __init__(self, configItem: OptionsConfigItem, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         configItem: OptionsConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
-        texts: List[str]
-            the text of items
+        texts: 列表[str]
+            文本 的 项
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem

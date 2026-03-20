@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 
 from PySide6.QtCore import Property
@@ -10,12 +10,12 @@ from ...common.overload import singledispatchmethod
 
 
 class IconWidget(QWidget):
-    """ Icon widget
+    """ 图标 部件
 
-    Constructors
+    构造函数
     ------------
-    * IconWidget(`parent`: QWidget = None)
-    * IconWidget(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * IconWidget(`父部件`: QWidget = None)
+    * IconWidget(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod

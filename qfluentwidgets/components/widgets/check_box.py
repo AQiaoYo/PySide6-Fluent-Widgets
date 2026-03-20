@@ -24,7 +24,7 @@ class CheckBoxIcon(FluentIconBase, Enum):
 
 
 class CheckBoxState(Enum):
-    """ Check box state """
+    """ 复选框 state """
 
     NORMAL = 0
     HOVER = 1
@@ -37,12 +37,12 @@ class CheckBoxState(Enum):
 
 
 class CheckBox(QCheckBox):
-    """ Check box
+    """ 复选框
 
-    Constructors
+    构造函数
     ------------
-    * CheckBox(`parent`: QWidget = None)
-    * CheckBox(`text`: str, `parent`: QWidget = None)
+    * CheckBox(`父部件`: QWidget = None)
+    * CheckBox(`文本`: str, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -81,24 +81,24 @@ class CheckBox(QCheckBox):
         self.update()
 
     def setCheckedColor(self, light, dark):
-        """ set the color of indicator in checked status
+        """ 设置指示器 中的 选中 状态的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            indicator color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            指示器 颜色 中的 亮色/暗色主题模式
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
         self.update()
 
     def setTextColor(self, light, dark):
-        """ set the color of text
+        """ 设置文本的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            text color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            文本颜色 中的 亮色/暗色主题模式
         """
         self.lightTextColor = QColor(light)
         self.darkTextColor = QColor(dark)
@@ -185,12 +185,12 @@ class CheckBox(QCheckBox):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.RenderHint.Antialiasing)
 
-        # get the rect of indicator
+        # 获取指示器的区域
         opt = QStyleOptionButton()
         opt.initFrom(self)
         rect = self.style().subElementRect(QStyle.SE_CheckBoxIndicator, opt, self)
 
-        # draw shape
+        # 绘制shape
         painter.setPen(self._borderColor())
         painter.setBrush(self._backgroundColor())
         painter.drawRoundedRect(rect, 4.5, 4.5)
@@ -198,7 +198,7 @@ class CheckBox(QCheckBox):
         if not self.isEnabled():
             painter.setOpacity(0.8)
 
-        # draw icon
+        # 绘制图标
         if self.checkState() == Qt.Checked:
             CheckBoxIcon.ACCEPT.render(painter, rect)
         elif self.checkState() == Qt.PartiallyChecked:

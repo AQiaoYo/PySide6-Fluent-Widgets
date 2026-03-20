@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 from PySide6.QtCore import Qt, Signal, QRectF
 from PySide6.QtGui import QPainter, QIcon, QColor
@@ -14,7 +14,7 @@ from .pivot import Pivot, PivotItem
 
 
 class SegmentedItem(PivotItem):
-    """ Segmented item """
+    """ Segmented 项 """
 
     def _postInit(self):
         super()._postInit()
@@ -22,7 +22,7 @@ class SegmentedItem(PivotItem):
 
 
 class SegmentedToolItem(ToolButton):
-    """ Pivot item """
+    """ Pivot 项 """
 
     itemClicked = Signal(bool)
 
@@ -71,7 +71,7 @@ class SegmentedToggleToolItem(TransparentToolButton):
 
 
 class SegmentedWidget(Pivot):
-    """ Segmented widget """
+    """ Segmented 部件 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -99,7 +99,7 @@ class SegmentedWidget(Pivot):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
-        # draw background
+        # 绘制背景
         if isDarkTheme():
             painter.setPen(QColor(255, 255, 255, 14))
             painter.setBrush(QColor(255, 255, 255, 15))
@@ -111,7 +111,7 @@ class SegmentedWidget(Pivot):
         rect = item.rect().adjusted(1, 1, -1, -1).translated(int(self.slideAni.value()), 0)
         painter.drawRoundedRect(rect, 5, 5)
 
-        # draw indicator
+        # 绘制指示器
         painter.setPen(Qt.PenStyle.NoPen)
         painter.setBrush(autoFallbackThemeColor(self.lightIndicatorColor, self.darkIndicatorColor))
 
@@ -123,25 +123,25 @@ class SegmentedWidget(Pivot):
 
 
 class SegmentedToolWidget(SegmentedWidget):
-    """ Segmented tool widget """
+    """ Segmented tool 部件 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground)
 
     def addItem(self, routeKey: str, icon: Union[str, QIcon, FluentIconBase], onClick=None):
-        """ add item
+        """ 添加 项
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            the unique name of item
+            unique name 的 项
 
         icon: str | QIcon | FluentIconBase
-            the icon of navigation item
+            图标 的 navigation 项
 
         onClick: callable
-            the slot connected to item clicked signal
+            槽函数 connected 到 项 clicked 信号
         """
         return self.insertItem(-1, routeKey, icon, onClick)
 
@@ -158,7 +158,7 @@ class SegmentedToolWidget(SegmentedWidget):
 
 
 class SegmentedToggleToolWidget(SegmentedToolWidget):
-    """ Segmented toggle tool widget """
+    """ Segmented 切换 tool 部件 """
 
     def _createItem(self, icon):
         return SegmentedToggleToolItem(icon)

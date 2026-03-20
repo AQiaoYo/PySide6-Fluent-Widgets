@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
@@ -11,31 +11,31 @@ from .expand_setting_card import ExpandSettingCard
 
 
 class OptionsSettingCard(ExpandSettingCard):
-    """ setting card with a group of options """
+    """ setting card 使用 分组 的 options """
 
     optionChanged = Signal(OptionsConfigItem)
 
     def __init__(self, configItem, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         configItem: OptionsConfigItem
-            options config item
+            options 配置项
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of setting card
+            标题 的 setting card
 
         content: str
-            the content of setting card
+            内容 的 setting card
 
-        texts: List[str]
-            the texts of radio buttons
+        texts: 列表[str]
+            texts 的 radio 按钮
 
         parent: QWidget
-            parent window
+            父部件 窗口
         """
         super().__init__(icon, title, content, parent)
         self.texts = texts or []
@@ -47,7 +47,7 @@ class OptionsSettingCard(ExpandSettingCard):
         self.choiceLabel.setObjectName("titleLabel")
         self.addWidget(self.choiceLabel)
 
-        # create buttons
+        # 创建按钮
         self.viewLayout.setSpacing(19)
         self.viewLayout.setContentsMargins(48, 18, 0, 18)
         for text, option in zip(texts, configItem.options):
@@ -62,7 +62,7 @@ class OptionsSettingCard(ExpandSettingCard):
         self.buttonGroup.buttonClicked.connect(self.__onButtonClicked)
 
     def __onButtonClicked(self, button: RadioButton):
-        """ button clicked slot """
+        """ 按钮 clicked 槽函数 """
         if button.text() == self.choiceLabel.text():
             return
 
@@ -74,7 +74,7 @@ class OptionsSettingCard(ExpandSettingCard):
         self.optionChanged.emit(self.configItem)
 
     def setValue(self, value):
-        """ select button according to the value """
+        """ select 按钮 根据 值 """
         qconfig.set(self.configItem, value)
 
         for button in self.buttonGroup.buttons():

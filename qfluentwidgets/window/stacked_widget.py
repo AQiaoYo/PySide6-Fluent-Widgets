@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QEasingCurve
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QAbstractScrollArea
 
@@ -7,7 +7,7 @@ from ..components.widgets.stacked_widget import PopUpAniStackedWidget, EntranceT
 
 
 class StackedWidget(QFrame):
-    """ Stacked widget """
+    """ 堆叠部件 """
 
     currentChanged = Signal(int)
 
@@ -26,15 +26,15 @@ class StackedWidget(QFrame):
         return self.view.isAnimationEnabled
 
     def setAnimationEnabled(self, isEnabled: bool):
-        """set whether the pop animation is enabled"""
+        """设置 是否 pop 动画 is 已启用"""
         self.view.setAnimationEnabled(isEnabled)
 
     def addWidget(self, widget):
-        """ add widget to view """
+        """ 将部件添加到视图 """
         self.view.addWidget(widget)
 
     def removeWidget(self, widget):
-        """ remove widget from view """
+        """ 从视图移除部件 """
         self.view.removeWidget(widget)
 
     def widget(self, index: int):

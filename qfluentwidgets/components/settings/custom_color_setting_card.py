@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QIcon, QColor
@@ -12,32 +12,32 @@ from ...common.icon import FluentIconBase
 
 
 class CustomColorSettingCard(ExpandGroupSettingCard):
-    """ Custom color setting card """
+    """ 自定义 颜色 setting card """
 
     colorChanged = Signal(QColor)
 
     def __init__(self, configItem: ColorConfigItem, icon: Union[str, QIcon, FluentIconBase], title: str,
                  content=None, parent=None, enableAlpha=False):
         """
-        Parameters
+        参数
         ----------
         configItem: ColorConfigItem
-            options config item
+            options 配置项
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of setting card
+            标题 的 setting card
 
         content: str
-            the content of setting card
+            内容 的 setting card
 
         parent: QWidget
-            parent window
+            父部件 窗口
 
         enableAlpha: bool
-            whether to enable the alpha channel
+            是否 到 启用 透明通道 channel
         """
         super().__init__(icon, title, content, parent=parent)
         self.enableAlpha = enableAlpha
@@ -107,7 +107,7 @@ class CustomColorSettingCard(ExpandGroupSettingCard):
         self.addGroupWidget(self.customColorWidget)
 
     def __onRadioButtonClicked(self, button: RadioButton):
-        """ radio button clicked slot """
+        """ 单选按钮 clicked 槽函数 """
         if button.text() == self.choiceLabel.text():
             return
 
@@ -126,14 +126,14 @@ class CustomColorSettingCard(ExpandGroupSettingCard):
                 self.colorChanged.emit(self.customColor)
 
     def __showColorDialog(self):
-        """ show color dialog """
+        """ 显示颜色对话框 """
         w = ColorDialog(
             qconfig.get(self.configItem), self.tr('Choose color'), self.window(), self.enableAlpha)
         w.colorChanged.connect(self.__onCustomColorChanged)
         w.exec()
 
     def __onCustomColorChanged(self, color):
-        """ custom color changed slot """
+        """ 自定义 颜色 changed 槽函数 """
         qconfig.set(self.configItem, color)
         self.customColor = QColor(color)
         self.colorChanged.emit(color)

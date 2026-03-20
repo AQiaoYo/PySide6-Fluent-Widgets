@@ -16,7 +16,7 @@ from .calendar_view import (ScrollItemDelegate, ScrollViewBase,
 
 
 class FastScrollItemDelegate(ScrollItemDelegate):
-    """ Fast scroll item delegate """
+    """ Fast 滚动 项 委托 """
 
     def __init__(self, min, max):
         super().__init__(min, max)
@@ -85,14 +85,14 @@ class FastScrollItemDelegate(ScrollItemDelegate):
 
 
 class FastYearScrollItemDelegate(FastScrollItemDelegate):
-    """ Year scroll item delegate """
+    """ 年份 滚动 项 委托 """
 
     def _itemMargin(self):
         return 8
 
 
 class FastDayScrollItemDelegate(FastScrollItemDelegate):
-    """ Fast day scroll item delegate """
+    """ Fast 日期 滚动 项 委托 """
 
     def _itemMargin(self):
         return 3
@@ -100,7 +100,7 @@ class FastDayScrollItemDelegate(FastScrollItemDelegate):
 
 
 class FastScrollViewBase(ScrollViewBase):
-    """ Scroll view base class """
+    """ 滚动视图基类 """
 
     pageChanged = Signal(int)
 
@@ -122,7 +122,7 @@ class FastScrollViewBase(ScrollViewBase):
         pass
 
     def _updateItems(self):
-        """ update the items of current page """
+        """ 更新the 项 的 当前 页面 """
         pass
 
     def pageCount(self):
@@ -137,7 +137,7 @@ class FastScrollViewBase(ScrollViewBase):
 
 
 class FastYearScrollView(FastScrollViewBase):
-    """ Year scroll view """
+    """ 年份 滚动视图 """
 
     def __init__(self, parent=None):
         super().__init__(FastYearScrollItemDelegate, parent)
@@ -182,7 +182,7 @@ class FastYearScrollView(FastScrollViewBase):
 
 
 class FastMonthScrollView(FastScrollViewBase):
-    """ Month scroll view """
+    """ 月份 滚动视图 """
 
     def __init__(self, parent=None):
         super().__init__(FastYearScrollItemDelegate, parent)
@@ -197,7 +197,7 @@ class FastMonthScrollView(FastScrollViewBase):
         ]
         self.addItems(self.months)
 
-        # add month items
+        # 添加 月份 项
         for i in range(len(self.months)):
             year = i // 12 + self.minYear
             m = i % 12 + 1
@@ -229,13 +229,13 @@ class FastMonthScrollView(FastScrollViewBase):
 
 
 class FastDayScrollView(FastScrollViewBase):
-    """ Day scroll view """
+    """ 日期 滚动视图 """
 
     def __init__(self, parent=None):
         super().__init__(FastDayScrollItemDelegate, parent)
         self.vBoxLayout = QHBoxLayout(self)
 
-        # add week day labels
+        # 添加 week 日期 labels
         self.weekDays = [
             self.tr('Mo'), self.tr('Tu'), self.tr('We'),
             self.tr('Th'), self.tr('Fr'), self.tr('Sa'), self.tr('Su')
@@ -265,14 +265,14 @@ class FastDayScrollView(FastScrollViewBase):
         startDate = QDate(self.minYear, 1, 1)
         currentDate = startDate
 
-        # add placeholder
+        # 添加 placeholder
         bias = currentDate.dayOfWeek() - 1
         for i in range(bias):
             item = QListWidgetItem(self)
             item.setFlags(Qt.ItemFlag.NoItemFlags)
             self.addItem(item)
 
-        # add day items
+        # 添加 日期 项
         items, dates = [], []
         endDate = startDate.addDays(self.pageSize() - bias)
         while currentDate < endDate:
@@ -343,7 +343,7 @@ class FastDayScrollView(FastScrollViewBase):
 
 
 class FastYearCalendarView(CalendarViewBase):
-    """ Year calendar view """
+    """ 年份 日历视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -356,7 +356,7 @@ class FastYearCalendarView(CalendarViewBase):
 
 
 class FastMonthCalendarView(CalendarViewBase):
-    """ Month calendar view """
+    """ 月份 日历视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -374,7 +374,7 @@ class FastMonthCalendarView(CalendarViewBase):
 
 
 class FastDayCalendarView(CalendarViewBase):
-    """ Day calendar view """
+    """ 日期 日历视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -437,7 +437,7 @@ class FastCalendarView(FlyoutViewBase):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ set the visibility of reset button """
+        """ 设置reset 按钮的可见性 """
         self._isResetEnabled = isEnabled
         self.yearView.setResetEnabled(isEnabled)
         self.monthView.setResetEnabled(isEnabled)
@@ -470,7 +470,7 @@ class FastCalendarView(FlyoutViewBase):
             self.dateChanged.emit(date)
 
     def setDate(self, date: QDate):
-        """ set the selected date """
+        """ 设置 选中日期 """
         self.dayView.setDate(date)
         self.date = date
 

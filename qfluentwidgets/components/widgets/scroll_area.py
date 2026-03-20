@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QEasingCurve, Qt, QPropertyAnimation
 from PySide6.QtGui import QWheelEvent
 from PySide6.QtWidgets import QScrollArea, QScrollBar
@@ -8,22 +8,22 @@ from .scroll_bar import ScrollBar, SmoothScrollBar, SmoothScrollDelegate
 
 
 class ScrollArea(QScrollArea):
-    """ Smooth scroll area """
+    """ 平滑滚动区域 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.scrollDelagate = SmoothScrollDelegate(self)
 
     def setSmoothMode(self, mode: SmoothMode, orientation: Qt.Orientation):
-        """ set smooth mode
+        """ 设置 平滑模式
 
-        Parameters
+        参数
         ----------
         mode: SmoothMode
-            smooth scroll mode
+            smooth 滚动 模式
 
         orientation: Qt.Orientation
-            scroll direction
+            滚动 方向
         """
         if orientation == Qt.Orientation.Vertical:
             self.scrollDelagate.verticalSmoothScroll.setSmoothMode(mode)
@@ -38,17 +38,17 @@ class ScrollArea(QScrollArea):
 
 
 class SingleDirectionScrollArea(QScrollArea):
-    """ Single direction scroll area"""
+    """ Single 方向 滚动区域"""
 
     def __init__(self, parent=None, orient=Qt.Vertical):
         """
-        Parameters
+        参数
         ----------
         parent: QWidget
-            parent widget
+            父部件 部件
 
         orient: Orientation
-            scroll orientation
+            滚动 orientation
         """
         super().__init__(parent)
         self.orient = orient
@@ -65,12 +65,12 @@ class SingleDirectionScrollArea(QScrollArea):
         self.hScrollBar.setForceHidden(policy == Qt.ScrollBarAlwaysOff)
 
     def setSmoothMode(self, mode):
-        """ set smooth mode
+        """ 设置 平滑模式
 
-        Parameters
+        参数
         ----------
         mode: SmoothMode
-            smooth scroll mode
+            smooth 滚动 模式
         """
         self.smoothScroll.setSmoothMode(mode)
 
@@ -95,25 +95,25 @@ class SingleDirectionScrollArea(QScrollArea):
 
 
 class SmoothScrollArea(QScrollArea):
-    """ Smooth scroll area """
+    """ 平滑滚动区域 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.delegate = SmoothScrollDelegate(self, True)
 
     def setScrollAnimation(self, orient, duration, easing=QEasingCurve.OutCubic):
-        """ set scroll animation
+        """ 设置 滚动 动画
 
-        Parameters
+        参数
         ----------
         orient: Orient
-            scroll orientation
+            滚动 orientation
 
         duration: int
-            scroll duration
+            滚动 持续时间
 
         easing: QEasingCurve
-            animation type
+            动画 type
         """
         bar = self.delegate.hScrollBar if orient == Qt.Horizontal else self.delegate.vScrollBar
         bar.setScrollAnimation(duration, easing)

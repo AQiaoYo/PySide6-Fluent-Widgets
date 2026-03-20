@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 
 from PySide6.QtCore import Qt, QSize, QRectF, QPoint
@@ -16,7 +16,7 @@ from .flyout import Flyout, FlyoutViewBase, FlyoutAnimationType
 
 
 class SpinIcon(FluentIconBase, Enum):
-    """ Spin icon """
+    """ Spin 图标 """
 
     UP = "Up"
     DOWN = "Down"
@@ -59,7 +59,7 @@ class SpinButton(QToolButton):
 
 
 class CompactSpinButton(QToolButton):
-    """ Compact spin button """
+    """ 紧凑 spin 按钮 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -78,7 +78,7 @@ class CompactSpinButton(QToolButton):
 
 
 class SpinFlyoutView(FlyoutViewBase):
-    """ Spin flyout view """
+    """ Spin 浮出层 视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -110,7 +110,7 @@ class SpinFlyoutView(FlyoutViewBase):
 
 
 class SpinBoxBase:
-    """ Spin box ui """
+    """ 微调框 ui """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -134,7 +134,7 @@ class SpinBoxBase:
         return self._isError
 
     def setError(self, isError: bool):
-        """ set the error status """
+        """ 设置 错误状态 """
         if isError == self.isError():
             return
 
@@ -146,17 +146,17 @@ class SpinBoxBase:
         self.setSymbolVisible(not isReadOnly)
 
     def setSymbolVisible(self, isVisible: bool):
-        """ set whether the spin symbol is visible """
+        """ 设置 是否 spin symbol is 可见 """
         self.setProperty("symbolVisible", isVisible)
         self.setStyle(QApplication.style())
 
     def setCustomFocusedBorderColor(self, light, dark):
-        """ set the border color in focused status
+        """ 设置 边框颜色 中的 聚焦状态
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            border color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            边框颜色 中的 亮色/暗色主题模式
         """
         self.lightFocusedBorderColor = QColor(light)
         self.darkFocusedBorderColor = QColor(dark)
@@ -196,7 +196,7 @@ class SpinBoxBase:
 
 
 class InlineSpinBoxBase(SpinBoxBase):
-    """ Inline spin box base """
+    """ Inline 微调框 base """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -224,7 +224,7 @@ class InlineSpinBoxBase(SpinBoxBase):
 
 
 class CompactSpinBoxBase(SpinBoxBase):
-    """ Compact spin box base """
+    """ 紧凑 微调框 base """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -266,41 +266,41 @@ class CompactSpinBoxBase(SpinBoxBase):
 
 
 class SpinBox(InlineSpinBoxBase, QSpinBox):
-    """ Spin box """
+    """ 微调框 """
 
 
 class CompactSpinBox(CompactSpinBoxBase, QSpinBox):
-    """ Compact spin box """
+    """ 紧凑 微调框 """
 
 
 class DoubleSpinBox(InlineSpinBoxBase, QDoubleSpinBox):
-    """ Double spin box """
+    """ Double 微调框 """
 
 
 class CompactDoubleSpinBox(CompactSpinBoxBase, QDoubleSpinBox):
-    """ Compact double spin box """
+    """ 紧凑 double 微调框 """
 
 
 class TimeEdit(InlineSpinBoxBase, QTimeEdit):
-    """ Time edit """
+    """ 时间 edit """
 
 
 class CompactTimeEdit(CompactSpinBoxBase, QTimeEdit):
-    """ Compact time edit """
+    """ 紧凑 时间 edit """
 
 
 class DateTimeEdit(InlineSpinBoxBase, QDateTimeEdit):
-    """ Date time edit """
+    """ 日期 时间 edit """
 
 
 class CompactDateTimeEdit(CompactSpinBoxBase, QDateTimeEdit):
-    """ Compact date time edit """
+    """ 紧凑 日期 时间 edit """
 
 
 class DateEdit(InlineSpinBoxBase, QDateEdit):
-    """ Date edit """
+    """ 日期 edit """
 
 
 class CompactDateEdit(CompactSpinBoxBase, QDateEdit):
-    """ Compact date edit """
+    """ 紧凑 日期 edit """
 

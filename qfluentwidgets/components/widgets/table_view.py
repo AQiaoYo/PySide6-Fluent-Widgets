@@ -46,7 +46,7 @@ class TableItemDelegate(QStyledItemDelegate):
                 self.pressedRow = -1
 
     def sizeHint(self, option, index):
-        # increase original sizeHint to accommodate space needed for border
+        # increase original sizeHint 到 accommodate space needed 用于 边框
         size = super().sizeHint(option, index)
         size = size.grownBy(QMargins(0, self.margin, 0, self.margin))
         return size
@@ -69,19 +69,19 @@ class TableItemDelegate(QStyledItemDelegate):
         editor.setGeometry(x, y, w, rect.height())
 
     def setCheckedColor(self, light, dark):
-        """ set the color of indicator in checked status
+        """ 设置指示器 中的 选中 状态的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
         self.parent().viewport().update()
 
     def _drawBackground(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        """ draw row background """
+        """ 绘制行 背景 """
         r = 5
         if index.column() == 0:
             rect = option.rect.adjusted(4, 0, r + 1, 0)
@@ -94,7 +94,7 @@ class TableItemDelegate(QStyledItemDelegate):
             painter.drawRect(rect)
 
     def _drawIndicator(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        """ draw indicator """
+        """ 绘制指示器 """
         y, h = option.rect.y(), option.rect.height()
         ph = round(0.35*h if self.pressedRow == index.row() else 0.257*h)
         painter.setBrush(autoFallbackThemeColor(self.lightCheckedColor, self.darkCheckedColor))
@@ -106,7 +106,7 @@ class TableItemDelegate(QStyledItemDelegate):
         # font
         option.font = index.data(Qt.FontRole) or getFont(13)
 
-        # text color
+        # 文本颜色
         textColor = Qt.white if isDarkTheme() else Qt.black
         textBrush = index.data(Qt.ForegroundRole)   # type: QBrush
         if textBrush is not None:
@@ -120,14 +120,14 @@ class TableItemDelegate(QStyledItemDelegate):
         painter.setPen(Qt.NoPen)
         painter.setRenderHint(QPainter.Antialiasing)
 
-        # set clipping rect of painter to avoid painting outside the borders
+        # 设置 clipping 区域 的 painter 到 avoid painting outside borders
         painter.setClipping(True)
         painter.setClipRect(option.rect)
 
-        # call original paint method where option.rect is adjusted to account for border
+        # call original 绘制 method where option.区域 is adjusted 到 account 用于 边框
         option.rect.adjust(0, self.margin, 0, -self.margin)
 
-        # draw highlight background
+        # 绘制highlight 背景
         isHover = self.hoverRow == index.row()
         isPressed = self.pressedRow == index.row()
         isAlternate = index.row() % 2 == 0 and self.parent().alternatingRowColors()
@@ -158,7 +158,7 @@ class TableItemDelegate(QStyledItemDelegate):
 
         self._drawBackground(painter, option, index)
 
-        # draw indicator
+        # 绘制指示器
         if index.row() in self.selectedRows and index.column() == 0 and self.parent().horizontalScrollBar().value() == 0:
             self._drawIndicator(painter, option, index)
 
@@ -202,7 +202,7 @@ class TableItemDelegate(QStyledItemDelegate):
 
 
 class TableBase:
-    """ Table base class """
+    """ Table 基类 """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -210,7 +210,7 @@ class TableBase:
         self.scrollDelagate = SmoothScrollDelegate(self)
         self._isSelectRightClickedRow = False
 
-        # set style sheet
+        # 设置样式表
         FluentStyleSheet.TABLE_VIEW.apply(self)
 
         self.setShowGrid(False)
@@ -227,32 +227,32 @@ class TableBase:
         self.verticalHeader().sectionClicked.connect(self.selectRow)
 
     def setBorderVisible(self, isVisible: bool):
-        """ set the visibility of border """
+        """ 设置边框的可见性 """
         self.setProperty("isBorderVisible", isVisible)
         updateDynamicStyle(self)
 
     def setBorderRadius(self, radius: int):
-        """ set the radius of border """
+        """ 设置边框的半径 """
         qss = f"QTableView{{border-radius: {radius}px}}"
         setCustomStyleSheet(self, qss, qss)
 
     def setCheckedColor(self, light, dark):
-        """ set the color in checked status
+        """ 设置 颜色 中的 选中状态
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.delegate.setCheckedColor(light, dark)
 
     def _setHoverRow(self, row: int):
-        """ set hovered row """
+        """ 设置 悬停行 """
         self.delegate.setHoverRow(row)
         self.viewport().update()
 
     def _setPressedRow(self, row: int):
-        """ set pressed row """
+        """ 设置 按下行 """
         if self.selectionMode() == QTableView.SelectionMode.NoSelection:
             return
 
@@ -320,7 +320,7 @@ class TableBase:
 
 
 class TableWidget(TableBase, QTableWidget):
-    """ Table widget """
+    """ Table 部件 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -347,7 +347,7 @@ class TableWidget(TableBase, QTableWidget):
 
 
 class TableView(TableBase, QTableView):
-    """ Table view """
+    """ 表格视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)

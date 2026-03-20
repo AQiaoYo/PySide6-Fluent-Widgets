@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, QSize, QRectF, QModelIndex, QEvent
 from PySide6.QtGui import QPainter, QColor, QPalette, QPainterPath, QPainterPath
 from PySide6.QtWidgets import QTreeWidget, QStyledItemDelegate, QStyle, QTreeView, QApplication, QStyleOptionViewItem, QStyleFactory
@@ -11,7 +11,7 @@ from .scroll_area import SmoothScrollDelegate
 
 
 class TreeItemDelegate(QStyledItemDelegate):
-    """ Tree item delegate """
+    """ Tree 项 委托 """
 
     def __init__(self, parent: QTreeView):
         super().__init__(parent)
@@ -19,12 +19,12 @@ class TreeItemDelegate(QStyledItemDelegate):
         self.darkCheckedColor = QColor()
 
     def setCheckedColor(self, light, dark):
-        """ set the color of indicator in checked status
+        """ 设置指示器 中的 选中 状态的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
@@ -44,10 +44,10 @@ class TreeItemDelegate(QStyledItemDelegate):
         painter.save()
         painter.setPen(Qt.NoPen)
 
-        # draw background
+        # 绘制背景
         self._drawBackground(painter, option, index)
 
-        # draw indicator
+        # 绘制指示器
         self._drawIndicator(painter, option, index)
 
         painter.restore()
@@ -136,7 +136,7 @@ class TreeItemDelegate(QStyledItemDelegate):
         # font
         option.font = index.data(Qt.FontRole) or getFont(13)
 
-        # text color
+        # 文本颜色
         textColor = Qt.white if isDarkTheme() else Qt.black
         textBrush = index.data(Qt.ForegroundRole)
         if textBrush is not None:
@@ -147,7 +147,7 @@ class TreeItemDelegate(QStyledItemDelegate):
 
 
 class TreeViewBase:
-    """ Tree view base class """
+    """ 树视图 基类 """
 
     def _initView(self):
         self.scrollDelagate = SmoothScrollDelegate(self)
@@ -163,12 +163,12 @@ class TreeViewBase:
         updateDynamicStyle(self)
 
     def setCheckedColor(self, light, dark):
-        """ set the color in checked status
+        """ 设置 颜色 中的 选中状态
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.itemDelegate().setCheckedColor(light, dark)
 
@@ -177,18 +177,18 @@ class TreeViewBase:
         return QTreeView.drawBranches(self, painter, rect, index)
 
     def setBorderVisible(self, isVisible: bool):
-        """ set the visibility of border """
+        """ 设置边框的可见性 """
         self.setProperty("isBorderVisible", isVisible)
         updateDynamicStyle(self)
 
     def setBorderRadius(self, radius: int):
-        """ set the radius of border """
+        """ 设置边框的半径 """
         qss = f"QTreeView{{border-radius: {radius}px}}"
         setCustomStyleSheet(self, qss, qss)
 
 
 class TreeWidget(TreeViewBase, QTreeWidget):
-    """ Tree widget """
+    """ Tree 部件 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -196,8 +196,8 @@ class TreeWidget(TreeViewBase, QTreeWidget):
 
     def viewportEvent(self, event):
         """
-        Catch the click event to override the item "expand/collapse" function which is
-        still called in the place it was before moving the branches in the drawBranches method.
+        捕获 点击 事件 到 重写 项 "expand/collapse" function which is
+        still called 中的 place it was before moving branches 中的 drawBranches method.
         """
         if event.type() != QEvent.Type.MouseButtonPress:
             return super().viewportEvent(event)
@@ -224,7 +224,7 @@ class TreeWidget(TreeViewBase, QTreeWidget):
 
 
 class TreeView(TreeViewBase, QTreeView):
-    """ Tree view """
+    """ 树视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -232,8 +232,8 @@ class TreeView(TreeViewBase, QTreeView):
 
     def viewportEvent(self, event):
         """
-        Catch the click event to override the item "expand/collapse" function which is
-        still called in the place it was before moving the branches in the drawBranches method.
+        捕获 点击 事件 到 重写 项 "expand/collapse" function which is
+        still called 中的 place it was before moving branches 中的 drawBranches method.
         """
         if event.type() != QEvent.Type.MouseButtonPress:
             return super().viewportEvent(event)

@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import TYPE_CHECKING, Union
 import sys
 
@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 
 class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
-    """ Fluent widget """
+    """ Fluent 部件 """
 
     def __init__(self, parent=None):
         self._isMicaEnabled = False
@@ -30,25 +30,25 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
         self._darkBackgroundColor = QColor(32, 32, 32)
         super().__init__(parent=parent)
 
-        # enable mica effect on win11
+        # 在 Win11 上默认启用 Mica 效果.
         self.setMicaEffectEnabled(True)
 
-        # show system title bar buttons on macOS
+        # 在 macOS 上显示系统标题栏按钮.
         if sys.platform == "darwin":
             self.setSystemTitleBarButtonVisible(True)
 
-        # set up title bar
+        # 初始化标题栏.
         self.setTitleBar(FluentWidgetTitleBar(self))
 
         qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
 
     def setCustomBackgroundColor(self, light, dark):
-        """ set custom background color
+        """设置自定义背景色.
 
-        Parameters
+        参数
         ----------
         light, dark: QColor | Qt.GlobalColor | str
-            background color in light/dark theme mode
+            亮色/暗色主题下使用的背景色.
         """
         self._lightBackgroundColor = QColor(light)
         self._darkBackgroundColor = QColor(dark)
@@ -73,12 +73,12 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
 
     def showEvent(self, e):
         super().showEvent(e)
-        # reapply mica effect after window is fully initialized
+        # 窗口初始化完成后重新应用 Mica 效果.
         if self.isMicaEffectEnabled():
             self.windowEffect.setMicaEffect(self.winId(), isDarkTheme())
 
     def setMicaEffectEnabled(self, isEnabled: bool):
-        """ set whether the mica effect is enabled, only available on Win11 """
+        """设置是否启用 Mica 效果,仅在 Win11 上可用."""
         if sys.platform != 'win32' or sys.getwindowsversion().build < 22000:
             return
 
@@ -95,19 +95,19 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
         return self._isMicaEnabled
 
     def systemTitleBarRect(self, size: QSize) -> QRect:
-        """ Returns the system title bar rect, only works for macOS
+        """返回系统标题栏区域,仅适用于 macOS.
 
-        Parameters
+        参数
         ----------
         size: QSize
-            original system title bar rect
+            原始系统标题栏区域.
         """
         return QRect(0, 0 if self.isFullScreen() else 2, 75, size.height())
 
     def setTitleBar(self, titleBar):
         super().setTitleBar(titleBar)
 
-        # hide title bar buttons on macOS
+        # 在 macOS 上隐藏自绘标题栏按钮,避免与系统按钮重复.
         if sys.platform == "darwin" and self.isSystemButtonVisible() and isinstance(titleBar, TitleBarBase):
             titleBar.minBtn.hide()
             titleBar.maxBtn.hide()
@@ -115,7 +115,7 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
 
 
 class FluentWindowBase(FluentWidget):
-    """ Fluent window base class """
+    """ Fluent 窗口基类 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -123,7 +123,7 @@ class FluentWindowBase(FluentWidget):
         self.stackedWidget = StackedWidget(self)
         self.navigationInterface = None
 
-        # initialize layout
+        # 初始化布局
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
@@ -131,19 +131,19 @@ class FluentWindowBase(FluentWidget):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         position=None):
-        """ add sub interface """
+        """添加子界面."""
         raise NotImplementedError
 
     def removeInterface(self, interface: QWidget, isDelete=False):
-        """ remove sub interface
+        """移除子界面.
 
-        Parameters
+        参数
         ----------
         interface: QWidget
-            sub interface to be removed
+            要移除的子界面.
 
         isDelete: bool
-            whether to delete the sub interface
+            是否一并删除该子界面.
         """
         raise NotImplementedError
 
@@ -166,18 +166,18 @@ class FluentWindowBase(FluentWidget):
         self.stackedWidget.setStyle(QApplication.style())
 
     def systemTitleBarRect(self, size: QSize) -> QRect:
-        """ Returns the system title bar rect, only works for macOS
+        """返回系统标题栏区域,仅适用于 macOS.
 
-        Parameters
+        参数
         ----------
         size: QSize
-            original system title bar rect
+            原始系统标题栏区域.
         """
         return QRect(size.width() - 75, 0 if self.isFullScreen() else 8, 75, size.height())
 
 
 class FluentTitleBarButton(TitleBarButton):
-    """ Fluent title bar button """
+    """ Fluent 标题栏按钮 """
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None):
         super().__init__(parent)
@@ -196,12 +196,12 @@ class FluentTitleBarButton(TitleBarButton):
                                QPainter.SmoothPixmapTransform)
         _, bgColor = self._getColors()
 
-        # draw background
+        # 绘制背景
         painter.setBrush(bgColor)
         painter.setPen(Qt.NoPen)
         painter.drawRect(self.rect())
 
-        # draw icon
+        # 绘制图标
         iw, ih = self.iconSize().width(), self.iconSize().height()
         x = (self.width() - iw) / 2
         y = (self.height() - ih) / 2
@@ -210,7 +210,7 @@ class FluentTitleBarButton(TitleBarButton):
 
 
 class FluentTitleBar(TitleBar):
-    """ Fluent title bar"""
+    """ Fluent 标题栏"""
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -219,13 +219,13 @@ class FluentTitleBar(TitleBar):
         self.hBoxLayout.removeWidget(self.maxBtn)
         self.hBoxLayout.removeWidget(self.closeBtn)
 
-        # add window icon
+        # 添加窗口图标.
         self.iconLabel = QLabel(self)
         self.iconLabel.setFixedSize(18, 18)
         self.hBoxLayout.insertWidget(0, self.iconLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.window().windowIconChanged.connect(self.setIcon)
 
-        # add title label
+        # 添加标题标签.
         from ..components.widgets.label import CaptionLabel
 
         self.titleLabel = CaptionLabel(self)
@@ -256,7 +256,7 @@ class FluentTitleBar(TitleBar):
 
 
 class FluentWindow(FluentWindowBase):
-    """ Fluent window """
+    """ Fluent 窗口 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -267,7 +267,7 @@ class FluentWindow(FluentWindowBase):
         self.navigationInterface = NavigationInterface(self, showReturnButton=True)
         self.widgetLayout = QHBoxLayout()
 
-        # initialize layout
+        # 初始化布局
         self.hBoxLayout.addWidget(self.navigationInterface)
         self.hBoxLayout.addLayout(self.widgetLayout)
         self.hBoxLayout.setStretchFactor(self.widgetLayout, 1)
@@ -280,29 +280,29 @@ class FluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         position=None, parent=None, isTransparent=False) -> 'NavigationTreeWidget':
-        """ add sub interface, the object name of `interface` should be set already
+        """ 添加 子界面, 对象 name 的 `interface` should be 设置 already
         before calling this method
 
-        Parameters
+        参数
         ----------
         interface: QWidget
-            the subinterface to be added
+            要添加的子界面,调用前必须已设置 `objectName`.
 
         icon: FluentIconBase | QIcon | str
-            the icon of navigation item
+            导航项图标.
 
         text: str
-            the text of navigation item
+            导航项文本.
 
         position: NavigationItemPosition
-            the position of navigation item
+            导航项位置.
 
         parent: QWidget | str
-            * QWidget: the parent of navigation item
-            * str: the parent route key of navigation item
+            * QWidget: 使用父部件的 `objectName` 作为父级导航项.
+            * str: 直接使用父级路由键.
 
         isTransparent: bool
-            whether to use transparent background
+            是否使用透明背景.
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
@@ -318,7 +318,7 @@ class FluentWindow(FluentWindowBase):
         interface.setProperty("isStackedTransparent", isTransparent)
         self.stackedWidget.addWidget(interface)
 
-        # add navigation item
+        # 将界面注册到导航树.
         routeKey = interface.objectName()
         item = self.navigationInterface.addItem(
             routeKey=routeKey,
@@ -330,7 +330,7 @@ class FluentWindow(FluentWindowBase):
             parentRouteKey=parentRouteKey
         )
 
-        # initialize selected item
+        # 第一个子界面默认作为当前页.
         if self.stackedWidget.count() == 1:
             self.stackedWidget.currentChanged.connect(self._onCurrentInterfaceChanged)
             self.navigationInterface.setCurrentItem(routeKey)
@@ -380,7 +380,7 @@ class FluentWidgetTitleBar(FluentTitleBar):
 
 
 class MSFluentWindow(FluentWindowBase):
-    """ Fluent window in Microsoft Store style """
+    """ Microsoft Store 风格的 Fluent 窗口 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -390,7 +390,7 @@ class MSFluentWindow(FluentWindowBase):
 
         self.navigationInterface = NavigationBar(self)
 
-        # initialize layout
+        # 初始化布局
         self.hBoxLayout.setContentsMargins(0, 48, 0, 0)
         self.hBoxLayout.addWidget(self.navigationInterface)
         self.hBoxLayout.addWidget(self.stackedWidget, 1)
@@ -400,25 +400,25 @@ class MSFluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         selectedIcon=None, position=None, isTransparent=False) -> 'NavigationBarPushButton':
-        """ add sub interface, the object name of `interface` should be set already
+        """ 添加 子界面, 对象 name 的 `interface` should be 设置 already
         before calling this method
 
-        Parameters
+        参数
         ----------
         interface: QWidget
-            the subinterface to be added
+            要添加的子界面,调用前必须已设置 `objectName`.
 
         icon: FluentIconBase | QIcon | str
-            the icon of navigation item
+            导航项图标.
 
         text: str
-            the text of navigation item
+            导航项文本.
 
         selectedIcon: str | QIcon | FluentIconBase
-            the icon of navigation item in selected state
+            导航项选中状态下的图标.
 
         position: NavigationItemPosition
-            the position of navigation item
+            导航项位置.
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
@@ -428,7 +428,7 @@ class MSFluentWindow(FluentWindowBase):
         interface.setProperty("isStackedTransparent", isTransparent)
         self.stackedWidget.addWidget(interface)
 
-        # add navigation item
+        # 将界面注册到导航栏.
         routeKey = interface.objectName()
         item = self.navigationInterface.addItem(
             routeKey=routeKey,
@@ -461,14 +461,14 @@ class SplitTitleBar(TitleBar):
 
     def __init__(self, parent):
         super().__init__(parent)
-        # add window icon
+        # 添加窗口图标.
         self.iconLabel = QLabel(self)
         self.iconLabel.setFixedSize(18, 18)
         self.hBoxLayout.insertSpacing(0, 12)
         self.hBoxLayout.insertWidget(1, self.iconLabel, 0, Qt.AlignLeft | Qt.AlignBottom)
         self.window().windowIconChanged.connect(self.setIcon)
 
-        # add title label
+        # 添加标题标签.
         self.titleLabel = QLabel(self)
         self.hBoxLayout.insertWidget(2, self.titleLabel, 0, Qt.AlignLeft | Qt.AlignBottom)
         self.titleLabel.setObjectName('titleLabel')
@@ -485,7 +485,7 @@ class SplitTitleBar(TitleBar):
 
 
 class SplitFluentWindow(FluentWindow):
-    """ Fluent window with split style """
+    """分栏风格的 Fluent 窗口."""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -501,6 +501,6 @@ class SplitFluentWindow(FluentWindow):
 
 
 class FluentBackgroundTheme:
-    """ Fluent background theme """
-    DEFAULT = (QColor(243, 243, 243), QColor(32, 32, 32))   # light, dark
+    """ Fluent 背景主题 """
+    DEFAULT = (QColor(243, 243, 243), QColor(32, 32, 32))   # 亮色, 暗色
     DEFAULT_BLUE = (QColor(240, 244, 249), QColor(25, 33, 42))

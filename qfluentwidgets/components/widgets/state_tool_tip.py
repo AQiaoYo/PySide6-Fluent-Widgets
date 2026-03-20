@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QTimer, Signal, QSize, QPoint, QRectF
 from PySide6.QtGui import QPainter
 from PySide6.QtWidgets import QLabel, QWidget, QToolButton, QGraphicsOpacityEffect
@@ -54,16 +54,16 @@ class StateToolTip(QWidget):
 
     def __init__(self, title, content, parent=None):
         """
-        Parameters
+        参数
         ----------
         title: str
-            title of tooltip
+            标题 的 tooltip
 
         content: str
-            content of tooltip
+            内容 的 tooltip
 
         parant:
-            parent window
+            父部件 窗口
         """
         super().__init__(parent)
         self.title = title
@@ -84,14 +84,14 @@ class StateToolTip(QWidget):
         self.__initWidget()
 
     def __initWidget(self):
-        """ initialize widgets """
+        """ 初始化部件 """
         self.setAttribute(Qt.WA_StyledBackground)
         self.setGraphicsEffect(self.opacityEffect)
         self.opacityEffect.setOpacity(1)
         self.rotateTimer.setInterval(50)
         self.contentLabel.setMinimumWidth(200)
 
-        # connect signal to slot
+        # 连接信号与槽函数
         self.closeButton.clicked.connect(self.__onCloseButtonClicked)
         self.rotateTimer.timeout.connect(self.__rotateTimerFlowSlot)
 
@@ -101,7 +101,7 @@ class StateToolTip(QWidget):
         self.rotateTimer.start()
 
     def __initLayout(self):
-        """ initialize layout """
+        """ 初始化布局 """
         self.setFixedSize(max(self.titleLabel.width(),
                           self.contentLabel.width()) + 56, 51)
         self.titleLabel.move(32, 9)
@@ -109,7 +109,7 @@ class StateToolTip(QWidget):
         self.closeButton.move(self.width() - 24, 19)
 
     def __setQss(self):
-        """ set style sheet """
+        """ 设置样式表 """
         self.titleLabel.setObjectName("titleLabel")
         self.contentLabel.setObjectName("contentLabel")
 
@@ -119,33 +119,33 @@ class StateToolTip(QWidget):
         self.contentLabel.adjustSize()
 
     def setTitle(self, title: str):
-        """ set the title of tooltip """
+        """ 设置tooltip的标题 """
         self.title = title
         self.titleLabel.setText(title)
         self.titleLabel.adjustSize()
 
     def setContent(self, content: str):
-        """ set the content of tooltip """
+        """ 设置tooltip的内容 """
         self.content = content
         self.contentLabel.setText(content)
 
-        # adjustSize() will mask spinner get stuck
+        # adjustSize() will 遮罩 spinner 获取 stuck
         self.contentLabel.adjustSize()
 
     def setState(self, isDone=False):
-        """ set the state of tooltip """
+        """ 设置tooltip的state """
         self.isDone = isDone
         self.update()
         if isDone:
             QTimer.singleShot(1000, self.__fadeOut)
 
     def __onCloseButtonClicked(self):
-        """ close button clicked slot """
+        """ 关闭 按钮 clicked 槽函数 """
         self.closedSignal.emit()
         self.hide()
 
     def __fadeOut(self):
-        """ fade out """
+        """ 淡出 """
         self.rotateTimer.stop()
         self.animation.setDuration(200)
         self.animation.setStartValue(1)
@@ -154,12 +154,12 @@ class StateToolTip(QWidget):
         self.animation.start()
 
     def __rotateTimerFlowSlot(self):
-        """ rotate timer time out slot """
+        """ rotate 定时器 时间 out 槽函数 """
         self.rotateAngle = (self.rotateAngle + self.deltaAngle) % 360
         self.update()
 
     def getSuitablePos(self):
-        """ get suitable position in main window """
+        """ 获取 suitable 位置 中的 main 窗口 """
         for i in range(10):
             dy = i*(self.height() + 16)
             pos = QPoint(self.parent().width() - self.width() - 24, 50+dy)
@@ -172,7 +172,7 @@ class StateToolTip(QWidget):
         return pos
 
     def paintEvent(self, e):
-        """ paint state tooltip """
+        """ 绘制state tooltip """
         super().paintEvent(e)
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)

@@ -5,7 +5,7 @@ from functools import singledispatch, update_wrapper
 class singledispatchmethod:
     """Single-dispatch generic method descriptor.
 
-    Supports wrapping existing descriptors and handles non-descriptor
+    Supports wrapping existing descriptors 和 handles non-descriptor
     callables as instance methods.
     """
 
@@ -17,9 +17,9 @@ class singledispatchmethod:
         self.func = func
 
     def register(self, cls, method=None):
-        """generic_method.register(cls, func) -> func
+        """generic_method.注册(cls, func) -> func
 
-        Registers a new implementation for the given *cls* on a *generic_method*.
+        Registers new implementation 用于 given *cls* 上的 *generic_method*.
         """
         return self.dispatcher.register(cls, func=method)
 

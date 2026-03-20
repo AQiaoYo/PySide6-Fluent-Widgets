@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 from typing import List
 
@@ -11,7 +11,7 @@ from ...common.animation import FluentAnimation
 
 
 class OpacityAniStackedWidget(QStackedWidget):
-    """ Stacked widget with fade in and fade out animation """
+    """ Stacked 部件 使用 fade 中的 和 fade out 动画 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -68,31 +68,31 @@ class PopUpAniInfo:
 
 
 class PopUpAniStackedWidget(QStackedWidget):
-    """ Stacked widget with pop up animation """
+    """ Stacked 部件 使用 pop up 动画 """
 
     aniFinished = Signal()
     aniStart = Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.aniInfos = []  # type: List[PopUpAniInfo]
+        self.aniInfos = []  # type: 列表[PopUpAniInfo]
         self.isAnimationEnabled = True
         self._nextIndex = None
         self._ani = None
 
     def addWidget(self, widget, deltaX=0, deltaY=76):
-        """ add widget to window
+        """ 将部件添加到窗口
 
-        Parameters
+        参数
         -----------
         widget:
-            widget to be added
+            部件 到 be added
 
         deltaX: int
-            the x-axis offset from the beginning to the end of animation
+            x-axis offset 从 beginning 到 end 的 动画
 
         deltaY: int
-            the y-axis offset from the beginning to the end of animation
+            y-axis offset 从 beginning 到 end 的 动画
         """
         super().addWidget(widget)
 
@@ -112,29 +112,29 @@ class PopUpAniStackedWidget(QStackedWidget):
         super().removeWidget(widget)
 
     def setAnimationEnabled(self, isEnabled: bool):
-        """set whether the pop animation is enabled"""
+        """设置 是否 pop 动画 is 已启用"""
         self.isAnimationEnabled = isEnabled
 
     def setCurrentIndex(self, index: int, needPopOut: bool = False, showNextWidgetDirectly: bool = True,
                         duration: int = 250, easingCurve=QEasingCurve.OutQuad):
-        """ set current window to display
+        """ 设置 当前 窗口 到 display
 
-        Parameters
+        参数
         ----------
         index: int
-            the index of widget to display
+            索引 的 部件 到 display
 
         isNeedPopOut: bool
-            need pop up animation or not
+            need pop up 动画 或 not
 
         showNextWidgetDirectly: bool
-            whether to show next widget directly when animation started
+            是否 到 显示 next 部件 directly 当 动画 started
 
         duration: int
-            animation duration
+            动画 持续时间
 
         easingCurve: QEasingCurve
-            the interpolation mode of animation
+            interpolation 模式 的 动画
         """
         if index < 0 or index >= self.count():
             raise Exception(f'The index `{index}` is illegal')
@@ -149,10 +149,10 @@ class PopUpAniStackedWidget(QStackedWidget):
             self._ani.stop()
             self.__onAniFinished()
 
-        # get the index of widget to be displayed
+        # 获取部件 到 be displayed的索引
         self._nextIndex = index
 
-        # get animation
+        # 获取 动画
         nextAniInfo = self.aniInfos[index]
         currentAniInfo = self.aniInfos[self.currentIndex()]
 
@@ -172,44 +172,44 @@ class PopUpAniStackedWidget(QStackedWidget):
             self.__setAnimation(ani, pos, QPoint(nextWidget.x(), 0), duration, easingCurve)
             super().setCurrentIndex(index)
 
-        # start animation
+        # 开始动画
         ani.finished.connect(self.__onAniFinished)
         ani.start()
         self.aniStart.emit()
 
     def setCurrentWidget(self, widget, needPopOut: bool = False, showNextWidgetDirectly: bool = True,
                          duration: int = 250, easingCurve=QEasingCurve.OutQuad):
-        """ set currect widget
+        """ 设置 currect 部件
 
-        Parameters
+        参数
         ----------
         widget:
-            the widget to be displayed
+            部件 到 be displayed
 
         isNeedPopOut: bool
-            need pop up animation or not
+            need pop up 动画 或 not
 
         showNextWidgetDirectly: bool
-            whether to show next widget directly when animation started
+            是否 到 显示 next 部件 directly 当 动画 started
 
         duration: int
-            animation duration
+            动画 持续时间
 
         easingCurve: QEasingCurve
-            the interpolation mode of animation
+            interpolation 模式 的 动画
         """
         self.setCurrentIndex(
             self.indexOf(widget), needPopOut, showNextWidgetDirectly, duration, easingCurve)
 
     def __setAnimation(self, ani, startValue, endValue, duration, easingCurve=QEasingCurve.Linear):
-        """ set the config of animation """
+        """ 设置动画的配置 """
         ani.setEasingCurve(easingCurve)
         ani.setStartValue(startValue)
         ani.setEndValue(endValue)
         ani.setDuration(duration)
 
     def __onAniFinished(self):
-        """ animation finished slot """
+        """ 动画 finished 槽函数 """
         self._ani.finished.disconnect()
         super().setCurrentIndex(self._nextIndex)
         self.aniFinished.emit()
@@ -231,11 +231,11 @@ class TransitionStackedWidget(QStackedWidget):
         self._aniGroup.finished.connect(self._onAniFinished)
 
     def setAnimationEnabled(self, isEnabled: bool):
-        """ set whether the transition animation is enabled """
+        """ 设置 是否 transition 动画 is 已启用 """
         self._isAnimationEnabled = isEnabled
 
     def isAnimationEnabled(self) -> bool:
-        """ return whether the transition animation is enabled """
+        """ 返回 是否 transition 动画 is 已启用 """
         return self._isAnimationEnabled
 
     def addWidget(self, w):
@@ -247,34 +247,34 @@ class TransitionStackedWidget(QStackedWidget):
         return super().insertWidget(index, w)
 
     def setCurrentWidget(self, widget: QWidget, duration: int = None, isBack: bool = False):
-        """ set current page widget with transition animation
+        """ 设置 当前 页面 部件 使用 transition 动画
 
-        Parameters
+        参数
         ----------
         widget: QWidget
-            target widget to display
+            目标 部件 到 display
 
         duration: int
-            animation duration in milliseconds, None for default
+            动画 持续时间 中的 milliseconds, None 用于 default
 
         isBack: bool
-            whether this is a back navigation
+            是否 this is back navigation
         """
         self.setCurrentIndex(self.indexOf(widget), duration, isBack)
 
     def setCurrentIndex(self, index: int, duration: int = None, isBack: bool = False):
-        """ set current page index with transition animation
+        """ 设置 当前 页面 索引 使用 transition 动画
 
-        Parameters
+        参数
         ----------
         index: int
-            page index
+            页面 索引
 
         duration: int
-            animation duration in milliseconds, None for default
+            动画 持续时间 中的 milliseconds, None 用于 default
 
         isBack: bool
-            whether this is a back navigation
+            是否 this is back navigation
         """
         if index < 0 or index >= self.count():
             return
@@ -289,19 +289,19 @@ class TransitionStackedWidget(QStackedWidget):
 
         self._nextIndex = index
 
-        # set up animation properties
+        # 设置 up 动画 properties
         self._setUpTransitionAnimation(index, duration, isBack)
 
-        # start transition animation
+        # 开始transition 动画
         self._aniGroup.start()
         self.aniStart.emit()
 
     def _setUpTransitionAnimation(self, nextIndex: int, duration: int, isBack: bool):
-        """ Set up transition animation """
+        """ 设置 up transition 动画 """
         raise NotImplementedError
 
     def _stopAnimation(self):
-        """ stop running animation """
+        """ 停止running 动画 """
         if self._aniGroup.state() != QAbstractAnimation.State.Running:
             return
 
@@ -328,13 +328,13 @@ class TransitionStackedWidget(QStackedWidget):
         return label
 
     def _renderSnapshot(self, widget: QWidget, label: QLabel):
-        # ensure widget has correct size
+        # ensure 部件 has correct 大小
         widget.resize(self.size())
 
-        # use grab() which works even when widget is hidden
+        # use grab() which 适用 even 当 部件 is hidden
         pixmap = widget.grab()
 
-        # if grab failed, fallback to render with transparent fill
+        # if grab failed, fallback 到 render 使用 透明 fill
         if pixmap.isNull() or pixmap.size().isEmpty():
             pixmap = QPixmap(widget.size())
             pixmap.fill(Qt.GlobalColor.transparent)
@@ -373,14 +373,14 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
             self._renderSnapshot(currentWidget, self._currentSnapshot)
             currentWidget.hide()
 
-            # fade out current widget
+            # fade out 当前 部件
             self.currentFadeOutAni.setDuration(self.outDuration)
             self.currentFadeOutAni.setStartValue(1.0)
             self.currentFadeOutAni.setEndValue(0.0)
             self.currentFadeOutAni.setEasingCurve(outCurve)
             self._aniGroup.addAnimation(self.currentFadeOutAni)
 
-            # slide out current widget
+            # slide out 当前 部件
             if isBack:
                 self.currentSlideOutAni.setDuration(self.outDuration)
                 self.currentSlideOutAni.setStartValue(QPoint(0, 0))
@@ -390,7 +390,7 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
 
         nextWidget.hide()
 
-        # show next widget after outDuration
+        # 显示next 部件 after outDuration
         if self.nextWidgetAniGroup.animationCount() > 0:
             self.nextWidgetAniGroup.takeAnimation(0)
 
@@ -401,7 +401,7 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
         pauseAni.finished.connect(lambda: nextWidget.show())
 
         if not isBack:
-            # slide in next widget
+            # slide 中的 next 部件
             self.nextSlideInAni.setTargetObject(nextWidget)
             nextWidget.setGeometry(0, self.offset, self.width(), self.height())
             self.nextSlideInAni.setDuration(inDuration)
@@ -410,7 +410,7 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
             self.nextSlideInAni.setEasingCurve(inCurve)
             self.nextWidgetAniGroup.addAnimation(self.nextSlideInAni)
         else:
-            # directly show next widget
+            # directly 显示 next 部件
             nextWidget.setGeometry(self.rect())
 
 
@@ -437,7 +437,7 @@ class DrillInTransitionStackedWidget(TransitionStackedWidget):
         else:
             inScale = 0.94
             outScale = 1.04
-            # shortened from 783ms to 333ms for better responsiveness
+            # shortened 从 783ms 到 333ms 用于 better responsiveness
             inDuration = duration or 333
             outDuration = 100
             inScaleCurve = scaleCurve
@@ -451,7 +451,7 @@ class DrillInTransitionStackedWidget(TransitionStackedWidget):
             self._currentSnapshot.setScaledContents(True)
             currentWidget.hide()
 
-            # scale out current widget
+            # scale out 当前 部件
             outW = int(rect.width() * outScale)
             outH = int(rect.height() * outScale)
             outX = (rect.width() - outW) // 2
@@ -464,14 +464,14 @@ class DrillInTransitionStackedWidget(TransitionStackedWidget):
             self.currentScaleOutAni.setEasingCurve(scaleCurve)
             self._aniGroup.addAnimation(self.currentScaleOutAni)
 
-            # fade out current widget
+            # fade out 当前 部件
             self.currentFadeOutAni.setDuration(outDuration)
             self.currentFadeOutAni.setStartValue(1.0)
             self.currentFadeOutAni.setEndValue(0.0)
             self.currentFadeOutAni.setEasingCurve(opacityCurve)
             self._aniGroup.addAnimation(self.currentFadeOutAni)
 
-        # scale in next widget
+        # scale 中的 next 部件
         self._renderSnapshot(nextWidget, self._nextSnapshot)
         self._nextSnapshot.setScaledContents(True)
         nextWidget.hide()

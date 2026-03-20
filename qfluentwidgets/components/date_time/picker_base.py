@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Iterable, List
 
 from PySide6.QtCore import Qt, Signal, QSize, QRectF, QPoint, QPropertyAnimation, QEasingCurve, QObject
@@ -15,7 +15,7 @@ from ...common.color import autoFallbackThemeColor
 
 
 class SeparatorWidget(QWidget):
-    """ Separator widget """
+    """ 分隔符 部件 """
 
     def __init__(self, orient: Qt.Orientation, parent=None):
         super().__init__(parent=parent)
@@ -29,7 +29,7 @@ class SeparatorWidget(QWidget):
 
 
 class ItemMaskWidget(QWidget):
-    """ Item mask widget """
+    """ 项 遮罩 部件 """
 
     def __init__(self, listWidgets: List[CycleListWidget], parent=None):
         super().__init__(parent=parent)
@@ -49,19 +49,19 @@ class ItemMaskWidget(QWidget):
         painter.setRenderHints(QPainter.Antialiasing |
                                QPainter.TextAntialiasing)
 
-        # draw background
+        # 绘制背景
         painter.setPen(Qt.NoPen)
         painter.setBrush(autoFallbackThemeColor(self.lightBackgroundColor, self.darkBackgroundColor))
         painter.drawRoundedRect(self.rect().adjusted(4, 0, -3, 0), 5, 5)
 
-        # draw text
+        # 绘制文本
         painter.setPen(Qt.black if isDarkTheme() else Qt.white)
         painter.setFont(self.font())
         w, h = 0, self.height()
         for i, p in enumerate(self.listWidgets):
             painter.save()
 
-            # draw first item's text
+            # 绘制first 项's 文本
             x = p.itemSize.width()//2 + 4 + self.x()
             item1 = p.itemAt(QPoint(x, self.y() + 6))
             if not item1:
@@ -73,7 +73,7 @@ class ItemMaskWidget(QWidget):
             painter.translate(w, y - self.y() + 7)
             self._drawText(item1, painter, 0)
 
-            # draw second item's text
+            # 绘制秒 项's 文本
             item2 = p.itemAt(self.pos() + QPoint(x, h - 6))
             self._drawText(item2, painter, h)
 
@@ -94,17 +94,17 @@ class ItemMaskWidget(QWidget):
 
 
 class PickerColumnFormatter(QObject):
-    """ Picker column formatter """
+    """ Picker 列 formatter """
 
     def __init__(self):
         super().__init__()
 
     def encode(self, value):
-        """ convert original value to formatted value """
+        """ 将original 值转换为formatted 值 """
         return str(value)
 
     def decode(self, value: str):
-        """ convert formatted value to original value """
+        """ 将formatted 值转换为original 值 """
         return str(value)
 
 
@@ -116,7 +116,7 @@ class DigitFormatter(PickerColumnFormatter):
 
 
 class PickerColumnButton(QPushButton):
-    """ Picker column button """
+    """ Picker 列 按钮 """
 
     def __init__(self, name: str, items: Iterable, width: int, align=Qt.AlignLeft, formatter=None, parent=None):
         super().__init__(text=name, parent=parent)
@@ -135,7 +135,7 @@ class PickerColumnButton(QPushButton):
         return self._align
 
     def setAlignment(self, align=Qt.AlignCenter):
-        """ set the text alignment """
+        """ 设置 文本 alignment """
         if align == Qt.AlignLeft:
             self.setProperty('align', 'left')
         elif align == Qt.AlignRight:
@@ -186,7 +186,7 @@ class PickerColumnButton(QPushButton):
 
 
 def checkColumnIndex(func):
-    """ check whether the index is out of range """
+    """ check 是否 索引 is out 的 range """
 
     def wrapper(picker, index: int, *args, **kwargs):
         if not 0 <= index < len(picker.columns):
@@ -198,11 +198,11 @@ def checkColumnIndex(func):
 
 
 class PickerBase(QPushButton):
-    """ Picker base class """
+    """ Picker 基类 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.columns = []   # type: List[PickerColumnButton]
+        self.columns = []   # type: 列表[PickerColumnButton]
 
         self.lightSelectedBackgroundColor = QColor()
         self.darkSelectedBackgroundColor = QColor()
@@ -220,62 +220,62 @@ class PickerBase(QPushButton):
         self.clicked.connect(self._showPanel)
 
     def setSelectedBackgroundColor(self, light, dark):
-        """ set the background color of selected row """
+        """ 设置selected 行的背景 颜色 """
         self.lightSelectedBackgroundColor = QColor(light)
         self.darkSelectedBackgroundColor = QColor(dark)
 
     def addColumn(self, name: str, items: Iterable, width: int, align=Qt.AlignCenter,
                   formatter: PickerColumnFormatter = None):
-        """ add column
+        """ 添加 列
 
-        Parameters
+        参数
         ----------
         name: str
-            the name of column
+            name 的 列
 
         items: Iterable
-            the items of column
+            项 的 列
 
         width: int
-            the width of column
+            宽度 的 列
 
         align: Qt.AlignmentFlag
-            the text alignment of button
+            文本 alignment 的 按钮
 
         formatter: PickerColumnFormatter
-            the formatter of column
+            formatter 的 列
         """
-        # create column button
+        # 创建列 按钮
         button = PickerColumnButton(name, items, width, align, formatter, self)
         self.columns.append(button)
 
         self.hBoxLayout.addWidget(button, 0, Qt.AlignLeft)
 
-        # update the style of buttons
+        # 更新the style 的 按钮
         for btn in self.columns[:-1]:
             btn.setProperty('hasBorder', True)
             btn.setStyle(QApplication.style())
 
     @checkColumnIndex
     def setColumnAlignment(self, index: int, align=Qt.AlignCenter):
-        """ set the text alignment of specified column """
+        """ 设置specified 列的文本 alignment """
         self.columns[index].setAlignment(align)
 
     @checkColumnIndex
     def setColumnWidth(self, index: int, width: int):
-        """ set the width of specified column """
+        """ 设置specified 列的宽度 """
         self.columns[index].setFixedWidth(width)
 
     @checkColumnIndex
     def setColumnTight(self, index: int):
-        """ make the specified column to be tight """
+        """ make specified 列 到 be tight """
         fm = self.fontMetrics()
         w = max(fm.width(i) for i in self.columns[index].items) + 30
         self.setColumnWidth(index, w)
 
     @checkColumnIndex
     def setColumnVisible(self, index: int, isVisible: bool):
-        """ set the text alignment of specified column """
+        """ 设置specified 列的文本 alignment """
         self.columns[index].setVisible(isVisible)
 
     def value(self):
@@ -302,34 +302,34 @@ class PickerBase(QPushButton):
 
     @checkColumnIndex
     def encodeValue(self, index: int, value):
-        """ convert original value to formatted value """
+        """ 将original 值转换为formatted 值 """
         return self.columns[index].formatter().encode(value)
 
     @checkColumnIndex
     def decodeValue(self, index: int, value):
-        """ convert formatted value to origin value """
+        """ 将formatted 值转换为origin 值 """
         return self.columns[index].formatter().decode(value)
 
     @checkColumnIndex
     def setColumn(self, index: int, name: str, items: Iterable, width: int, align=Qt.AlignCenter):
-        """ set column
+        """ 设置 列
 
-        Parameters
+        参数
         ----------
         index: int
-            the index of column
+            索引 的 列
 
         name: str
-            the name of column
+            name 的 列
 
         items: Iterable
-            the items of column
+            项 的 列
 
         width: int
-            the width of column
+            宽度 的 列
 
         align: Qt.AlignmentFlag
-            the text alignment of button
+            文本 alignment 的 按钮
         """
         button = self.columns[index]
         button.setText(name)
@@ -337,12 +337,12 @@ class PickerBase(QPushButton):
         button.setAlignment(align)
 
     def clearColumns(self):
-        """ clear columns """
+        """ 清空columns """
         while self.columns:
             btn = self.columns.pop()
             self.hBoxLayout.removeWidget(btn)
-            # The parent of btn should be explicitly set to None to remove references from its parent.
-            # Otherwise, GC will not collect and remove it until the end of it parent life-cycle
+            # 父部件 的 btn should be explicitly 设置 到 None 到 移除 references 从 its 父部件.
+            # Otherwise, GC will not collect 和 移除 it until end 的 it 父部件 life-cycle
             btn.setParent(None)
             btn.deleteLater()
 
@@ -361,21 +361,21 @@ class PickerBase(QPushButton):
         super().mouseReleaseEvent(e)
 
     def _setButtonProperty(self, name, value):
-        """ send event to picker buttons """
+        """ send 事件 到 picker 按钮 """
         for button in self.columns:
             button.setProperty(name, value)
             button.setStyle(QApplication.style())
 
     def panelInitialValue(self):
-        """ initial value of panel """
+        """ initial 值 的 面板 """
         return self.value()
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ set whether to enable scroll button auto repeat """
+        """ 设置 是否 到 启用 滚动按钮 auto repeat """
         self._isScrollButtonRepeatEnabled = isEnabled
 
     def _showPanel(self):
-        """ show panel """
+        """ 显示面板 """
         panel = PickerPanel(self)
         for column in self.columns:
             if column.isVisible():
@@ -404,19 +404,19 @@ class PickerBase(QPushButton):
             self.setColumnValue(i, None)
 
     def _onColumnValueChanged(self, panel, index: int, value: str):
-        """ column value changed slot """
+        """ 列 值 changed 槽函数 """
         pass
 
     def isRestEnabled(self):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ set the visibility of reset button """
+        """ 设置reset 按钮的可见性 """
         self._isResetEnabled = isEnabled
 
 
 class PickerToolButton(TransparentToolButton):
-    """ Picker tool button """
+    """ Picker 工具按钮 """
 
     def _drawIcon(self, icon, painter, rect):
         if self.isPressed:
@@ -426,7 +426,7 @@ class PickerToolButton(TransparentToolButton):
 
 
 class PickerPanel(QWidget):
-    """ picker panel """
+    """ picker 面板 """
 
     confirmed = Signal(list)
     resetted = Signal()
@@ -435,7 +435,7 @@ class PickerPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.itemHeight = 37
-        self.listWidgets = []   # type: List[CycleListWidget]
+        self.listWidgets = []   # type: 列表[CycleListWidget]
 
         self.view = QFrame(self)
         self.itemMaskWidget = ItemMaskWidget(self.listWidgets, self)
@@ -502,7 +502,7 @@ class PickerPanel(QWidget):
         FluentStyleSheet.TIME_PICKER.apply(self)
 
     def setShadowEffect(self, blurRadius=30, offset=(0, 8), color=QColor(0, 0, 0, 30)):
-        """ add shadow to dialog """
+        """ 将shadow添加到对话框 """
         self.shadowEffect = QGraphicsDropShadowEffect(self.view)
         self.shadowEffect.setBlurRadius(blurRadius)
         self.shadowEffect.setOffset(*offset)
@@ -511,11 +511,11 @@ class PickerPanel(QWidget):
         self.view.setGraphicsEffect(self.shadowEffect)
 
     def setResetEnabled(self, isEnabled: bool):
-        """ set the visibility of reset button """
+        """ 设置reset 按钮的可见性 """
         self.resetButton.setVisible(isEnabled)
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ set whether to enable scroll button auto repeat """
+        """ 设置 是否 到 启用 滚动按钮 auto repeat """
         self.scrollButtonRepeatEnabled = isEnabled
         for widget in self.listWidgets:
             widget.setScrollButtonRepeatEnabled(isEnabled)
@@ -527,18 +527,18 @@ class PickerPanel(QWidget):
         return self.resetButton.isVisible()
 
     def addColumn(self, items: Iterable, width: int, align=Qt.AlignCenter):
-        """ add one column to view
+        """ 将one 列添加到视图
 
-        Parameters
+        参数
         ----------
         items: Iterable[Any]
-            the items to be added
+            项 到 be added
 
         width: int
-            the width of item
+            宽度 的 项
 
         align: Qt.AlignmentFlag
-            the text alignment of item
+            文本 alignment 的 项
         """
         if self.listWidgets:
             self.listLayout.addWidget(SeparatorWidget(Qt.Vertical))
@@ -560,11 +560,11 @@ class PickerPanel(QWidget):
         self.itemMaskWidget.move(m.left()+2, m.top() + 148)
 
     def value(self):
-        """ return the value of columns """
+        """ 返回columns的值 """
         return [i.currentItem().text() for i in self.listWidgets]
 
     def setValue(self, value: list):
-        """ set the value of columns """
+        """ 设置columns的值 """
         if len(value) != len(self.listWidgets):
             return
 
@@ -572,38 +572,38 @@ class PickerPanel(QWidget):
             w.setSelectedItem(v)
 
     def columnValue(self, index: int) -> str:
-        """ return the value of specified column """
+        """ 返回specified 列的值 """
         if not 0 <= index < len(self.listWidgets):
             return
 
         return self.listWidgets[index].currentItem().text()
 
     def setColumnValue(self, index: int, value: str):
-        """ set the value of specified column """
+        """ 设置specified 列的值 """
         if not 0 <= index < len(self.listWidgets):
             return
 
         self.listWidgets[index].setSelectedItem(value)
 
     def column(self, index: int):
-        """ return the list widget of specified column """
+        """ 返回specified 列的列表 部件 """
         return self.listWidgets[index]
 
     def exec(self, pos, ani=True):
-        """ show panel
+        """ 显示面板
 
-        Parameters
+        参数
         ----------
         pos: QPoint
-            pop-up position
+            pop-up 位置
 
         ani: bool
-            Whether to show pop-up animation
+            是否 到 显示 pop-up 动画
         """
         if self.isVisible():
             return
 
-        # show before running animation, or the height calculation will be wrong
+        # 显示before running 动画, 或 高度 calculation will be wrong
         self.show()
 
         rect = getCurrentScreenGeometry()

@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QSize, Qt, Signal, QPoint, QRectF, QPropertyAnimation, Property, QEasingCurve
 from PySide6.QtGui import QColor, QMouseEvent, QPainter, QPainterPath
 from PySide6.QtWidgets import QProxyStyle, QSlider, QStyle, QStyleOptionSlider, QWidget
@@ -10,7 +10,7 @@ from ...common.overload import singledispatchmethod
 
 
 class SliderHandle(QWidget):
-    """ Slider handle """
+    """ Slider 处理 """
 
     pressed = Signal()
     released = Signal()
@@ -63,25 +63,25 @@ class SliderHandle(QWidget):
         painter.setRenderHints(QPainter.RenderHint.Antialiasing)
         painter.setPen(Qt.PenStyle.NoPen)
 
-        # draw outer circle
+        # 绘制outer circle
         isDark = isDarkTheme()
         painter.setPen(QColor(0, 0, 0, 90 if isDark else 25))
         painter.setBrush(QColor(69, 69, 69) if isDark else Qt.GlobalColor.white)
         painter.drawEllipse(self.rect().adjusted(1, 1, -1, -1))
 
-        # draw innert circle
+        # 绘制innert circle
         painter.setBrush(autoFallbackThemeColor(self.lightHandleColor, self.darkHandleColor))
         painter.drawEllipse(QPoint(11, 11), self.radius, self.radius)
 
 
 
 class Slider(QSlider):
-    """ A slider can be clicked
+    """ slider can be clicked
 
-    Constructors
+    构造函数
     ------------
-    * Slider(`parent`: QWidget = None)
-    * Slider(`orient`: Qt.Orientation, `parent`: QWidget = None)
+    * Slider(`父部件`: QWidget = None)
+    * Slider(`orient`: Qt.Orientation, `父部件`: QWidget = None)
     """
 
     clicked = Signal(int)
@@ -196,7 +196,7 @@ class Slider(QSlider):
 
 
 class ClickableSlider(QSlider):
-    """ A slider can be clicked """
+    """ slider can be clicked """
 
     clicked = Signal(int)
 
@@ -215,14 +215,14 @@ class ClickableSlider(QSlider):
 
 
 class HollowHandleStyle(QProxyStyle):
-    """ Hollow handle style """
+    """ Hollow 处理 style """
 
     def __init__(self, config: dict = None):
         """
-        Parameters
+        参数
         ----------
         config: dict
-            style config
+            style 配置
         """
         super().__init__()
         self.config = {
@@ -237,13 +237,13 @@ class HollowHandleStyle(QProxyStyle):
         config = config if config else {}
         self.config.update(config)
 
-        # get handle size
+        # 获取 处理 大小
         w = self.config["handle.margin"]+self.config["handle.ring-width"] + \
             self.config["handle.hollow-radius"]
         self.config["handle.size"] = QSize(2*w, 2*w)
 
     def subControlRect(self, cc: QStyle.ComplexControl, opt: QStyleOptionSlider, sc: QStyle.SubControl, widget: QSlider):
-        """ get the rectangular area occupied by the sub control """
+        """ 获取 rectangular area occupied by sub control """
         if cc != self.ComplexControl.CC_Slider or widget.orientation() != Qt.Horizontal \
                 or sc == self.SubControl.SC_SliderTickmarks:
             return super().subControlRect(cc, opt, sc, widget)
@@ -260,13 +260,13 @@ class HollowHandleStyle(QProxyStyle):
             x = self.sliderPositionFromValue(
                 widget.minimum(), widget.maximum(), widget.value(), rect.width())
 
-            # solve the situation that the handle runs out of slider
+            # solve situation that 处理 runs out 的 slider
             x *= (rect.width()-size.width())/rect.width()
             sliderRect = QRectF(x, 0, size.width(), size.height())
             return sliderRect.toRect()
 
     def drawComplexControl(self, cc: QStyle.ComplexControl, opt: QStyleOptionSlider, painter: QPainter, widget: QSlider):
-        """ draw sub control """
+        """ 绘制sub control """
         if cc != self.ComplexControl.CC_Slider or widget.orientation() != Qt.Horizontal:
             return super().drawComplexControl(cc, opt, painter, widget)
 
@@ -275,23 +275,23 @@ class HollowHandleStyle(QProxyStyle):
         painter.setRenderHints(QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
 
-        # paint groove
+        # 绘制groove
         painter.save()
         painter.translate(grooveRect.topLeft())
 
-        # paint the crossed part
+        # 绘制the crossed part
         w = handleRect.x()-grooveRect.x()
         h = self.config['groove.height']
         painter.setBrush(self.config["sub-page.color"])
         painter.drawRect(0, 0, w, h)
 
-        # paint the uncrossed part
+        # 绘制the uncrossed part
         x = w+self.config['handle.size'].width()
         painter.setBrush(self.config["add-page.color"])
         painter.drawRect(x, 0, grooveRect.width()-w, h)
         painter.restore()
 
-        # paint handle
+        # 绘制处理
         ringWidth = self.config["handle.ring-width"]
         hollowRadius = self.config["handle.hollow-radius"]
         radius = ringWidth + hollowRadius
@@ -308,7 +308,7 @@ class HollowHandleStyle(QProxyStyle):
         painter.setBrush(handleColor)
         painter.drawPath(path)
 
-        # press handle
+        # press 处理
         if widget.isSliderDown():
             handleColor.setAlpha(255)
             painter.setBrush(handleColor)

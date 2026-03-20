@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QThread, Signal
 
 from .config import Theme, qconfig
@@ -6,7 +6,7 @@ import sys
 
 
 class SystemThemeListener(QThread):
-    """ System theme listener """
+    """ System 主题 listener """
 
     systemThemeChanged = Signal()
 

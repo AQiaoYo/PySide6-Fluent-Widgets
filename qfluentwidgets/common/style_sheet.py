@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 from string import Template
 import sys
@@ -13,26 +13,26 @@ from .config import qconfig, Theme, isDarkTheme, QT_VERSION
 
 
 class StyleSheetManager(QObject):
-    """ Style sheet manager """
+    """ 样式表 管理器 """
 
     def __init__(self):
         self.widgets = weakref.WeakKeyDictionary()
 
     def register(self, source, widget: QWidget, reset=True):
-        """ register widget to manager
+        """ 注册 部件 到 管理器
 
-        Parameters
+        参数
         ----------
         source: str | StyleSheetBase
-            qss source, it could be:
+            qss 源, it could be:
             * `str`: qss file path
-            * `StyleSheetBase`: style sheet instance
+            * `StyleSheetBase`: 样式表 instance
 
         widget: QWidget
-            the widget to set style sheet
+            部件 到 设置 样式表
 
         reset: bool
-            whether to reset the qss source
+            是否 到 reset qss 源
         """
         if isinstance(source, str):
             source = StyleSheetFile(source)
@@ -49,7 +49,7 @@ class StyleSheetManager(QObject):
             self.widgets[widget] = StyleSheetCompose([source, CustomStyleSheet(widget)])
 
     def deregister(self, widget: QWidget):
-        """ deregister widget from manager """
+        """ deregister 部件 从 管理器 """
         if widget not in self.widgets:
             return
 
@@ -59,7 +59,7 @@ class StyleSheetManager(QObject):
         return self.widgets.items()
 
     def source(self, widget: QWidget):
-        """ get the qss source of widget """
+        """ 获取部件的qss 源 """
         return self.widgets.get(widget, StyleSheetCompose([]))
 
 
@@ -67,19 +67,19 @@ styleSheetManager = StyleSheetManager()
 
 
 class QssTemplate(Template):
-    """ style sheet template """
+    """ 样式表 template """
 
     delimiter = '--'
 
 
 def applyThemeColor(qss: str):
-    """ apply theme color to style sheet
+    """ apply 主题 颜色 到 样式表
 
-    Parameters
+    参数
     ----------
     qss: str
-        the style sheet string to apply theme color, the substituted variable
-        should be equal to the value of `ThemeColor` and starts width `--`, i.e `--ThemeColorPrimary`
+        样式表 string 到 apply 主题 颜色, substituted variable
+        should be equal 到 值 的 `ThemeColor` 和 starts 宽度 `--`, i.e `--ThemeColorPrimary`
     """
     template = QssTemplate(qss)
     mappings = {c.value: c.name() for c in ThemeColor._member_map_.values()}
@@ -87,13 +87,13 @@ def applyThemeColor(qss: str):
 
 
 def renderQss(qss: str):
-    """ render font and theme color to style sheet
+    """ render font 和 主题 颜色 到 样式表
 
-    Parameters
+    参数
     ----------
     qss: str
-        the style sheet string to apply theme color, the substituted variable
-        should be equal to the value of `ThemeColor` and starts width `--`, i.e `--ThemeColorPrimary`
+        样式表 string 到 apply 主题 颜色, substituted variable
+        should be equal 到 值 的 `ThemeColor` 和 starts 宽度 `--`, i.e `--ThemeColorPrimary`
     """
     template = QssTemplate(qss)
     mappings = {c.value: c.name() for c in ThemeColor._member_map_.values()}
@@ -102,23 +102,23 @@ def renderQss(qss: str):
 
 
 class StyleSheetBase:
-    """ Style sheet base class """
+    """ 样式表 基类 """
 
     def path(self, theme=Theme.AUTO):
-        """ get the path of style sheet """
+        """ 获取style sheet的path """
         raise NotImplementedError
 
     def content(self, theme=Theme.AUTO):
-        """ get the content of style sheet """
+        """ 获取style sheet的内容 """
         return getStyleSheetFromFile(self.path(theme))
 
     def apply(self, widget: QWidget, theme=Theme.AUTO):
-        """ apply style sheet to widget """
+        """ apply 样式表 到 部件 """
         setStyleSheet(widget, self, theme)
 
 
 class FluentStyleSheet(StyleSheetBase, Enum):
-    """ Fluent style sheet """
+    """ Fluent 样式表 """
 
     MENU = "menu"
     LABEL = "label"
@@ -161,7 +161,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
 
 
 class StyleSheetFile(StyleSheetBase):
-    """ Style sheet file """
+    """ 样式表 file """
 
     def __init__(self, path: str):
         super().__init__()
@@ -172,7 +172,7 @@ class StyleSheetFile(StyleSheetBase):
 
 
 class CustomStyleSheet(StyleSheetBase):
-    """ Custom style sheet """
+    """ 自定义 样式表 """
 
     DARK_QSS_KEY = 'darkCustomQss'
     LIGHT_QSS_KEY = 'lightCustomQss'
@@ -195,20 +195,20 @@ class CustomStyleSheet(StyleSheetBase):
         return other.widget is self.widget
 
     def setCustomStyleSheet(self, lightQss: str, darkQss: str):
-        """ set custom style sheet in light and dark theme mode """
+        """ 设置 自定义 样式表 中的 亮色 和 暗色主题模式 """
         self.setLightStyleSheet(lightQss)
         self.setDarkStyleSheet(darkQss)
         return self
 
     def setLightStyleSheet(self, qss: str):
-        """ set the style sheet in light mode """
+        """ 设置 样式表 中的 亮色 模式 """
         if self.widget:
             self.widget.setProperty(self.LIGHT_QSS_KEY, qss)
 
         return self
 
     def setDarkStyleSheet(self, qss: str):
-        """ set the style sheet in dark mode """
+        """ 设置 样式表 中的 暗色 模式 """
         if self.widget:
             self.widget.setProperty(self.DARK_QSS_KEY, qss)
 
@@ -236,7 +236,7 @@ class CustomStyleSheet(StyleSheetBase):
 
 
 class CustomStyleSheetWatcher(QObject):
-    """ Custom style sheet watcher """
+    """ 自定义 样式表 watcher """
 
     def eventFilter(self, obj: QWidget, e: QEvent):
         if e.type() != QEvent.DynamicPropertyChange:
@@ -250,7 +250,7 @@ class CustomStyleSheetWatcher(QObject):
 
 
 class DirtyStyleSheetWatcher(QObject):
-    """ Dirty style sheet watcher """
+    """ Dirty 样式表 watcher """
 
     def eventFilter(self, obj: QWidget, e: QEvent):
         if e.type() != QEvent.Type.Paint or not obj.property('dirty-qss'):
@@ -264,7 +264,7 @@ class DirtyStyleSheetWatcher(QObject):
 
 
 class StyleSheetCompose(StyleSheetBase):
-    """ Style sheet compose """
+    """ 样式表 compose """
 
     def __init__(self, sources: List[StyleSheetBase]):
         super().__init__()
@@ -274,14 +274,14 @@ class StyleSheetCompose(StyleSheetBase):
         return '\n'.join([i.content(theme) for i in self.sources])
 
     def add(self, source: StyleSheetBase):
-        """ add style sheet source """
+        """ 添加 样式表 源 """
         if source is self or source in self.sources:
             return
 
         self.sources.append(source)
 
     def remove(self, source: StyleSheetBase):
-        """ remove style sheet source """
+        """ 移除 样式表 源 """
         if source not in self.sources:
             return
 
@@ -289,7 +289,7 @@ class StyleSheetCompose(StyleSheetBase):
 
 
 def getStyleSheetFromFile(file: Union[str, QFile]):
-    """ get style sheet from qss file """
+    """ 获取 样式表 从 qss file """
     f = QFile(file)
     f.open(QFile.ReadOnly)
     qss = str(f.readAll(), encoding='utf-8')
@@ -298,17 +298,17 @@ def getStyleSheetFromFile(file: Union[str, QFile]):
 
 
 def getStyleSheet(source: Union[str, StyleSheetBase], theme=Theme.AUTO):
-    """ get style sheet
+    """ 获取 样式表
 
-    Parameters
+    参数
     ----------
     source: str | StyleSheetBase
-        qss source, it could be:
+        qss 源, it could be:
           * `str`: qss file path
-          * `StyleSheetBase`: style sheet instance
+          * `StyleSheetBase`: 样式表 instance
 
-    theme: Theme
-        the theme of style sheet
+    theme: 主题
+        主题 的 样式表
     """
     if isinstance(source, str):
         source = StyleSheetFile(source)
@@ -317,24 +317,24 @@ def getStyleSheet(source: Union[str, StyleSheetBase], theme=Theme.AUTO):
 
 
 def setStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=Theme.AUTO, register=True):
-    """ set the style sheet of widget
+    """ 设置部件的style sheet
 
-    Parameters
+    参数
     ----------
     widget: QWidget
-        the widget to set style sheet
+        部件 到 设置 样式表
 
     source: str | StyleSheetBase
-        qss source, it could be:
+        qss 源, it could be:
           * `str`: qss file path
-          * `StyleSheetBase`: style sheet instance
+          * `StyleSheetBase`: 样式表 instance
 
-    theme: Theme
-        the theme of style sheet
+    theme: 主题
+        主题 的 样式表
 
     register: bool
-        whether to register the widget to the style manager. If `register=True`, the style of
-        the widget will be updated automatically when the theme changes
+        是否 到 注册 部件 到 style 管理器. 如果 `注册=True`, style of
+        部件 will be updated automatically 当 主题 changes
     """
     if register:
         styleSheetManager.register(source, widget)
@@ -343,41 +343,41 @@ def setStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=The
 
 
 def setCustomStyleSheet(widget: QWidget, lightQss: str, darkQss: str):
-    """ set custom style sheet
+    """ 设置 自定义 样式表
 
-    Parameters
+    参数
     ----------
     widget: QWidget
-        the widget to add style sheet
+        部件 到 添加 样式表
 
     lightQss: str
-        style sheet used in light theme mode
+        样式表 used 中的 亮色主题模式
 
     darkQss: str
-        style sheet used in light theme mode
+        样式表 used 中的 亮色主题模式
     """
     CustomStyleSheet(widget).setCustomStyleSheet(lightQss, darkQss)
 
 
 def addStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=Theme.AUTO, register=True):
-    """ add style sheet to widget
+    """ 将style sheet添加到部件
 
-    Parameters
+    参数
     ----------
     widget: QWidget
-        the widget to set style sheet
+        部件 到 设置 样式表
 
     source: str | StyleSheetBase
-        qss source, it could be:
+        qss 源, it could be:
           * `str`: qss file path
-          * `StyleSheetBase`: style sheet instance
+          * `StyleSheetBase`: 样式表 instance
 
-    theme: Theme
-        the theme of style sheet
+    theme: 主题
+        主题 的 样式表
 
     register: bool
-        whether to register the widget to the style manager. If `register=True`, the style of
-        the widget will be updated automatically when the theme changes
+        是否 到 注册 部件 到 style 管理器. 如果 `注册=True`, style of
+        部件 will be updated automatically 当 主题 changes
     """
     if register:
         styleSheetManager.register(source, widget, reset=False)
@@ -390,12 +390,12 @@ def addStyleSheet(widget: QWidget, source: Union[str, StyleSheetBase], theme=The
 
 
 def updateStyleSheet(lazy=False):
-    """ update the style sheet of all fluent widgets
+    """ 更新the 样式表 的 all fluent 部件
 
-    Parameters
+    参数
     ----------
     lazy: bool
-        whether to update the style sheet lazily, set to `True` will accelerate theme switching
+        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
     """
     removes = []
     for widget, file in list(styleSheetManager.items()):
@@ -413,18 +413,18 @@ def updateStyleSheet(lazy=False):
 
 
 def setTheme(theme: Theme, save=False, lazy=False):
-    """ set the theme of application
+    """ 设置application的主题
 
-    Parameters
+    参数
     ----------
-    theme: Theme
-        theme mode
+    theme: 主题
+        主题 模式
 
     save: bool
-        whether to save the change to config file
+        是否 到 save 更改 到 配置 file
 
     lazy: bool
-        whether to update the style sheet lazily, set to `True` will accelerate theme switching
+        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
     """
     qconfig.set(qconfig.themeMode, theme, save)
     updateStyleSheet(lazy)
@@ -432,22 +432,22 @@ def setTheme(theme: Theme, save=False, lazy=False):
 
 
 def toggleTheme(save=False, lazy=False):
-    """ toggle the theme of application
+    """ 切换the 主题 的 application
 
-    Parameters
+    参数
     ----------
     save: bool
-        whether to save the change to config file
+        是否 到 save 更改 到 配置 file
 
     lazy: bool
-        whether to update the style sheet lazily, set to `True` will accelerate theme switching
+        是否 到 更新 样式表 lazily, 设置 到 `True` will accelerate 主题 switching
     """
     theme = Theme.LIGHT if isDarkTheme() else Theme.DARK
     setTheme(theme, save, lazy)
 
 
 class ThemeColor(Enum):
-    """ Theme color type """
+    """ 主题 颜色 type """
 
     PRIMARY = "ThemeColorPrimary"
     DARK_1 = "ThemeColorDark1"
@@ -463,7 +463,7 @@ class ThemeColor(Enum):
     def color(self):
         color = qconfig.get(qconfig._cfg.themeColor)  # type:QColor
 
-        # transform color into hsv space
+        # transform 颜色 into hsv space
         h, s, v, _ = color.getHsvF()
 
         if isDarkTheme():
@@ -505,23 +505,23 @@ class ThemeColor(Enum):
 
 
 def themeColor():
-    """ get theme color """
+    """ 获取 主题 颜色 """
     return ThemeColor.PRIMARY.color()
 
 
 def setThemeColor(color, save=False, lazy=False):
-    """ set theme color
+    """ 设置 主题 颜色
 
-    Parameters
+    参数
     ----------
     color: QColor | Qt.GlobalColor | str
-        theme color
+        主题 颜色
 
     save: bool
-        whether to save to change to config file
+        是否 到 save 到 更改 到 配置 file
 
     lazy: bool
-        whether to update the style sheet lazily
+        是否 到 更新 样式表 lazily
     """
     color = QColor(color)
     qconfig.set(qconfig.themeColor, color, save=save)
@@ -529,7 +529,7 @@ def setThemeColor(color, save=False, lazy=False):
 
 
 def updateDynamicStyle(widget: QWidget):
-    """ update the dynamic style of widget """
+    """ 更新the dynamic style 的 部件 """
     if sys.platform != "win32" or QT_VERSION < (6, 8, 0):
         widget.setStyle(QApplication.style())
     else:

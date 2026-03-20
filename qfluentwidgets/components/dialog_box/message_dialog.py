@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QLabel, QPushButton, QDialog
 
@@ -8,7 +8,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class MessageDialog(MaskDialogBase):
-    """ Win10 style message dialog box with a mask """
+    """ Win10 style message 对话框 box 使用 遮罩 """
 
     yesSignal = Signal()
     cancelSignal = Signal()
@@ -23,7 +23,7 @@ class MessageDialog(MaskDialogBase):
         self.__initWidget()
 
     def __initWidget(self):
-        """ initialize widgets """
+        """ 初始化部件 """
         self.windowMask.resize(self.size())
         self.widget.setMaximumWidth(540)
         self.titleLabel.move(24, 24)
@@ -33,12 +33,12 @@ class MessageDialog(MaskDialogBase):
         self.__setQss()
         self.__initLayout()
 
-        # connect signal to slot
+        # 连接信号与槽函数
         self.yesButton.clicked.connect(self.__onYesButtonClicked)
         self.cancelButton.clicked.connect(self.__onCancelButtonClicked)
 
     def __initLayout(self):
-        """ initialize layout """
+        """ 初始化布局 """
         self.contentLabel.adjustSize()
         self.widget.setFixedSize(48+self.contentLabel.width(),
                                  self.contentLabel.y() + self.contentLabel.height()+92)
@@ -58,7 +58,7 @@ class MessageDialog(MaskDialogBase):
         self.accept()
 
     def __setQss(self):
-        """ set style sheet """
+        """ 设置样式表 """
         self.windowMask.setObjectName('windowMask')
         self.titleLabel.setObjectName('titleLabel')
         self.contentLabel.setObjectName('contentLabel')

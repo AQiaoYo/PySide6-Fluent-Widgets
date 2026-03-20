@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from math import floor
 from io import BytesIO
 from typing import Union
@@ -21,7 +21,7 @@ def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
         image = fromqpixmap(QPixmap(image))
 
     if blurPicSize:
-        # adjust image size to reduce computation
+        # 调整图像 大小 到 reduce computation
         w, h = image.size
         ratio = min(blurPicSize[0] / w, blurPicSize[1] / h)
         w_, h_ = w * ratio, h * ratio
@@ -31,7 +31,7 @@ def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
 
     image = np.array(image)
 
-    # handle gray image
+    # 处理 灰度 图像
     if len(image.shape) == 2:
         image = np.stack([image, image, image], axis=-1)
 
@@ -40,7 +40,7 @@ def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
         image[:, :, i] = gaussian_filter(
             image[:, :, i], blurRadius) * brightFactor
 
-    # convert ndarray to QPixmap
+    # 将ndarray转换为QPixmap
     h, w, c = image.shape
     if c == 3:
         format = QImage.Format_RGB888
@@ -53,13 +53,13 @@ def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
 # https://github.com/python-pillow/Pillow/blob/main/src/PIL/ImageQt.py
 def fromqpixmap(im: Union[QImage, QPixmap]):
     """
-    :param im: QImage or PIL ImageQt object
+    :param im: QImage 或 PIL ImageQt 对象
     """
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.ReadWrite)
 
-    # preserve alpha channel with png
-    # otherwise ppm is more friendly with Image.open
+    # 保留 透明通道 channel 使用 png
+    # otherwise ppm is more friendly 使用 图像.打开
     if im.hasAlphaChannel():
         im.save(buffer, "png")
     else:
@@ -74,35 +74,35 @@ def fromqpixmap(im: Union[QImage, QPixmap]):
 
 
 class DominantColor:
-    """ Dominant color class """
+    """ Dominant 颜色 类 """
 
     @classmethod
     @exceptionHandler((24, 24, 24))
     def getDominantColor(cls, imagePath):
-        """ extract dominant color from image
+        """ extract dominant 颜色 从 图像
 
-        Parameters
+        参数
         ----------
         imagePath: str
-            image path
+            图像 path
 
-        Returns
+        返回
         -------
         r, g, b: int
-            gray value of each color channel
+            灰度 值 的 each 颜色 channel
         """
         if imagePath.startswith(':'):
             return (24, 24, 24)
 
         colorThief = ColorThief(imagePath)
 
-        # scale image to speed up the computation speed
+        # scale 图像 到 speed up computation speed
         if max(colorThief.image.size) > 400:
             colorThief.image = colorThief.image.resize((400, 400))
 
         palette = colorThief.get_palette(quality=9)
 
-        # adjust the brightness of palette
+        # 调整the 亮度 的 palette
         palette = cls.__adjustPaletteValue(palette)
         for rgb in palette[:]:
             h, s, v = cls.rgb2hsv(rgb)
@@ -118,7 +118,7 @@ class DominantColor:
 
     @classmethod
     def __adjustPaletteValue(cls, palette):
-        """ adjust the brightness of palette """
+        """ 调整the 亮度 的 palette """
         newPalette = []
         for rgb in palette:
             h, s, v = cls.rgb2hsv(rgb)
@@ -137,7 +137,7 @@ class DominantColor:
 
     @staticmethod
     def rgb2hsv(rgb):
-        """ convert rgb to hsv """
+        """ 将rgb转换为hsv """
         r, g, b = [i / 255 for i in rgb]
         mx = max(r, g, b)
         mn = min(r, g, b)
@@ -156,7 +156,7 @@ class DominantColor:
 
     @staticmethod
     def hsv2rgb(h, s, v):
-        """ convert hsv to rgb """
+        """ 将hsv转换为rgb """
         h60 = h / 60.0
         h60f = floor(h60)
         hi = int(h60f) % 6
@@ -185,11 +185,11 @@ class DominantColor:
         rg = np.absolute(r - g)
         yb = np.absolute(0.5 * (r + g) - b)
 
-        # Compute the mean and standard deviation of both `rg` and `yb`.
+        # Compute mean 和 标准 deviation 的 both `rg` 和 `yb`.
         rg_mean, rg_std = (np.mean(rg), np.std(rg))
         yb_mean, yb_std = (np.mean(yb), np.std(yb))
 
-        # Combine the mean and standard deviations.
+        # Combine mean 和 标准 deviations.
         std_root = np.sqrt((rg_std ** 2) + (yb_std ** 2))
         mean_root = np.sqrt((rg_mean ** 2) + (yb_mean ** 2))
 

@@ -8,7 +8,7 @@ from ..widgets.tool_tip import ToolTip, ToolTipFilter
 
 
 class AcrylicToolTipContainer(AcrylicWidget, QFrame):
-    """ Acrylic tool tip container """
+    """ 亚克力 工具提示 container """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -21,7 +21,7 @@ class AcrylicToolTipContainer(AcrylicWidget, QFrame):
 
 
 class AcrylicToolTip(ToolTip):
-    """ Acrylic tool tip """
+    """ 亚克力 工具提示 """
 
     def _createContainer(self):
         return AcrylicToolTipContainer(self)
@@ -33,7 +33,7 @@ class AcrylicToolTip(ToolTip):
 
 
 class AcrylicToolTipFilter(ToolTipFilter):
-    """ Acrylic tool tip filter """
+    """ 亚克力 工具提示 filter """
 
     def _createToolTip(self):
         return AcrylicToolTip(self.parent().toolTip(), self.parent().window())

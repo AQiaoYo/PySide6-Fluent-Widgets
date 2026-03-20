@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, QPoint
 from PySide6.QtGui import QAction
 
@@ -33,43 +33,43 @@ class AcrylicComboBoxMenu(AcrylicMenuBase, RoundMenu):
 
 
 class AcrylicComboBox(ComboBox):
-    """ Acrylic combo box """
+    """ 亚克力组合框 """
 
     def _createComboMenu(self):
         return AcrylicComboBoxMenu(self)
 
 
 class AcrylicEditableComboBox(AcrylicLineEditBase, EditableComboBox):
-    """ Acrylic combo box """
+    """ 亚克力组合框 """
 
     def _createComboMenu(self):
         return AcrylicComboBoxMenu(self)
 
 
 class AcrylicComboBoxSettingCard(SettingCard):
-    """ Setting card with a combo box """
+    """ Setting card 使用 组合框 """
 
     def __init__(self, configItem: OptionsConfigItem, icon, title, content=None, texts=None, parent=None):
         """
-        Parameters
+        参数
         ----------
         configItem: OptionsConfigItem
-            configuration item operated by the card
+            configuration 项 operated by card
 
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
-        texts: List[str]
-            the text of items
+        texts: 列表[str]
+            文本 的 项
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem

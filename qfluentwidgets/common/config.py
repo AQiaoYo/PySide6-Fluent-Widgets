@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 import json
 from copy import deepcopy
 from enum import Enum
@@ -32,7 +32,7 @@ def _resolve_system_theme():
     return Theme(detected_theme) if detected_theme else Theme.LIGHT
 
 class Theme(Enum):
-    """ Theme enumeration """
+    """ 主题枚举 """
 
     LIGHT = "Light"
     DARK = "Dark"
@@ -40,19 +40,19 @@ class Theme(Enum):
 
 
 class ConfigValidator:
-    """ Config validator """
+    """ 配置校验器 """
 
     def validate(self, value):
-        """ Verify whether the value is legal """
+        """校验值是否合法."""
         return True
 
     def correct(self, value):
-        """ correct illegal value """
+        """修正非法值."""
         return value
 
 
 class RangeValidator(ConfigValidator):
-    """ Range validator """
+    """ 范围校验器 """
 
     def __init__(self, min, max):
         self.min = min
@@ -67,7 +67,7 @@ class RangeValidator(ConfigValidator):
 
 
 class OptionsValidator(ConfigValidator):
-    """ Options validator """
+    """ 选项校验器 """
 
     def __init__(self, options):
         if not options:
@@ -86,14 +86,14 @@ class OptionsValidator(ConfigValidator):
 
 
 class BoolValidator(OptionsValidator):
-    """ Boolean validator """
+    """ 布尔值校验器 """
 
     def __init__(self):
         super().__init__([True, False])
 
 
 class FolderValidator(ConfigValidator):
-    """ Folder validator """
+    """ 文件夹校验器 """
 
     def validate(self, value):
         return Path(value).exists()
@@ -105,7 +105,7 @@ class FolderValidator(ConfigValidator):
 
 
 class FolderListValidator(ConfigValidator):
-    """ Folder list validator """
+    """ 文件夹列表校验器 """
 
     def validate(self, value):
         return all(Path(i).exists() for i in value)
@@ -121,7 +121,7 @@ class FolderListValidator(ConfigValidator):
 
 
 class ColorValidator(ConfigValidator):
-    """ RGB color validator """
+    """ RGB 颜色校验器 """
 
     def __init__(self, default):
         self.default = QColor(default)
@@ -137,19 +137,19 @@ class ColorValidator(ConfigValidator):
 
 
 class ConfigSerializer:
-    """ Config serializer """
+    """ 配置序列化器 """
 
     def serialize(self, value):
-        """ serialize config value """
+        """序列化配置值."""
         return value
 
     def deserialize(self, value):
-        """ deserialize config from config file's value """
+        """从配置文件中的值反序列化配置."""
         return value
 
 
 class EnumSerializer(ConfigSerializer):
-    """ enumeration class serializer """
+    """ 枚举类序列化器 """
 
     def __init__(self, enumClass):
         self.enumClass = enumClass
@@ -162,7 +162,7 @@ class EnumSerializer(ConfigSerializer):
 
 
 class ColorSerializer(ConfigSerializer):
-    """ QColor serializer """
+    """ QColor 序列化器 """
 
     def serialize(self, value: QColor):
         return value.name(QColor.HexArgb)
@@ -175,31 +175,28 @@ class ColorSerializer(ConfigSerializer):
 
 
 class ConfigItem(QObject):
-    """ Config item """
+    """ 配置项 """
 
     valueChanged = Signal(object)
 
     def __init__(self, group, name, default, validator=None, serializer=None, restart=False):
         """
-        Parameters
+        参数
         ----------
         group: str
-            config group name
+            配置分组名称.
 
         name: str
-            config item name, can be empty
+            配置项名称,可以为空.
 
         default:
-            default value
-
-        options: list
-            options value
+            默认值.
 
         serializer: ConfigSerializer
-            config serializer
+            配置序列化器.
 
         restart: bool
-            whether to restart the application after updating value
+            更新值后是否需要重启应用.
         """
         super().__init__()
         self.group = group
@@ -213,7 +210,7 @@ class ConfigItem(QObject):
 
     @property
     def value(self):
-        """ get the value of config item """
+        """获取配置项的值."""
         return self.__value
 
     @value.setter
@@ -226,7 +223,7 @@ class ConfigItem(QObject):
 
     @property
     def key(self):
-        """ get the config key separated by `.` """
+        """获取以 `.` 分隔的配置键."""
         return self.group+"."+self.name if self.name else self.group
 
     def __str__(self):
@@ -240,11 +237,11 @@ class ConfigItem(QObject):
 
 
 class RangeConfigItem(ConfigItem):
-    """ Config item of range """
+    """带范围约束的配置项."""
 
     @property
     def range(self):
-        """ get the available range of config """
+        """ 获取配置的可用 range """
         return self.validator.range
 
     def __str__(self):
@@ -252,7 +249,7 @@ class RangeConfigItem(ConfigItem):
 
 
 class OptionsConfigItem(ConfigItem):
-    """ Config item with options """
+    """带选项列表的配置项."""
 
     @property
     def options(self):
@@ -263,7 +260,7 @@ class OptionsConfigItem(ConfigItem):
 
 
 class ColorConfigItem(ConfigItem):
-    """ Color config item """
+    """ 颜色配置项 """
 
     def __init__(self, group, name, default, restart=False):
         super().__init__(group, name, QColor(default), ColorValidator(default),
@@ -274,7 +271,7 @@ class ColorConfigItem(ConfigItem):
 
 
 class QConfig(QObject):
-    """ Config of app """
+    """应用级配置对象."""
 
     appRestartSig = Signal()
     themeChanged = Signal(Theme)
@@ -293,30 +290,30 @@ class QConfig(QObject):
         self._cfg = self
 
     def get(self, item):
-        """ get the value of config item """
+        """获取配置项的值."""
         return item.value
 
     def set(self, item, value, save=True, copy=True):
-        """ set the value of config item
+        """设置配置项的值.
 
-        Parameters
+        参数
         ----------
         item: ConfigItem
-            config item
+            配置项.
 
         value:
-            the new value of config item
+            要写入的新值.
 
         save: bool
-            whether to save the change to config file
+            是否立即保存到配置文件.
 
         copy: bool
-            whether to deep copy the new value
+            是否对新值执行深拷贝.
         """
         if item.value == value:
             return
 
-        # deepcopy new value
+        # 复杂对象默认做深拷贝,避免外部引用继续修改配置值.
         try:
             item.value = deepcopy(value) if copy else value
         except:
@@ -336,7 +333,7 @@ class QConfig(QObject):
             self._cfg.themeColorChanged.emit(value)
 
     def toDict(self, serialize=True):
-        """ convert config items to `dict` """
+        """将配置项转换为 `dict`."""
         items = {}
         for name in dir(self._cfg.__class__):
             item = getattr(self._cfg.__class__, name)
@@ -356,22 +353,22 @@ class QConfig(QObject):
         return items
 
     def save(self):
-        """ save config """
+        """保存配置."""
         self._cfg.file.parent.mkdir(parents=True, exist_ok=True)
         with open(self._cfg.file, "w", encoding="utf-8") as f:
             json.dump(self._cfg.toDict(), f, ensure_ascii=False, indent=4)
 
     @exceptionHandler()
     def load(self, file=None, config=None):
-        """ load config
+        """加载配置.
 
-        Parameters
+        参数
         ----------
-        file: str or Path
-            the path of json config file
+        file: str 或 Path
+            JSON 配置文件路径.
 
-        config: Config
-            config object to be initialized
+        config: 配置
+            要初始化的配置对象.
         """
         if isinstance(config, QConfig):
             self._cfg = config
@@ -386,14 +383,14 @@ class QConfig(QObject):
         except:
             cfg = {}
 
-        # map config items'key to item
+        # 将配置键映射到对应的配置项,便于后续回填.
         items = {}
         for name in dir(self._cfg.__class__):
             item = getattr(self._cfg.__class__, name)
             if isinstance(item, ConfigItem):
                 items[item.key] = item
 
-        # update the value of config item
+        # 根据配置文件中的值更新配置项.
         for k, v in cfg.items():
             if not isinstance(v, dict) and items.get(k) is not None:
                 items[k].deserializeFrom(v)
@@ -407,12 +404,12 @@ class QConfig(QObject):
 
     @property
     def theme(self):
-        """ get theme mode, can be `Theme.Light` or `Theme.Dark` """
+        """获取当前主题模式."""
         return self._cfg._theme
 
     @theme.setter
     def theme(self, t):
-        """ chaneg the theme without modifying the config file """
+        """切换主题,但不修改配置文件."""
         if t == Theme.AUTO:
             t = _resolve_system_theme()
 
@@ -424,13 +421,13 @@ qconfig = QConfig()
 
 
 def isDarkTheme():
-    """ whether the theme is dark mode """
+    """返回当前主题是否为暗色模式."""
     return qconfig.theme == Theme.DARK
 
 def theme():
-    """ get theme mode """
+    """获取当前主题."""
     return qconfig.theme
 
 def isDarkThemeMode(theme=Theme.AUTO):
-    """ whether the theme is dark mode """
+    """判断给定主题模式是否为暗色模式."""
     return theme == Theme.DARK if theme != Theme.AUTO else isDarkTheme()

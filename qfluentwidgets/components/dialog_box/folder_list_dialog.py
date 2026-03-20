@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 import os
 
 from PySide6.QtCore import Qt, Signal
@@ -16,7 +16,7 @@ from ..widgets.scroll_area import SingleDirectionScrollArea
 
 
 class FolderListDialog(MaskDialogBase):
-    """ Folder list dialog box """
+    """ 文件夹 列表 对话框 box """
 
     folderChanged = Signal(list)
 
@@ -39,7 +39,7 @@ class FolderListDialog(MaskDialogBase):
         self.__initWidget()
 
     def __initWidget(self):
-        """ initialize widgets """
+        """ 初始化部件 """
         self.__setQss()
 
         w = max(self.titleLabel.width()+48, self.contentLabel.width()+48, 352)
@@ -56,14 +56,14 @@ class FolderListDialog(MaskDialogBase):
         self.scrollArea.hScrollBar.setForceHidden(True)
         self.__initLayout()
 
-        # connect signal to slot
+        # 连接信号与槽函数
         self.addFolderCard.clicked.connect(self.__showFileDialog)
         self.completeButton.clicked.connect(self.__onButtonClicked)
         for card in self.folderCards:
             card.clicked.connect(self.__showDeleteFolderCardDialog)
 
     def __initLayout(self):
-        """ initialize layout """
+        """ 初始化布局 """
         self.vBoxLayout.setContentsMargins(24, 24, 24, 24)
         self.vBoxLayout.setSizeConstraint(QVBoxLayout.SetFixedSize)
         self.vBoxLayout.setAlignment(Qt.AlignTop)
@@ -94,7 +94,7 @@ class FolderListDialog(MaskDialogBase):
         for card in self.folderCards:
             self.scrollLayout.addWidget(card, 0, Qt.AlignTop)
 
-        # buttons
+        # 按钮
         layout_3 = QHBoxLayout()
         layout_3.setContentsMargins(0, 0, 0, 0)
         layout_3.addStretch(1)
@@ -104,14 +104,14 @@ class FolderListDialog(MaskDialogBase):
         self.__adjustWidgetSize()
 
     def __showFileDialog(self):
-        """ show file dialog to select folder """
+        """ 显示file 对话框 到 select 文件夹 """
         path = QFileDialog.getExistingDirectory(
             self, self.tr("Choose folder"), "./")
 
         if not path or path in self.folderPaths:
             return
 
-        # create folder card
+        # 创建文件夹 card
         card = FolderCard(path, self.scrollWidget)
         self.scrollLayout.addWidget(card, 0, Qt.AlignTop)
         card.clicked.connect(self.__showDeleteFolderCardDialog)
@@ -123,7 +123,7 @@ class FolderListDialog(MaskDialogBase):
         self.__adjustWidgetSize()
 
     def __showDeleteFolderCardDialog(self):
-        """ show delete folder card dialog """
+        """ 显示delete 文件夹 card 对话框 """
         sender = self.sender()
         title = self.tr('Are you sure you want to delete the folder?')
         content = self.tr("If you delete the ") + f'"{sender.folderName}"' + \
@@ -134,18 +134,18 @@ class FolderListDialog(MaskDialogBase):
         dialog.exec_()
 
     def __deleteFolderCard(self, folderCard):
-        """ delete selected folder card """
+        """ delete selected 文件夹 card """
         self.scrollLayout.removeWidget(folderCard)
         index = self.folderCards.index(folderCard)
         self.folderCards.pop(index)
         self.folderPaths.pop(index)
         folderCard.deleteLater()
 
-        # adjust height
+        # 调整高度
         self.__adjustWidgetSize()
 
     def __setQss(self):
-        """ set style sheet """
+        """ 设置样式表 """
         self.titleLabel.setObjectName('titleLabel')
         self.contentLabel.setObjectName('contentLabel')
         self.completeButton.setObjectName('completeButton')
@@ -159,7 +159,7 @@ class FolderListDialog(MaskDialogBase):
         self.completeButton.adjustSize()
 
     def __onButtonClicked(self):
-        """ done button clicked slot """
+        """ done 按钮 clicked 槽函数 """
         if sorted(self.__originalPaths) != sorted(self.folderPaths):
             self.setEnabled(False)
             QApplication.processEvents()
@@ -174,7 +174,7 @@ class FolderListDialog(MaskDialogBase):
 
 
 class ClickableWindow(QWidget):
-    """ Clickable window """
+    """ Clickable 窗口 """
 
     clicked = Signal()
 
@@ -205,7 +205,7 @@ class ClickableWindow(QWidget):
         self.update()
 
     def paintEvent(self, e):
-        """ paint window """
+        """ 绘制窗口 """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -235,7 +235,7 @@ class ClickableWindow(QWidget):
 
 
 class FolderCard(ClickableWindow):
-    """ Folder card """
+    """ 文件夹 card """
 
     def __init__(self, folderPath: str, parent=None):
         super().__init__(parent)
@@ -246,13 +246,13 @@ class FolderCard(ClickableWindow):
             12, 12, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
     def paintEvent(self, e):
-        """ paint card """
+        """ 绘制card """
         super().paintEvent(e)
         painter = QPainter(self)
         painter.setRenderHints(
             QPainter.TextAntialiasing | QPainter.SmoothPixmapTransform | QPainter.Antialiasing)
 
-        # paint text and icon
+        # 绘制文本 和 图标
         color = Qt.white if isDarkTheme() else Qt.black
         painter.setPen(color)
         if self._isPressed:
@@ -263,8 +263,8 @@ class FolderCard(ClickableWindow):
             painter.drawPixmap(self.width() - 24, 20, self.__closeIcon)
 
     def __drawText(self, painter, x1, fontSize1, x2, fontSize2):
-        """ draw text """
-        # paint folder name
+        """ 绘制文本 """
+        # 绘制文件夹 name
         font = QFont("Microsoft YaHei")
         font.setBold(True)
         font.setPixelSize(fontSize1)
@@ -273,7 +273,7 @@ class FolderCard(ClickableWindow):
             self.folderName, Qt.ElideRight, self.width()-48)
         painter.drawText(x1, 30, name)
 
-        # paint folder path
+        # 绘制文件夹 path
         font = QFont("Microsoft YaHei")
         font.setPixelSize(fontSize2)
         painter.setFont(font)
@@ -283,7 +283,7 @@ class FolderCard(ClickableWindow):
 
 
 class AddFolderCard(ClickableWindow):
-    """ Add folder card """
+    """ 添加 文件夹 card """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -292,7 +292,7 @@ class AddFolderCard(ClickableWindow):
             22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
     def paintEvent(self, e):
-        """ paint card """
+        """ 绘制card """
         super().paintEvent(e)
         painter = QPainter(self)
         w = self.width()

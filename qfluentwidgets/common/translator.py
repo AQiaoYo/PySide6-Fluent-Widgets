@@ -3,7 +3,7 @@ from PySide6.QtCore import QTranslator, QLocale
 
 
 class FluentTranslator(QTranslator):
-    """ Translator of fluent widgets """
+    """ Translator 的 fluent 部件 """
 
     def __init__(self, locale: QLocale = None, parent=None):
         super().__init__(parent=parent)

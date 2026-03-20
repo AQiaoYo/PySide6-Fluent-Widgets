@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Dict
 
 from PySide6.QtCore import Qt, Signal, QRectF
@@ -15,7 +15,7 @@ from .navigation_types import RouteKeyError
 
 
 class PivotItem(PushButton):
-    """ Pivot item """
+    """ Pivot 项 """
 
     itemClicked = Signal(bool)
 
@@ -66,59 +66,59 @@ class Pivot(QWidget):
         self.slideAni.valueChanged.connect(lambda: self.update())
 
     def addItem(self, routeKey: str, text: str, onClick=None, icon=None):
-        """ add item
+        """ 添加 项
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            the unique name of item
+            unique name 的 项
 
         text: str
-            the text of navigation item
+            文本 的 navigation 项
 
         onClick: callable
-            the slot connected to item clicked signal
+            槽函数 connected 到 项 clicked 信号
 
         icon: str
-            the icon of navigation item
+            图标 的 navigation 项
         """
         return self.insertItem(-1, routeKey, text, onClick, icon)
 
     def addWidget(self, routeKey: str, widget: PivotItem, onClick=None):
-        """ add widget
+        """ 添加 部件
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            the unique name of item
+            unique name 的 项
 
         widget: PivotItem
-            navigation widget
+            导航部件
 
         onClick: callable
-            the slot connected to item clicked signal
+            槽函数 connected 到 项 clicked 信号
         """
         self.insertWidget(-1, routeKey, widget, onClick)
 
     def insertItem(self, index: int, routeKey: str, text: str, onClick=None, icon=None):
-        """ insert item
+        """ 插入 项
 
-        Parameters
+        参数
         ----------
         index: int
-            insert position
+            插入 位置
 
         routeKey: str
-            the unique name of item
+            unique name 的 项
 
         text: str
-            the text of navigation item
+            文本 的 navigation 项
 
         onClick: callable
-            the slot connected to item clicked signal
+            槽函数 connected 到 项 clicked 信号
 
         icon: str
-            the icon of navigation item
+            图标 的 navigation 项
         """
         if routeKey in self.items:
             return
@@ -131,21 +131,21 @@ class Pivot(QWidget):
         return item
 
     def insertWidget(self, index: int, routeKey: str, widget: PivotItem, onClick=None):
-        """ insert item
+        """ 插入 项
 
-        Parameters
+        参数
         ----------
         index: int
-            insert position
+            插入 位置
 
         routeKey: str
-            the unique name of item
+            unique name 的 项
 
         widget: PivotItem
-            navigation widget
+            导航部件
 
         onClick: callable
-            the slot connected to item clicked signal
+            槽函数 connected 到 项 clicked 信号
         """
         if routeKey in self.items:
             return
@@ -159,12 +159,12 @@ class Pivot(QWidget):
         self.hBoxLayout.insertWidget(index, widget, 1)
 
     def removeWidget(self, routeKey: str):
-        """ remove widget
+        """ 移除 部件
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            the unique name of item
+            unique name 的 项
         """
         if routeKey not in self.items:
             return
@@ -178,7 +178,7 @@ class Pivot(QWidget):
             self._currentRouteKey = None
 
     def clear(self):
-        """ clear all navigation items """
+        """ 清空all navigation 项 """
         for k, w in self.items.items():
             self.hBoxLayout.removeWidget(w)
             qrouter.remove(k)
@@ -188,7 +188,7 @@ class Pivot(QWidget):
         self._currentRouteKey = None
 
     def currentItem(self):
-        """ Returns the current selected item """
+        """ 返回 当前 选中项 """
         if self._currentRouteKey is None:
             return None
 
@@ -198,12 +198,12 @@ class Pivot(QWidget):
         return self._currentRouteKey
 
     def setCurrentItem(self, routeKey: str):
-        """ set current selected item
+        """ 设置 当前 选中项
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            the unique name of item
+            unique name 的 项
         """
         if routeKey not in self.items or routeKey == self.currentRouteKey():
             return
@@ -230,7 +230,7 @@ class Pivot(QWidget):
         return self._indicatorLength
 
     def setItemFontSize(self, size: int):
-        """ set the pixel font size of items """
+        """ 设置项的pixel font 大小 """
         for item in self.items.values():
             font = item.font()
             font.setPixelSize(size)
@@ -238,7 +238,7 @@ class Pivot(QWidget):
             item.adjustSize()
 
     def setItemText(self, routeKey: str, text: str):
-        """ set the text of item """
+        """ 设置项的文本 """
         item = self.widget(routeKey)
         item.setText(text)
 

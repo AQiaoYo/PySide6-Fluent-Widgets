@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 from typing import Union
 
@@ -13,7 +13,7 @@ from ...common.style_sheet import themeColor, FluentStyleSheet, isDarkTheme, The
 
 
 class InfoLevel(Enum):
-    """ Info level """
+    """ Info 层级 """
     INFOAMTION = 'Info'
     SUCCESS = 'Success'
     ATTENTION = 'Attension'
@@ -22,7 +22,7 @@ class InfoLevel(Enum):
 
 
 class InfoBadgePosition(Enum):
-    """ Info badge position """
+    """ 信息徽标 位置 """
     TOP_RIGHT = 0
     BOTTOM_RIGHT = 1
     RIGHT = 2
@@ -35,12 +35,12 @@ class InfoBadgePosition(Enum):
 class InfoBadge(QLabel):
     """ Information badge
 
-    Constructors
+    构造函数
     ------------
-    * InfoBadge(`parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
-    * InfoBadge(`text`: str, `parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
-    * InfoBadge(`num`: int, `parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
-    * InfoBadge(`num`: float, `parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
+    * InfoBadge(`父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
+    * InfoBadge(`文本`: str, `父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
+    * InfoBadge(`num`: int, `父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
+    * InfoBadge(`num`: float, `父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
     """
 
     @singledispatchmethod
@@ -74,7 +74,7 @@ class InfoBadge(QLabel):
         self.setNum(num)
 
     def setLevel(self, level: InfoLevel):
-        """ set infomation level """
+        """ 设置 infomation 层级 """
         if level == self.level:
             return
 
@@ -92,12 +92,12 @@ class InfoBadge(QLabel):
             self.level = InfoLevel(value)
 
     def setCustomBackgroundColor(self, light, dark):
-        """ set the custom background color
+        """ 设置 自定义 背景色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
@@ -167,24 +167,24 @@ class InfoBadge(QLabel):
     @classmethod
     def custom(cls, text: Union[str, float], light: QColor, dark: QColor, parent=None, target: QWidget = None,
                position=InfoBadgePosition.TOP_RIGHT):
-        """ create a badge with custom background color
+        """ 创建a badge 使用 自定义 背景色
 
-        Parameters
+        参数
         ----------
         text: str | float
-            the text of badge
+            文本 的 badge
 
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
 
         parent: QWidget
-            parent widget
+            父部件 部件
 
         target: QWidget
-            target widget to show the badge
+            目标 部件 到 显示 badge
 
         pos: InfoBadgePosition
-            the position relative to target
+            位置 relative 到 目标
         """
         w = cls.make(text, parent, target=target, position=position)
         w.setCustomBackgroundColor(light, dark)
@@ -192,7 +192,7 @@ class InfoBadge(QLabel):
 
 
 class DotInfoBadge(InfoBadge):
-    """ Dot info badge """
+    """ Dot 信息徽标 """
 
     def __init__(self, parent=None, level=InfoLevel.ATTENTION):
         super().__init__(parent, level)
@@ -239,15 +239,15 @@ class DotInfoBadge(InfoBadge):
     @classmethod
     def custom(cls, light: QColor, dark: QColor, parent=None, target: QWidget = None,
                position=InfoBadgePosition.TOP_RIGHT):
-        """ create a badge with custom background color
+        """ 创建a badge 使用 自定义 背景色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         w = cls.make(parent, target=target, position=position)
         w.setCustomBackgroundColor(light, dark)
@@ -255,12 +255,12 @@ class DotInfoBadge(InfoBadge):
 
 
 class IconInfoBadge(InfoBadge):
-    """ Icon icon badge
+    """ 图标 图标 badge
 
-    Constructors
+    构造函数
     ------------
-    * IconInfoBadge(`parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
-    * IconInfoBadge(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None, `level`=InfoLevel.ATTENTION)
+    * IconInfoBadge(`父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
+    * IconInfoBadge(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None, `层级`=InfoLevel.ATTENTION)
     """
 
     @singledispatchmethod
@@ -281,7 +281,7 @@ class IconInfoBadge(InfoBadge):
         self.setIcon(icon)
 
     def setIcon(self, icon: Union[QIcon, FluentIconBase, str]):
-        """ set the icon of info badge """
+        """ 设置info badge的图标 """
         self._icon = icon
         self.update()
 
@@ -351,18 +351,18 @@ class IconInfoBadge(InfoBadge):
     @classmethod
     def custom(cls, icon: Union[QIcon, FluentIconBase], light: QColor, dark: QColor, parent=None,
                target: QWidget = None, position=InfoBadgePosition.TOP_RIGHT):
-        """ create a badge with custom background color
+        """ 创建a badge 使用 自定义 背景色
 
-        Parameters
+        参数
         ----------
         icon: QIcon | FluentIconBase
-            the icon of badge
+            图标 的 badge
 
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         w = cls.make(icon, parent, target=target, position=position)
         w.setCustomBackgroundColor(light, dark)
@@ -370,7 +370,7 @@ class IconInfoBadge(InfoBadge):
 
 
 class InfoBadgeManager(QObject):
-    """ Info badge manager """
+    """ 信息徽标 管理器 """
 
     managers = {}
 
@@ -390,12 +390,12 @@ class InfoBadgeManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ register menu animation manager
+        """ 注册 菜单 动画 管理器
 
-        Parameters
+        参数
         ----------
         name: Any
-            the name of manager, it should be unique
+            name 的 管理器, it should be unique
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -407,20 +407,20 @@ class InfoBadgeManager(QObject):
 
     @classmethod
     def make(cls, position: InfoBadgePosition, target: QWidget, badge: InfoBadge):
-        """ mask info badge manager """
+        """ 遮罩 信息徽标 管理器 """
         if position not in cls.managers:
             raise ValueError(f'`{position}` is an invalid animation type.')
 
         return cls.managers[position](target, badge)
 
     def position(self):
-        """ return the position of info badge """
+        """ 返回info badge的位置 """
         return QPoint()
 
 
 @InfoBadgeManager.register(InfoBadgePosition.TOP_RIGHT)
 class TopRightInfoBadgeManager(InfoBadgeManager):
-    """ Top right info badge manager """
+    """ Top right 信息徽标 管理器 """
 
     def position(self):
         pos = self.target.geometry().topRight()
@@ -431,7 +431,7 @@ class TopRightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.RIGHT)
 class RightInfoBadgeManager(InfoBadgeManager):
-    """ Right info badge manager """
+    """ Right 信息徽标 管理器 """
 
     def position(self):
         x = self.target.geometry().right() - self.badge.width() // 2
@@ -441,7 +441,7 @@ class RightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.BOTTOM_RIGHT)
 class BottomRightInfoBadgeManager(InfoBadgeManager):
-    """ Bottom right info badge manager """
+    """ Bottom right 信息徽标 管理器 """
 
     def position(self):
         pos = self.target.geometry().bottomRight()
@@ -452,7 +452,7 @@ class BottomRightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.TOP_LEFT)
 class TopLeftInfoBadgeManager(InfoBadgeManager):
-    """ Top left info badge manager """
+    """ Top left 信息徽标 管理器 """
 
     def position(self):
         x = self.target.x() - self.badge.width() // 2
@@ -462,7 +462,7 @@ class TopLeftInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.LEFT)
 class LeftInfoBadgeManager(InfoBadgeManager):
-    """ Top left info badge manager """
+    """ Top left 信息徽标 管理器 """
 
     def position(self):
         x = self.target.x() - self.badge.width() // 2
@@ -472,7 +472,7 @@ class LeftInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.BOTTOM_LEFT)
 class BottomLeftInfoBadgeManager(InfoBadgeManager):
-    """ Bottom left info badge manager """
+    """ Bottom left 信息徽标 管理器 """
 
     def position(self):
         pos = self.target.geometry().bottomLeft()

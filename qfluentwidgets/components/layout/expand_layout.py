@@ -1,11 +1,11 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QSize, QPoint, Qt, QEvent, QRect
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import QLayout, QWidget
 
 
 class ExpandLayout(QLayout):
-    """ Expand layout """
+    """ 展开布局 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -45,7 +45,7 @@ class ExpandLayout(QLayout):
         return True
 
     def heightForWidth(self, width):
-        """ get the minimal height according to width """
+        """ 获取 minimal 高度 根据 宽度 """
         return self.__doLayout(QRect(0, 0, width, 0), False)
 
     def setGeometry(self, rect):
@@ -67,7 +67,7 @@ class ExpandLayout(QLayout):
         return size
 
     def __doLayout(self, rect, move):
-        """ adjust widgets position according to the window size """
+        """ 调整部件 位置 根据 窗口 大小 """
         margin = self.contentsMargins()
         x = rect.x() + margin.left()
         y = rect.y() + margin.top()

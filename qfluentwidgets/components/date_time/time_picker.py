@@ -1,11 +1,11 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QTime, Property
 
 from .picker_base import PickerBase, PickerColumnFormatter, DigitFormatter
 
 
 class TimePickerBase(PickerBase):
-    """ Time picker base class """
+    """ 时间选择器 基类 """
 
     timeChanged = Signal(QTime)
 
@@ -18,12 +18,12 @@ class TimePickerBase(PickerBase):
         return self._time
 
     def setTime(self, time: QTime):
-        """ set current time
+        """ 设置 当前 时间
 
-        Parameters
+        参数
         ----------
         time: QTime
-            current time
+            当前 时间
         """
         raise NotImplementedError
 
@@ -31,19 +31,19 @@ class TimePickerBase(PickerBase):
         return self._isSecondVisible
 
     def setSecondVisible(self, isVisible: bool):
-        """ set the visibility of seconds column """
+        """ 设置seconds 列的可见性 """
         raise NotImplementedError
 
 
 class MiniuteFormatter(DigitFormatter):
-    """ Minute formatter """
+    """ 分钟 formatter """
 
     def encode(self, minute):
         return str(minute).zfill(2)
 
 
 class AMHourFormatter(DigitFormatter):
-    """ AM/PM Hour formatter """
+    """ AM/PM 小时 formatter """
 
     def encode(self, hour):
         hour = int(hour)
@@ -70,20 +70,20 @@ class AMPMFormatter(PickerColumnFormatter):
 
 
 class TimePicker(TimePickerBase):
-    """ 24 hours time picker """
+    """ 24 hours 时间选择器 """
 
     def __init__(self, parent=None, showSeconds=False):
         super().__init__(parent, showSeconds)
-        # add hour column
+        # 添加 小时 列
         w = 80 if showSeconds else 120
         self.addColumn(self.tr('hour'), range(0, 24),
                        w, formatter=DigitFormatter())
 
-        # add minute column
+        # 添加 分钟 列
         self.addColumn(self.tr('minute'), range(0, 60),
                        w, formatter=MiniuteFormatter())
 
-        # add seconds column
+        # 添加 seconds 列
         self.addColumn(self.tr('second'), range(0, 60),
                        w, formatter=MiniuteFormatter())
         self.setColumnVisible(2, showSeconds)
@@ -139,27 +139,27 @@ class TimePicker(TimePickerBase):
 
 
 class AMTimePicker(TimePickerBase):
-    """ AM/PM time picker """
+    """ AM/PM 时间选择器 """
 
     def __init__(self, parent=None, showSeconds=False):
         super().__init__(parent, showSeconds)
         self.AM = self.tr('AM')
         self.PM = self.tr('PM')
 
-        # add hour column
+        # 添加 小时 列
         self.addColumn(self.tr('hour'), range(1, 13),
                        80, formatter=AMHourFormatter())
 
-        # add minute column
+        # 添加 分钟 列
         self.addColumn(self.tr('minute'), range(0, 60),
                        80, formatter=MiniuteFormatter())
 
-        # add second column
+        # 添加 秒 列
         self.addColumn(self.tr('second'), range(0, 60),
                        80, formatter=MiniuteFormatter())
         self.setColumnVisible(2, showSeconds)
 
-        # add AM/PM column
+        # 添加 AM/PM 列
         self.addColumn(self.AM, [self.AM, self.PM],
                        80, formatter=AMPMFormatter())
 

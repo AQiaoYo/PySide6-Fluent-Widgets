@@ -17,7 +17,7 @@ from .scroll_bar import SmoothScrollDelegate
 
 
 class LineEditButton(QToolButton):
-    """ Line edit button """
+    """ 行编辑器 按钮 """
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None):
         super().__init__(parent=parent)
@@ -83,7 +83,7 @@ class LineEditButton(QToolButton):
 
 
 class LineEdit(QLineEdit):
-    """ Line edit """
+    """ 行编辑器 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -94,8 +94,8 @@ class LineEdit(QLineEdit):
         self.lightFocusedBorderColor = QColor()
         self.darkFocusedBorderColor = QColor()
 
-        self.leftButtons = []   # type: List[LineEditButton]
-        self.rightButtons = []  # type: List[LineEditButton]
+        self.leftButtons = []   # type: 列表[LineEditButton]
+        self.rightButtons = []  # type: 列表[LineEditButton]
 
         self.setProperty("transparent", True)
         FluentStyleSheet.LINE_EDIT.apply(self)
@@ -122,7 +122,7 @@ class LineEdit(QLineEdit):
         return self._isError
 
     def setError(self, isError: bool):
-        """ set the error status """
+        """ 设置 错误状态 """
         if isError == self.isError():
             return
 
@@ -130,12 +130,12 @@ class LineEdit(QLineEdit):
         self.update()
 
     def setCustomFocusedBorderColor(self, light, dark):
-        """ set the border color in focused status
+        """ 设置 边框颜色 中的 聚焦状态
 
-        Parameters
+        参数
         ----------
-        light, dark: str | QColor | Qt.GlobalColor
-            border color in light/dark theme mode
+        亮色, dark: str | QColor | Qt.GlobalColor
+            边框颜色 中的 亮色/暗色主题模式
         """
         self.lightFocusedBorderColor = QColor(light)
         self.darkFocusedBorderColor = QColor(dark)
@@ -199,7 +199,7 @@ class LineEdit(QLineEdit):
             self.clearButton.setVisible(bool(self.text()))
 
     def __onTextChanged(self, text):
-        """ text changed slot """
+        """ 文本 changed 槽函数 """
         if self.isClearButtonEnabled():
             self.clearButton.setVisible(bool(text) and self.hasFocus())
 
@@ -213,12 +213,12 @@ class LineEdit(QLineEdit):
             self._completerMenu.close()
 
     def setCompleterMenu(self, menu):
-        """ set completer menu
+        """ 设置 completer 菜单
 
-        Parameters
+        参数
         ----------
         menu: CompleterMenu
-            completer menu
+            completer 菜单
         """
         menu.activated.connect(self._completer.activated)
         menu.indexActivated.connect(lambda idx: self._completer.activated[QModelIndex].emit(idx))
@@ -228,16 +228,16 @@ class LineEdit(QLineEdit):
         if not self.completer() or not self.text():
             return
 
-        # create menu
+        # 创建菜单
         if not self._completerMenu:
             self.setCompleterMenu(CompleterMenu(self))
 
-        # add menu items
+        # 添加 菜单 项
         self.completer().setCompletionPrefix(self.text())
         changed = self._completerMenu.setCompletion(self.completer().completionModel(), self.completer().completionColumn())
         self._completerMenu.setMaxVisibleItems(self.completer().maxVisibleItems())
 
-        # show menu
+        # 显示菜单
         if changed:
             self._completerMenu.popup()
 
@@ -267,7 +267,7 @@ class LineEdit(QLineEdit):
 
 
 class CompleterMenu(RoundMenu):
-    """ Completer menu """
+    """ Completer 菜单 """
 
     activated = Signal(str)
     indexActivated = Signal(QModelIndex)
@@ -287,7 +287,7 @@ class CompleterMenu(RoundMenu):
         self.setItemHeight(33)
 
     def setCompletion(self, model: QAbstractItemModel, column=0):
-        """ set the completion model """
+        """ 设置 completion model """
         items = []
         self.indexes.clear()
         for i in range(model.rowCount()):
@@ -301,7 +301,7 @@ class CompleterMenu(RoundMenu):
         return True
 
     def setItems(self, items: List[str]):
-        """ set completion items """
+        """ 设置 completion 项 """
         self.view.clear()
 
         self.items = items
@@ -319,7 +319,7 @@ class CompleterMenu(RoundMenu):
         if e.type() != QEvent.KeyPress:
             return super().eventFilter(obj, e)
 
-        # redirect input to line edit
+        # redirect input 到 行编辑器
         self.lineEdit.event(e)
         self.view.event(e)
 
@@ -342,17 +342,17 @@ class CompleterMenu(RoundMenu):
         return super().exec(pos, ani, aniType)
 
     def popup(self):
-        """ show menu """
+        """ 显示菜单 """
         if not self.items:
             return self.close()
 
-        # adjust menu size
+        # 调整菜单 大小
         p = self.lineEdit
         if self.view.width() < p.width():
             self.view.setMinimumWidth(p.width())
             self.adjustSize()
 
-        # determine the animation type by choosing the maximum height of view
+        # 判断the 动画 type by choosing maximum 高度 的 视图
         x = -self.width()//2 + self.layout().contentsMargins().left() + p.width()//2
         y = p.height() - self.layout().contentsMargins().top() + 2
         pd = p.mapToGlobal(QPoint(x, y))
@@ -370,21 +370,21 @@ class CompleterMenu(RoundMenu):
 
         self.view.adjustSize(pos, aniType)
 
-        # update border style
+        # 更新边框 style
         self.view.setProperty('dropDown', aniType == MenuAnimationType.FADE_IN_DROP_DOWN)
         updateDynamicStyle(self.view)
 
         self.adjustSize()
         self.exec(pos, aniType=aniType)
 
-        # remove the focus of menu
+        # 移除 焦点 的 菜单
         self.view.setFocusPolicy(Qt.NoFocus)
         self.setFocusPolicy(Qt.NoFocus)
         p.setFocus()
 
 
 class SearchLineEdit(LineEdit):
-    """ Search line edit """
+    """ Search 行编辑器 """
 
     searchSignal = Signal(str)
     clearSignal = Signal()
@@ -401,7 +401,7 @@ class SearchLineEdit(LineEdit):
         self.clearButton.clicked.connect(self.clearSignal)
 
     def search(self):
-        """ emit search signal """
+        """ emit search 信号 """
         text = self.text().strip()
         if text:
             self.searchSignal.emit(text)
@@ -448,7 +448,7 @@ class EditLayer(QWidget):
 
 
 class TextEdit(QTextEdit):
-    """ Text edit """
+    """ 文本 edit """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -464,7 +464,7 @@ class TextEdit(QTextEdit):
 
 
 class PlainTextEdit(QPlainTextEdit):
-    """ Plain text edit """
+    """ Plain 文本 edit """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -480,7 +480,7 @@ class PlainTextEdit(QPlainTextEdit):
 
 
 class TextBrowser(QTextBrowser):
-    """ Text browser """
+    """ 文本 browser """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -496,7 +496,7 @@ class TextBrowser(QTextBrowser):
 
 
 class PasswordLineEdit(LineEdit):
-    """ Password line edit """
+    """ Password 行编辑器 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -512,7 +512,7 @@ class PasswordLineEdit(LineEdit):
         self.viewButton.setFixedSize(29, 25)
 
     def setPasswordVisible(self, isVisible: bool):
-        """ set the visibility of password """
+        """ 设置password的可见性 """
         if isVisible:
             self.setEchoMode(QLineEdit.Normal)
         else:
@@ -530,7 +530,7 @@ class PasswordLineEdit(LineEdit):
             self.setTextMargins(0, 0, 28*enable + 30, 0)
 
     def setViewPasswordButtonVisible(self, isVisible: bool):
-        """ set the visibility of view password button """
+        """ 设置视图 password 按钮的可见性 """
         self.viewButton.setVisible(isVisible)
 
     def eventFilter(self, obj, e):
@@ -545,7 +545,7 @@ class PasswordLineEdit(LineEdit):
         return super().eventFilter(obj, e)
 
     def inputMethodQuery(self, query: Qt.InputMethodQuery):
-        # Disable IME for PasswordLineEdit
+        # 禁用IME 用于 PasswordLineEdit
         if query == Qt.InputMethodQuery.ImEnabled:
             return False
         else:

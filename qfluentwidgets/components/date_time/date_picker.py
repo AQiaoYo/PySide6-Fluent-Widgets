@@ -1,11 +1,11 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QDate, QCalendar, Property
 
 from .picker_base import PickerBase, PickerPanel, PickerColumnFormatter, DigitFormatter
 
 
 class DatePickerBase(PickerBase):
-    """ Date picker base class """
+    """ 日期选择器 基类 """
 
     dateChanged = Signal(QDate)
 
@@ -21,7 +21,7 @@ class DatePickerBase(PickerBase):
         return self._date
 
     def setDate(self, date: QDate):
-        """ set current date """
+        """ 设置 当前 日期 """
         raise NotImplementedError
 
     def setYearFormatter(self, formatter: PickerColumnFormatter):
@@ -44,7 +44,7 @@ class DatePickerBase(PickerBase):
 
 
 class MonthFormatter(PickerColumnFormatter):
-    """ Month formatter """
+    """ 月份 formatter """
 
     def __init__(self):
         super().__init__()
@@ -63,23 +63,23 @@ class MonthFormatter(PickerColumnFormatter):
 
 
 class DatePicker(DatePickerBase):
-    """ Date picker """
+    """ 日期选择器 """
 
     MM_DD_YYYY = 0
     YYYY_MM_DD = 1
 
     def __init__(self, parent=None, format=MM_DD_YYYY, isMonthTight=True):
         """
-        Parameters
+        参数
         ----------
         parent: QWidget
-            parent widget
+            父部件 部件
 
         format: int
-            the format of date, could be `DatePicker.MM_DD_YYYY` or `DatePicker.YYYY_MM_DD`
+            format 的 日期, could be `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`
 
         isMonthTight: bool
-            is the month column tight
+            is 月份 列 tight
         """
         super().__init__(parent=parent)
         self.MONTH = self.tr('month')
@@ -90,12 +90,12 @@ class DatePicker(DatePickerBase):
         self.setDateFormat(format)
 
     def setDateFormat(self, format: int):
-        """ set the format of date
+        """ 设置日期的format
 
-        Parameters
+        参数
         ----------
         format: int
-            the format of date, could be `DatePicker.MM_DD_YYYY` or `DatePicker.YYYY_MM_DD`
+            format 的 日期, could be `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`
         """
         self.clearColumns()
         y = QDate.currentDate().year()
@@ -137,7 +137,7 @@ class DatePicker(DatePickerBase):
         return [y, m, d] if self.dateFormat == self.YYYY_MM_DD else [m, d, y]
 
     def setMonthTight(self, isTight: bool):
-        """ set whether the month column is tight """
+        """ 设置 是否 月份 列 is tight """
         if self.isMonthTight == isTight:
             return
 
@@ -149,7 +149,7 @@ class DatePicker(DatePickerBase):
         wm = max(fm.boundingRect(i).width()
                  for i in self.columns[self.monthIndex].items()) + 20
 
-        # don't use tight layout for english
+        # don't use tight 布局 用于 english
         if self.MONTH == 'month':
             return wm + 49
 
@@ -159,14 +159,14 @@ class DatePicker(DatePickerBase):
         if index == self.dayIndex:
             return
 
-        # get days number in month
+        # 获取 days number 中的 月份
         month = self.decodeValue(
             self.monthIndex, panel.columnValue(self.monthIndex))
         year = self.decodeValue(
             self.yearIndex, panel.columnValue(self.yearIndex))
         days = self.calendar.daysInMonth(month, year)
 
-        # update days
+        # 更新days
         c = panel.column(self.dayIndex)
         day = c.currentItem().text()
         self.setColumnItems(self.dayIndex, range(1, days + 1))
@@ -202,7 +202,7 @@ class DatePicker(DatePickerBase):
 
 
 class ZhFormatter(PickerColumnFormatter):
-    """ Chinese date formatter """
+    """ Chinese 日期 formatter """
 
     suffix = ""
 
@@ -214,25 +214,25 @@ class ZhFormatter(PickerColumnFormatter):
 
 
 class ZhYearFormatter(ZhFormatter):
-    """ Chinese year formatter """
+    """ Chinese 年份 formatter """
 
     suffix = "年"
 
 
 class ZhMonthFormatter(ZhFormatter):
-    """ Chinese month formatter """
+    """ Chinese 月份 formatter """
 
     suffix = "月"
 
 
 class ZhDayFormatter(ZhFormatter):
-    """ Chinese day formatter """
+    """ Chinese 日期 formatter """
 
     suffix = "日"
 
 
 class ZhDatePicker(DatePicker):
-    """ Chinese date picker """
+    """ Chinese 日期选择器 """
 
     def __init__(self, parent=None):
         super().__init__(parent, DatePicker.YYYY_MM_DD)

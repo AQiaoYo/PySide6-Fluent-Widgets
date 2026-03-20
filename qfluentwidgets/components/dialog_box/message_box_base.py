@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QFrame, QVBoxLayout, QHBoxLayout, QPushButton
@@ -61,12 +61,12 @@ class MessageBoxBase(MaskDialogBase):
         self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignVCenter)
 
     def validate(self) -> bool:
-        """ validate the data of form before closing dialog
+        """ validate 数据 的 form before closing 对话框
 
-        Returns
+        返回
         -------
         isValid: bool
-            whether the data of form is legal
+            是否 数据 的 form is 合法
         """
         return True
 

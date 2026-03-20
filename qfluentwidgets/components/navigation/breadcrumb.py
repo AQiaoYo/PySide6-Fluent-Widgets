@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 import math
 
 from typing import Dict, List
@@ -13,7 +13,7 @@ from ...components.widgets.menu import RoundMenu, MenuAnimationType
 
 
 class BreadcrumbWidget(QWidget):
-    """ Bread crumb widget """
+    """ Bread crumb 部件 """
 
     clicked = Signal()
 
@@ -41,7 +41,7 @@ class BreadcrumbWidget(QWidget):
 
 
 class ElideButton(BreadcrumbWidget):
-    """ Elide button """
+    """ Elide 按钮 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -67,7 +67,7 @@ class ElideButton(BreadcrumbWidget):
 
 
 class BreadcrumbItem(BreadcrumbWidget):
-    """ Breadcrumb item """
+    """ Breadcrumb 项 """
 
     def __init__(self, routeKey: str, text: str, index: int, parent=None):
         super().__init__(parent=parent)
@@ -111,7 +111,7 @@ class BreadcrumbItem(BreadcrumbWidget):
         painter.setRenderHints(QPainter.TextAntialiasing | QPainter.Antialiasing)
         painter.setPen(Qt.NoPen)
 
-        # draw seperator
+        # 绘制seperator
         sw = self.spacing * 2
         if not self.isRoot():
             iw = self.font().pixelSize() / 14 * 8
@@ -120,7 +120,7 @@ class BreadcrumbItem(BreadcrumbWidget):
             painter.setOpacity(0.61)
             FluentIcon.CHEVRON_RIGHT_MED.render(painter, rect)
 
-        # draw text
+        # 绘制文本
         if self.isPressed:
             alpha = 0.54 if isDarkTheme() else 0.45
             painter.setOpacity(1 if self.isSelected else alpha)
@@ -142,7 +142,7 @@ class BreadcrumbItem(BreadcrumbWidget):
 
 
 class BreadcrumbBar(QWidget):
-    """ Breadcrumb bar """
+    """ Breadcrumb 栏 """
 
     currentItemChanged = Signal(str)
     currentIndexChanged = Signal(int)
@@ -150,8 +150,8 @@ class BreadcrumbBar(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.itemMap = {}       # type: Dict[BreadcrumbItem]
-        self.items = []         # type: List[BreadcrumbItem]
-        self.hiddenItems = []   # type: List[BreadcrumbItem]
+        self.items = []         # type: 列表[BreadcrumbItem]
+        self.hiddenItems = []   # type: 列表[BreadcrumbItem]
 
         self._spacing = 10
         self._currentIndex = -1
@@ -165,15 +165,15 @@ class BreadcrumbBar(QWidget):
         self.elideButton.clicked.connect(self._showHiddenItemsMenu)
 
     def addItem(self, routeKey: str, text: str):
-        """ add item
+        """ 添加 项
 
-        Parameters
+        参数
         ----------
         routeKey: str
-            unique key of item
+            unique key 的 项
 
         text: str
-            the text of item
+            文本 的 项
         """
         if routeKey in self.itemMap:
             return
@@ -200,7 +200,7 @@ class BreadcrumbBar(QWidget):
         self._currentIndex = index
         self.currentItem().setSelected(True)
 
-        # remove trailing items
+        # 移除 trailing 项
         for item in self.items[-1:index:-1]:
             item = self.items.pop()
             self.itemMap.pop(item.routeKey)
@@ -244,7 +244,7 @@ class BreadcrumbBar(QWidget):
         self.updateGeometry()
 
     def clear(self):
-        """ clear all items """
+        """ 清空all 项 """
         while self.items:
             item = self.items.pop()
             self.itemMap.pop(item.routeKey)
@@ -254,7 +254,7 @@ class BreadcrumbBar(QWidget):
         self._currentIndex = -1
 
     def popItem(self):
-        """ pop trailing item """
+        """ pop trailing 项 """
         if not self.items:
             return
 
@@ -264,7 +264,7 @@ class BreadcrumbBar(QWidget):
             self.clear()
 
     def count(self):
-        """ Returns the number of items """
+        """ 返回 number 的 项 """
         return len(self.items)
 
     def updateGeometry(self):
@@ -321,7 +321,7 @@ class BreadcrumbBar(QWidget):
             menu.addAction(
                 QAction(item.text, menu, triggered=lambda checked=True, i=item: self.setCurrentItem(i.routeKey)))
 
-        # determine the animation type by choosing the maximum height of view
+        # 判断the 动画 type by choosing maximum 高度 的 视图
         x = -menu.layout().contentsMargins().left()
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)

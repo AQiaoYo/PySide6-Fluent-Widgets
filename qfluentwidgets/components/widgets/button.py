@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
@@ -16,13 +16,13 @@ from .menu import RoundMenu, MenuAnimationType
 
 
 class PushButton(QPushButton):
-    """ Push button
+    """ 按钮
 
-    Constructors
+    构造函数
     ------------
-    * PushButton(`parent`: QWidget = None)
-    * PushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * PushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * PushButton(`父部件`: QWidget = None)
+    * PushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    * PushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -90,7 +90,7 @@ class PushButton(QPushButton):
         self.update()
 
     def _drawIcon(self, icon, painter, rect, state=QIcon.Off):
-        """ draw icon """
+        """ 绘制图标 """
         drawIcon(icon, painter, rect, state)
 
     def paintEvent(self, e):
@@ -122,18 +122,18 @@ class PushButton(QPushButton):
 
 
 class PrimaryPushButton(PushButton):
-    """ Primary color push button
+    """ 主题色按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimaryPushButton(`parent`: QWidget = None)
-    * PrimaryPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * PrimaryPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * PrimaryPushButton(`父部件`: QWidget = None)
+    * PrimaryPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    * PrimaryPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def _drawIcon(self, icon, painter, rect, state=QIcon.Off):
         if isinstance(icon, FluentIconBase) and self.isEnabled():
-            # reverse icon color
+            # reverse 图标 颜色
             theme = Theme.DARK if not isDarkTheme() else Theme.LIGHT
             icon = icon.icon(theme)
         elif not self.isEnabled():
@@ -145,24 +145,24 @@ class PrimaryPushButton(PushButton):
 
 
 class TransparentPushButton(PushButton):
-    """ Transparent push button
+    """ 透明按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentPushButton(`parent`: QWidget = None)
-    * TransparentPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * TransparentPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * TransparentPushButton(`父部件`: QWidget = None)
+    * TransparentPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    * TransparentPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
 
 class ToggleButton(PushButton):
-    """ Toggle push button
+    """ 切换按钮
 
-    Constructors
+    构造函数
     ------------
-    * ToggleButton(`parent`: QWidget = None)
-    * ToggleButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * ToggleButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * ToggleButton(`父部件`: QWidget = None)
+    * ToggleButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    * ToggleButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -180,25 +180,25 @@ TogglePushButton = ToggleButton
 
 
 class TransparentTogglePushButton(TogglePushButton):
-    """ Transparent toggle push button
+    """ 透明切换按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentTogglePushButton(`parent`: QWidget = None)
-    * TransparentTogglePushButton(`text`: str, `parent`: QWidget = None,
-                                  `icon`: QIcon | str | FluentIconBase = None)
-    * TransparentTogglePushButton(`icon`: QIcon | FluentIconBase, `text`: str, `parent`: QWidget = None)
+    * TransparentTogglePushButton(`父部件`: QWidget = None)
+    * TransparentTogglePushButton(`文本`: str, `父部件`: QWidget = None,
+                                  `图标`: QIcon | str | FluentIconBase = None)
+    * TransparentTogglePushButton(`图标`: QIcon | FluentIconBase, `文本`: str, `父部件`: QWidget = None)
     """
 
 
 class HyperlinkButton(PushButton):
-    """ Hyperlink button
+    """ 超链接按钮
 
-    Constructors
+    构造函数
     ------------
-    * HyperlinkButton(`parent`: QWidget = None)
-    * HyperlinkButton(`url`: str, `text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
-    * HyperlinkButton(`icon`: QIcon | FluentIconBase, `url`: str, `text`: str, `parent`: QWidget = None)
+    * HyperlinkButton(`父部件`: QWidget = None)
+    * HyperlinkButton(`url`: str, `文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    * HyperlinkButton(`图标`: QIcon | FluentIconBase, `url`: str, `文本`: str, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -247,13 +247,13 @@ class HyperlinkButton(PushButton):
 
 
 class RadioButton(QRadioButton):
-    """ Radio button
+    """ 单选按钮
 
-    Constructors
+    构造函数
     ------------
-    * RadioButton(`parent`: QWidget = None)
-    * RadioButton(`url`: text, `text`: str, `parent`: QWidget = None,
-                  `icon`: QIcon | str | FluentIconBase = None)
+    * RadioButton(`父部件`: QWidget = None)
+    * RadioButton(`url`: 文本, `文本`: str, `父部件`: QWidget = None,
+                  `图标`: QIcon | str | FluentIconBase = None)
     """
 
     @singledispatchmethod
@@ -341,7 +341,7 @@ class RadioButton(QRadioButton):
         path = QPainterPath()
         path.setFillRule(Qt.FillRule.WindingFill)
 
-        # outer circle (border)
+        # outer circle (边框)
         outerRect = QRectF(center.x() - radius, center.y() - radius, 2 * radius, 2 * radius)
         path.addEllipse(outerRect)
 
@@ -353,7 +353,7 @@ class RadioButton(QRadioButton):
 
         path = path.subtracted(innerPath)
 
-        # draw outer ring
+        # 绘制outer ring
         painter.setPen(Qt.NoPen)
         painter.fillPath(path, borderColor)
 
@@ -391,12 +391,12 @@ class RadioButton(QRadioButton):
 
 
 class ToolButton(QToolButton):
-    """ Tool button
+    """ 工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * ToolButton(`parent`: QWidget = None)
-    * ToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * ToolButton(`父部件`: QWidget = None)
+    * ToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -459,7 +459,7 @@ class ToolButton(QToolButton):
         self.update()
 
     def _drawIcon(self, icon, painter: QPainter, rect: QRectF, state=QIcon.Off):
-        """ draw icon """
+        """ 绘制图标 """
         drawIcon(icon, painter, rect, state)
 
     def paintEvent(self, e):
@@ -483,27 +483,27 @@ class ToolButton(QToolButton):
 
 
 class TransparentToolButton(ToolButton):
-    """ Transparent background tool button
+    """ 透明 背景 工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentToolButton(`parent`: QWidget = None)
-    * TransparentToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * TransparentToolButton(`父部件`: QWidget = None)
+    * TransparentToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
 
 class PrimaryToolButton(ToolButton):
-    """ Primary color tool button
+    """ 主题色工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimaryToolButton(`parent`: QWidget = None)
-    * PrimaryToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * PrimaryToolButton(`父部件`: QWidget = None)
+    * PrimaryToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def _drawIcon(self, icon, painter: QPainter, rect: QRectF, state=QIcon.Off):
         if isinstance(icon, FluentIconBase) and self.isEnabled():
-            # reverse icon color
+            # reverse 图标 颜色
             theme = Theme.DARK if not isDarkTheme() else Theme.LIGHT
             icon = icon.icon(theme)
         elif isinstance(icon, Icon) and self.isEnabled():
@@ -518,12 +518,12 @@ class PrimaryToolButton(ToolButton):
 
 
 class ToggleToolButton(ToolButton):
-    """ Toggle tool button
+    """ 切换工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * ToggleToolButton(`parent`: QWidget = None)
-    * ToggleToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * ToggleToolButton(`父部件`: QWidget = None)
+    * ToggleToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -538,17 +538,17 @@ class ToggleToolButton(ToolButton):
 
 
 class TransparentToggleToolButton(ToggleToolButton):
-    """ Transparent toggle tool button
+    """ 透明切换工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentToggleToolButton(`parent`: QWidget = None)
-    * TransparentToggleToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * TransparentToggleToolButton(`父部件`: QWidget = None)
+    * TransparentToggleToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
 
 class DropDownButtonBase:
-    """ Drop down button base class """
+    """ Drop down 按钮 基类 """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -570,7 +570,7 @@ class DropDownButtonBase:
         menu.view.adjustSize()
         menu.adjustSize()
 
-        # determine the animation type by choosing the maximum height of view
+        # 判断the 动画 type by choosing maximum 高度 的 视图
         x = -menu.width()//2 + menu.layout().contentsMargins().left() + self.width()//2
         pd = self.mapToGlobal(QPoint(x, self.height()))
         hd = menu.view.heightForAnimation(pd, MenuAnimationType.DROP_DOWN)
@@ -609,14 +609,14 @@ class DropDownButtonBase:
 
 
 class DropDownPushButton(DropDownButtonBase, PushButton):
-    """ Drop down push button
+    """ 下拉按钮
 
-    Constructors
+    构造函数
     ------------
-    * DropDownPushButton(`parent`: QWidget = None)
-    * DropDownPushButton(`text`: str, `parent`: QWidget = None,
-                         `icon`: QIcon | str | FluentIconBase = None)
-    * DropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * DropDownPushButton(`父部件`: QWidget = None)
+    * DropDownPushButton(`文本`: str, `父部件`: QWidget = None,
+                         `图标`: QIcon | str | FluentIconBase = None)
+    * DropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -629,24 +629,24 @@ class DropDownPushButton(DropDownButtonBase, PushButton):
 
 
 class TransparentDropDownPushButton(DropDownPushButton):
-    """ Transparent drop down push button
+    """ 透明 drop down 按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentDropDownPushButton(`parent`: QWidget = None)
-    * TransparentDropDownPushButton(`text`: str, `parent`: QWidget = None,
-                                    `icon`: QIcon | str | FluentIconBase = None)
-    * TransparentDropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * TransparentDropDownPushButton(`父部件`: QWidget = None)
+    * TransparentDropDownPushButton(`文本`: str, `父部件`: QWidget = None,
+                                    `图标`: QIcon | str | FluentIconBase = None)
+    * TransparentDropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
 
 class DropDownToolButton(DropDownButtonBase, ToolButton):
-    """ Drop down tool button
+    """ 下拉工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * DropDownToolButton(`parent`: QWidget = None)
-    * DropDownToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * DropDownToolButton(`父部件`: QWidget = None)
+    * DropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -663,17 +663,17 @@ class DropDownToolButton(DropDownButtonBase, ToolButton):
 
 
 class TransparentDropDownToolButton(DropDownToolButton):
-    """ Transparent drop down tool button
+    """ 透明下拉工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * TransparentDropDownToolButton(`parent`: QWidget = None)
-    * TransparentDropDownToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * TransparentDropDownToolButton(`父部件`: QWidget = None)
+    * TransparentDropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
 
 class PrimaryDropDownButtonBase(DropDownButtonBase):
-    """ Primary color drop down button base class """
+    """ 主题色 颜色 drop down 按钮 基类 """
 
     def _drawDropDownIcon(self, painter, rect):
         theme = Theme.DARK if not isDarkTheme() else Theme.LIGHT
@@ -681,14 +681,14 @@ class PrimaryDropDownButtonBase(DropDownButtonBase):
 
 
 class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
-    """ Primary color drop down push button
+    """ 主题色下拉按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimaryDropDownPushButton(`parent`: QWidget = None)
-    * PrimaryDropDownPushButton(`text`: str, `parent`: QWidget = None,
-                                `icon`: QIcon | str | FluentIconBase = None)
-    * PrimaryDropDownPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * PrimaryDropDownPushButton(`父部件`: QWidget = None)
+    * PrimaryDropDownPushButton(`文本`: str, `父部件`: QWidget = None,
+                                `图标`: QIcon | str | FluentIconBase = None)
+    * PrimaryDropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -701,12 +701,12 @@ class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
 
 
 class PrimaryDropDownToolButton(PrimaryDropDownButtonBase, PrimaryToolButton):
-    """ Primary drop down tool button
+    """ 主题色 drop down 工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimaryDropDownToolButton(`parent`: QWidget = None)
-    * PrimaryDropDownToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * PrimaryDropDownToolButton(`父部件`: QWidget = None)
+    * PrimaryDropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -768,7 +768,7 @@ class PrimarySplitDropButton(PrimaryToolButton):
 
 
 class SplitWidgetBase(QWidget):
-    """ Split widget base class """
+    """ Split 部件 基类 """
 
     dropDownClicked = Signal()
 
@@ -789,11 +789,11 @@ class SplitWidgetBase(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def setWidget(self, widget: QWidget):
-        """ set the widget on left side """
+        """ 设置 部件 上的 left side """
         self.hBoxLayout.insertWidget(0, widget, 1, Qt.AlignLeft)
 
     def setDropButton(self, button):
-        """ set drop dow button """
+        """ 设置 drop dow 按钮 """
         self.hBoxLayout.removeWidget(self.dropButton)
         self.dropButton.deleteLater()
 
@@ -803,27 +803,27 @@ class SplitWidgetBase(QWidget):
         self.hBoxLayout.addWidget(button)
 
     def setDropIcon(self, icon: Union[str, QIcon, FluentIconBase]):
-        """ set the icon of drop down button """
+        """ 设置drop down 按钮的图标 """
         self.dropButton.setIcon(icon)
         self.dropButton.removeEventFilter(self.dropButton.arrowAni)
 
     def setDropIconSize(self, size: QSize):
-        """ set the icon size of drop down button """
+        """ 设置drop down 按钮的图标 大小 """
         self.dropButton.setIconSize(size)
 
     def setFlyout(self, flyout):
-        """ set the widget pops up when drop down button is clicked
+        """ 设置 部件 pops up 当 drop down 按钮 is clicked
 
-        Parameters
+        参数
         ----------
         flyout: QWidget
-            the widget pops up when drop down button is clicked.
+            部件 pops up 当 drop down 按钮 is clicked.
             It should contain `exec(pos: QPoint)` method
         """
         self.flyout = flyout
 
     def showFlyout(self):
-        """ show flyout """
+        """ 显示浮出层 """
         if not self.flyout:
             return
 
@@ -841,12 +841,12 @@ class SplitWidgetBase(QWidget):
 
 
 class SplitPushButton(SplitWidgetBase):
-    """ Split push button
+    """ 分离式按钮
 
-    Constructors
+    构造函数
     ------------
-    * SplitPushButton(`parent`: QWidget = None)
-    * SplitPushButton(`text`: str, `parent`: QWidget = None, `icon`: QIcon | str | FluentIconBase = None)
+    * SplitPushButton(`父部件`: QWidget = None)
+    * SplitPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
     """
 
     clicked = Signal()
@@ -898,14 +898,14 @@ class SplitPushButton(SplitWidgetBase):
 
 
 class PrimarySplitPushButton(SplitPushButton):
-    """ Primary split push button
+    """ 主题色分离式按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimarySplitPushButton(`parent`: QWidget = None)
-    * PrimarySplitPushButton(`text`: str, `parent`: QWidget = None,
-                             `icon`: QIcon | str | FluentIconBase = None)
-    * PrimarySplitPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * PrimarySplitPushButton(`父部件`: QWidget = None)
+    * PrimarySplitPushButton(`文本`: str, `父部件`: QWidget = None,
+                             `图标`: QIcon | str | FluentIconBase = None)
+    * PrimarySplitPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -921,12 +921,12 @@ class PrimarySplitPushButton(SplitPushButton):
 
 
 class SplitToolButton(SplitWidgetBase):
-    """ Split tool button
+    """ 分离式工具按钮
 
-    Constructors
+    构造函数
     ------------
-    * SplitToolButton(`parent`: QWidget = None)
-    * SplitToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * SplitToolButton(`父部件`: QWidget = None)
+    * SplitToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     clicked = Signal()
@@ -971,12 +971,12 @@ class SplitToolButton(SplitWidgetBase):
 
 
 class PrimarySplitToolButton(SplitToolButton):
-    """ Primary split push button
+    """ 主题色分离式按钮
 
-    Constructors
+    构造函数
     ------------
-    * PrimarySplitToolButton(`parent`: QWidget = None)
-    * PrimarySplitToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * PrimarySplitToolButton(`父部件`: QWidget = None)
+    * PrimarySplitToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -992,7 +992,7 @@ class PrimarySplitToolButton(SplitToolButton):
 
 
 class PillButtonBase:
-    """ Pill button base class """
+    """ Pill 按钮 基类 """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1034,14 +1034,14 @@ class PillButtonBase:
 
 
 class PillPushButton(TogglePushButton, PillButtonBase):
-    """ Pill push button
+    """ Pill 按钮
 
-    Constructors
+    构造函数
     ------------
-    * PillPushButton(`parent`: QWidget = None)
-    * PillPushButton(`text`: str, `parent`: QWidget = None,
-                     `icon`: QIcon | str | FluentIconBase = None)
-    * PillPushButton(`icon`: QIcon | FluentIcon, `text`: str, `parent`: QWidget = None)
+    * PillPushButton(`父部件`: QWidget = None)
+    * PillPushButton(`文本`: str, `父部件`: QWidget = None,
+                     `图标`: QIcon | str | FluentIconBase = None)
+    * PillPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
     """
 
     def paintEvent(self, e):
@@ -1050,12 +1050,12 @@ class PillPushButton(TogglePushButton, PillButtonBase):
 
 
 class PillToolButton(ToggleToolButton, PillButtonBase):
-    """ Pill push button
+    """ Pill 按钮
 
-    Constructors
+    构造函数
     ------------
-    * PillToolButton(`parent`: QWidget = None)
-    * PillToolButton(`icon`: QIcon | str | FluentIconBase, `parent`: QWidget = None)
+    * PillToolButton(`父部件`: QWidget = None)
+    * PillToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
     """
 
     def paintEvent(self, e):

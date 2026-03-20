@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from math import floor
 
 from PySide6.QtCore import (QEasingCurve, Qt, QPropertyAnimation, Property,
@@ -60,24 +60,24 @@ class ProgressBar(QProgressBar):
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ set the custom bar color
+        """ 设置 自定义 条颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            bar color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            条颜色 中的 亮色/暗色主题模式
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
         self.update()
 
     def setCustomBackgroundColor(self, light, dark):
-        """ set the custom background color
+        """ 设置 自定义 背景色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
@@ -144,7 +144,7 @@ class ProgressBar(QProgressBar):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
-        # draw background
+        # 绘制背景
         bc = self.darkBackgroundColor if isDarkTheme() else self.lightBackgroundColor
         painter.setPen(bc)
         y =  floor(self.height() / 2)
@@ -153,7 +153,7 @@ class ProgressBar(QProgressBar):
         if self.minimum() >= self.maximum():
             return
 
-        # draw bar
+        # 绘制栏
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.barColor())
         w = int(self.val / (self.maximum() - self.minimum()) * self.width())
@@ -165,7 +165,7 @@ class ProgressBar(QProgressBar):
 
 
 class IndeterminateProgressBar(QProgressBar):
-    """ Indeterminate progress bar """
+    """ Indeterminate 进度条 """
 
     def __init__(self, parent=None, start=True):
         super().__init__(parent=parent)
@@ -208,12 +208,12 @@ class IndeterminateProgressBar(QProgressBar):
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ set the custom bar color
+        """ 设置 自定义 条颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            bar color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            条颜色 中的 亮色/暗色主题模式
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
@@ -298,13 +298,13 @@ class IndeterminateProgressBar(QProgressBar):
         painter.setPen(Qt.NoPen)
         painter.setBrush(self.barColor())
 
-        # draw short bar
+        # 绘制short 栏
         x = int((self.shortPos - 0.4) * self.width())
         w = int(0.4 * self.width())
         r = self.height() / 2
         painter.drawRoundedRect(x, 0, w, self.height(), r, r)
 
-        # draw long bar
+        # 绘制long 栏
         x = int((self.longPos - 0.6) * self.width())
         w = int(0.6 * self.width())
         r = self.height() / 2

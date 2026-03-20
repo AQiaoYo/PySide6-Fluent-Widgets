@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import (Qt, QRectF, QEasingCurve, QPropertyAnimation, QParallelAnimationGroup,
                           QSequentialAnimationGroup, Property)
 from PySide6.QtGui import QColor, QPen, QPainter, QFont
@@ -10,7 +10,7 @@ from ...common.style_sheet import themeColor, isDarkTheme
 
 
 class ProgressRing(ProgressBar):
-    """ Progress ring """
+    """ 进度环 """
 
     def __init__(self, parent=None, useAni=True):
         super().__init__(parent, useAni=useAni)
@@ -30,7 +30,7 @@ class ProgressRing(ProgressBar):
         self.update()
 
     def _drawText(self, painter: QPainter, text: str):
-        """ draw text """
+        """ 绘制文本 """
         painter.setFont(self.font())
         painter.setPen(Qt.white if isDarkTheme() else Qt.black)
         painter.drawText(self.rect(), Qt.AlignCenter, text)
@@ -43,7 +43,7 @@ class ProgressRing(ProgressBar):
         w = min(self.height(), self.width()) - cw
         rc = QRectF(cw/2, self.height()/2 - w/2, w, w)
 
-        # draw background
+        # 绘制背景
         bc = self.darkBackgroundColor if isDarkTheme() else self.lightBackgroundColor
         pen = QPen(bc, cw, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
         painter.setPen(pen)
@@ -52,13 +52,13 @@ class ProgressRing(ProgressBar):
         if self.maximum() <= self.minimum():
             return
 
-        # draw bar
+        # 绘制栏
         pen.setColor(self.barColor())
         painter.setPen(pen)
         degree = int(self.val / (self.maximum() - self.minimum()) * 360)
         painter.drawArc(rc, 90*16, -degree*16)
 
-        # draw text
+        # 绘制文本
         if self.isTextVisible():
             self._drawText(painter, self.valText())
 
@@ -66,7 +66,7 @@ class ProgressRing(ProgressBar):
 
 
 class IndeterminateProgressRing(QProgressBar):
-    """ Indeterminate progress ring """
+    """ Indeterminate 进度环 """
 
     def __init__(self, parent=None, start=True):
         super().__init__(parent=parent)
@@ -88,7 +88,7 @@ class IndeterminateProgressRing(QProgressBar):
         self.spanAngleAniGroup = QSequentialAnimationGroup(self)
         self.aniGroup = QParallelAnimationGroup(self)
 
-        # initialize start angle animation
+        # 初始化开始 angle 动画
         self.startAngleAni1.setDuration(1000)
         self.startAngleAni1.setStartValue(0)
         self.startAngleAni1.setEndValue(450)
@@ -100,7 +100,7 @@ class IndeterminateProgressRing(QProgressBar):
         self.startAngleAniGroup.addAnimation(self.startAngleAni1)
         self.startAngleAniGroup.addAnimation(self.startAngleAni2)
 
-        # initialize span angle animation
+        # 初始化span angle 动画
         self.spanAngleAni1.setDuration(1000)
         self.spanAngleAni1.setStartValue(0)
         self.spanAngleAni1.setEndValue(180)
@@ -147,13 +147,13 @@ class IndeterminateProgressRing(QProgressBar):
         self.update()
 
     def start(self):
-        """ start spin """
+        """ 开始spin """
         self._startAngle = 0
         self._spanAngle = 0
         self.aniGroup.start()
 
     def stop(self):
-        """ stop spin """
+        """ 停止spin """
         self.aniGroup.stop()
         self.startAngle = 0
         self.spanAngle = 0
@@ -165,24 +165,24 @@ class IndeterminateProgressRing(QProgressBar):
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ set the custom bar color
+        """ 设置 自定义 条颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            bar color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            条颜色 中的 亮色/暗色主题模式
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
         self.update()
 
     def setCustomBackgroundColor(self, light, dark):
-        """ set the custom background color
+        """ 设置 自定义 背景色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
@@ -196,13 +196,13 @@ class IndeterminateProgressRing(QProgressBar):
         w = min(self.height(), self.width()) - cw
         rc = QRectF(cw/2, self.height()/2 - w/2, w, w)
 
-        # draw background
+        # 绘制背景
         bc = self.darkBackgroundColor if isDarkTheme() else self.lightBackgroundColor
         pen = QPen(bc, cw, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
         painter.setPen(pen)
         painter.drawArc(rc, 0, 360*16)
 
-        # draw bar
+        # 绘制栏
         pen.setColor(self.darkBarColor() if isDarkTheme() else self.lightBarColor())
         painter.setPen(pen)
 

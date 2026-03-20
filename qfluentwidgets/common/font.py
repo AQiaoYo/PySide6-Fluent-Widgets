@@ -7,34 +7,34 @@ from .config import qconfig
 
 
 def setFontFamilies(families: List[str], save=False):
-    """ set the font families used by all widgets
+    """ 设置 font families used by all 部件
 
-    Parameters
+    参数
     ----------
-    families: List[str]
-        font family names, the default value is `['Segoe UI', 'Microsoft YaHei', 'PingFang SC']`
+    families: 列表[str]
+        font family names, default 值 is `['Segoe UI', 'Microsoft YaHei', 'PingFang SC']`
 
     save: bool
-        whether to save the change to config file
+        是否 到 save 更改 到 配置 file
     """
     qconfig.set(qconfig.fontFamilies, families, save)
 
 
 def fontFamilies() -> List[str]:
-    """ Returns the font families used by all widgets """
+    """ 返回 font families used by all 部件 """
     return qconfig.get(qconfig.fontFamilies).copy()
 
 
 def setFont(widget: QWidget, fontSize=14, weight=QFont.Normal):
-    """ set the font of widget
+    """ 设置部件的font
 
-    Parameters
+    参数
     ----------
     widget: QWidget
-        the widget to set font
+        部件 到 设置 font
 
     fontSize: int
-        font pixel size
+        font pixel 大小
 
     weight: `QFont.Weight`
         font weight
@@ -43,12 +43,12 @@ def setFont(widget: QWidget, fontSize=14, weight=QFont.Normal):
 
 
 def getFont(fontSize=14, weight=QFont.Normal):
-    """ create font
+    """ 创建font
 
-    Parameters
+    参数
     ----------
     fontSize: int
-        font pixel size
+        font pixel 大小
 
     weight: `QFont.Weight`
         font weight
@@ -61,7 +61,7 @@ def getFont(fontSize=14, weight=QFont.Normal):
 
 
 def fontStyleSheet(font: QFont):
-    """ Returns the style sheet of font """
+    """ 返回 样式表 的 font """
     families = []
     for family in font.families():
         families.append(f"'{family}'")

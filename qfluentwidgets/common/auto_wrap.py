@@ -12,7 +12,7 @@ class CharType(Enum):
 
 
 class TextWrap:
-    """Text wrap"""
+    """文本 wrap"""
 
     EAST_ASAIN_WIDTH_TABLE = {
         "F": 2,
@@ -26,19 +26,19 @@ class TextWrap:
     @classmethod
     @lru_cache(maxsize=128)
     def get_width(cls, char: str) -> int:
-        """Returns the width of the char"""
+        """返回 宽度 的 char"""
         return cls.EAST_ASAIN_WIDTH_TABLE.get(east_asian_width(char), 1)
 
     @classmethod
     @lru_cache(maxsize=32)
     def get_text_width(cls, text: str) -> int:
-        """Returns the width of the text"""
+        """返回 宽度 的 文本"""
         return sum(cls.get_width(char) for char in text)
 
     @classmethod
     @lru_cache(maxsize=128)
     def get_char_type(cls, char: str) -> CharType:
-        """Returns the type of the char"""
+        """返回 type 的 char"""
 
         if char.isspace():
             return CharType.SPACE
@@ -50,7 +50,7 @@ class TextWrap:
 
     @classmethod
     def process_text_whitespace(cls, text: str) -> str:
-        """Process whitespace and leading and trailing spaces in strings"""
+        """Process whitespace 和 leading 和 trailing spaces 中的 strings"""
         return sub(pattern=r"\s+", repl=" ", string=text).strip()
 
     @classmethod
@@ -80,26 +80,26 @@ class TextWrap:
 
     @classmethod
     def wrap(cls, text: str, width: int, once: bool = True) -> Tuple[str, bool]:
-        """Wrap according to string length
+        """Wrap 根据 string length
 
-        Parameters
+        参数
         ----------
         text: str
-            the text to be wrapped
+            文本 到 be wrapped
 
         width: int
-            the maximum length of a single line, the length of Chinese characters is 2
+            maximum length 的 single line, length 的 Chinese characters is 2
 
         once: bool
-            whether to wrap only once
+            是否 到 wrap 仅 once
 
-        Returns
+        返回
         -------
         wrap_text: str
-            text after auto word wrap process
+            文本 after auto word wrap process
 
         is_wrapped: bool
-            whether a line break occurs in the text
+            是否 line break occurs 中的 文本
         """
 
         width = int(width)

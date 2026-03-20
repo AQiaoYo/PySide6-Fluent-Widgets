@@ -1,10 +1,10 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QObject, QUrl
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
 
 
 class MediaPlayerBase(QObject):
-    """ Media player base class """
+    """ 媒体播放器基类 """
 
     mediaStatusChanged = Signal(QMediaPlayer.MediaStatus)
     playbackRateChanged = Signal(float)
@@ -18,79 +18,79 @@ class MediaPlayerBase(QObject):
         super().__init__(parent=parent)
 
     def isPlaying(self):
-        """ Whether the media is playing """
+        """ 是否 media is playing """
         raise NotImplementedError
 
     def mediaStatus(self) -> QMediaPlayer.MediaStatus:
-        """ Return the status of the current media stream """
+        """ 返回 状态 的 当前媒体流 """
         raise NotImplementedError
 
     def playbackState(self) -> QMediaPlayer.PlaybackState:
-        """ Return the playback status of the current media stream """
+        """ 返回 播放状态 的 当前媒体流 """
         raise NotImplementedError
 
     def duration(self):
-        """ Returns the duration of the current media in ms """
+        """ 返回 持续时间 的 当前 media 中的 ms """
         raise NotImplementedError
 
     def position(self):
-        """ Returns the current position inside the media being played back in ms """
+        """ 返回 当前 位置 inside media being played back 中的 ms """
         raise NotImplementedError
 
     def volume(self):
-        """ Return the volume of player """
+        """ 返回 音量 的 播放器 """
         raise NotImplementedError
 
     def source(self) -> QUrl:
-        """ Return the active media source being used """
+        """ 返回 active media 源 being used """
         raise NotImplementedError
 
     def pause(self):
-        """ Pause playing the current source """
+        """ Pause playing 当前 源 """
         raise NotImplementedError
 
     def play(self):
-        """ Start or resume playing the current source """
+        """ 开始or resume playing 当前 源 """
         raise NotImplementedError
 
     def stop(self):
-        """ Stop playing, and reset the play position to the beginning """
+        """ 停止playing, 和 reset play 位置 到 beginning """
         raise NotImplementedError
 
     def playbackRate(self) -> float:
-        """ Return the playback rate of the current media """
+        """ 返回 播放速率 的 当前 media """
         raise NotImplementedError
 
     def setPosition(self, position: int):
-        """ Sets the position of media in ms """
+        """ 设置 位置 的 media 中的 ms """
         raise NotImplementedError
 
     def setSource(self, media: QUrl):
-        """ Sets the current source """
+        """ 设置 当前 源 """
         raise NotImplementedError
 
     def setPlaybackRate(self, rate: float):
-        """ Sets the playback rate of player """
+        """ 设置 播放速率 的 播放器 """
         raise NotImplementedError
 
     def setVolume(self, volume: int):
-        """ Sets the volume of player """
+        """ 设置 音量 的 播放器 """
         raise NotImplementedError
 
     def setMuted(self, isMuted: bool):
         raise NotImplementedError
 
     def videoOutput(self) -> QObject:
-        """ Return the video output to be used by the media player """
+        """ 返回 视频 output 到 be used by 媒体播放器 """
         raise NotImplementedError
 
     def setVideoOutput(self, output: QObject) -> None:
-        """ Sets the video output to be used by the media player """
+        """ 设置 视频 output 到 be used by 媒体播放器 """
         raise NotImplementedError
 
 
 class MediaPlayer(QMediaPlayer):
-    """ Media player """
+    """ 媒体播放器 """
 
     sourceChanged = Signal(QUrl)
     mutedChanged = Signal(bool)
@@ -105,11 +105,11 @@ class MediaPlayer(QMediaPlayer):
         return self.playbackState() == QMediaPlayer.PlayingState
 
     def volume(self):
-        """ Return the volume of player """
+        """ 返回 音量 的 播放器 """
         return int(self.audioOutput().volume() * 100)
 
     def setVolume(self, volume: int):
-        """ Sets the volume of player """
+        """ 设置 音量 的 播放器 """
         if volume == self.volume():
             return
 

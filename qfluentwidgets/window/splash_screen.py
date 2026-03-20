@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Union
 import sys
 
@@ -14,7 +14,7 @@ from qframelesswindow import TitleBar
 
 
 class SplashScreen(QWidget):
-    """ Splash screen """
+    """ 启动画面 """
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None, enableShadow=True):
         super().__init__(parent=parent)
@@ -57,7 +57,7 @@ class SplashScreen(QWidget):
         return self._iconSize
 
     def setTitleBar(self, titleBar: QWidget):
-        """ set title bar """
+        """ 设置 标题栏 """
         self.titleBar.deleteLater()
         self.titleBar = titleBar
         titleBar.setParent(self)
@@ -79,14 +79,14 @@ class SplashScreen(QWidget):
         self.titleBar.resize(self.width(), self.titleBar.height())
 
     def finish(self):
-        """ close splash screen """
+        """ 关闭 splash 屏幕 """
         self.close()
 
     def paintEvent(self, e):
         painter = QPainter(self)
         painter.setPen(Qt.NoPen)
 
-        # draw background
+        # 绘制背景
         c = 32 if isDarkTheme() else 255
         painter.setBrush(QColor(c, c, c))
         painter.drawRect(self.rect())

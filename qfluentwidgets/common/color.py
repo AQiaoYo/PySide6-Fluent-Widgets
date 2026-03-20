@@ -8,7 +8,7 @@ from .config import isDarkThemeMode
 
 
 class FluentThemeColor(Enum):
-    """ Fluent theme color
+    """ Fluent 主题 颜色
 
     Refer to: https://www.figma.com/file/iM7EPX8Jn37zjeSezb43cF
     """

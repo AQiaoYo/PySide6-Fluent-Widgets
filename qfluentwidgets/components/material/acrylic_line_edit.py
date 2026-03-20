@@ -1,10 +1,10 @@
-# coding:utf-8
+# coding: utf-8
 from .acrylic_menu import AcrylicCompleterMenu, AcrylicLineEditMenu
 from ..widgets.line_edit import LineEdit, SearchLineEdit
 
 
 class AcrylicLineEditBase:
-    """ Acrylic line edit base """
+    """ 亚克力 行编辑器 base """
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -20,8 +20,8 @@ class AcrylicLineEditBase:
 
 
 class AcrylicLineEdit(AcrylicLineEditBase, LineEdit):
-    """ Acrylic line edit """
+    """ 亚克力 行编辑器 """
 
 
 class AcrylicSearchLineEdit(AcrylicLineEditBase, SearchLineEdit):
-    """ Acrylic search line edit """
+    """ 亚克力 search 行编辑器 """

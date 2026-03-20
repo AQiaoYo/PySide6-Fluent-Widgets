@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 import sys
 from typing import Union
@@ -17,7 +17,7 @@ from .label import ImageLabel
 
 
 class FlyoutAnimationType(Enum):
-    """ Flyout animation type """
+    """ 浮出层 动画 type """
     PULL_UP = 0
     DROP_DOWN = 1
     SLIDE_LEFT = 2
@@ -46,7 +46,7 @@ class IconWidget(QWidget):
 
 
 class FlyoutViewBase(QWidget):
-    """ Flyout view base class """
+    """ 浮出层 视图 基类 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -72,7 +72,7 @@ class FlyoutViewBase(QWidget):
 
 
 class FlyoutView(FlyoutViewBase):
-    """ Flyout view """
+    """ 浮出层 视图 """
 
     closed = Signal()
 
@@ -143,36 +143,36 @@ class FlyoutView(FlyoutViewBase):
         self.widgetLayout.setSpacing(0)
         self.vBoxLayout.setSpacing(0)
 
-        # add icon widget
+        # 添加 图标 部件
         if not self.title or not self.content:
             self.iconWidget.setFixedHeight(36)
 
         self.vBoxLayout.addLayout(self.viewLayout)
         self.viewLayout.addWidget(self.iconWidget, 0, Qt.AlignTop)
 
-        # add text
+        # 添加 文本
         self._adjustText()
         self.widgetLayout.addWidget(self.titleLabel)
         self.widgetLayout.addWidget(self.contentLabel)
         self.viewLayout.addLayout(self.widgetLayout)
 
-        # add close button
+        # 添加 关闭 按钮
         self.closeButton.setVisible(self.isClosable)
         self.viewLayout.addWidget(
             self.closeButton, 0, Qt.AlignRight | Qt.AlignTop)
 
-        # adjust content margins
+        # 调整内容 margins
         margins = QMargins(6, 5, 6, 5)
         margins.setLeft(20 if not self.icon else 5)
         margins.setRight(20 if not self.isClosable else 6)
         self.viewLayout.setContentsMargins(margins)
 
-        # add image
+        # 添加 图像
         self._adjustImage()
         self._addImageToLayout()
 
     def addWidget(self, widget: QWidget, stretch=0, align=Qt.AlignLeft):
-        """ add widget to view """
+        """ 将部件添加到视图 """
         self.widgetLayout.addSpacing(8)
         self.widgetLayout.addWidget(widget, stretch, align)
 
@@ -185,11 +185,11 @@ class FlyoutView(FlyoutViewBase):
         w = min(900, QApplication.screenAt(
             QCursor.pos()).geometry().width() - 200)
 
-        # adjust title
+        # 调整标题
         chars = max(min(w / 10, 120), 30)
         self.titleLabel.setText(TextWrap.wrap(self.title, chars, False)[0])
 
-        # adjust content
+        # 调整内容
         chars = max(min(w / 9, 120), 30)
         self.contentLabel.setText(TextWrap.wrap(self.content, chars, False)[0])
 
@@ -204,7 +204,7 @@ class FlyoutView(FlyoutViewBase):
 
 
 class Flyout(QWidget):
-    """ Flyout """
+    """ 浮出层 """
 
     closed = Signal()
 
@@ -238,7 +238,7 @@ class Flyout(QWidget):
         return super().eventFilter(watched, event)
 
     def setShadowEffect(self, blurRadius=35, offset=(0, 8)):
-        """ add shadow to dialog """
+        """ 将shadow添加到对话框 """
         color = QColor(0, 0, 0, 80 if isDarkTheme() else 30)
         self.shadowEffect = QGraphicsDropShadowEffect(self.view)
         self.shadowEffect.setBlurRadius(blurRadius)
@@ -255,12 +255,12 @@ class Flyout(QWidget):
         self.closed.emit()
 
     def showEvent(self, e):
-        # fixes #780
+        # 修复 #780
         self.activateWindow()
         super().showEvent(e)
 
     def exec(self, pos: QPoint, aniType=FlyoutAnimationType.PULL_UP):
-        """ show calendar view """
+        """ 显示日历视图 """
         self.aniManager = FlyoutAnimationManager.make(aniType, self)
         self.show()
         self.aniManager.exec(pos)
@@ -268,34 +268,34 @@ class Flyout(QWidget):
     @classmethod
     def make(cls, view: FlyoutViewBase, target: Union[QWidget, QPoint] = None, parent=None,
              aniType=FlyoutAnimationType.PULL_UP, isDeleteOnClose=True, isMacInputMethodEnabled=False):
-        """ create and show a flyout
+        """ 创建and 显示 浮出层
 
-        Parameters
+        参数
         ----------
         view: FlyoutViewBase
-            flyout view
+            浮出层 视图
 
         target: QWidget | QPoint
-            the target widget or position to show flyout
+            目标 部件 或 位置 到 显示 浮出层
 
         parent: QWidget
-            parent window
+            父部件 窗口
 
         aniType: FlyoutAnimationType
-            flyout animation type
+            浮出层 动画 type
 
         isDeleteOnClose: bool
-            whether delete flyout automatically when flyout is closed
+            是否 delete 浮出层 automatically 当 浮出层 is closed
         """
         w = cls(view, parent, isDeleteOnClose, isMacInputMethodEnabled)
 
         if target is None:
             return w
 
-        # show flyout first so that we can get the correct size
+        # 显示浮出层 first so that we can 获取 correct 大小
         w.show()
 
-        # move flyout to the top of target
+        # move 浮出层 到 top 的 目标
         if isinstance(target, QWidget):
             target = FlyoutAnimationManager.make(aniType, w).position(target)
 
@@ -306,36 +306,36 @@ class Flyout(QWidget):
     def create(cls, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                image: Union[str, QPixmap, QImage] = None, isClosable=False, target: Union[QWidget, QPoint] = None,
                parent=None, aniType=FlyoutAnimationType.PULL_UP, isDeleteOnClose=True, isMacInputMethodEnabled=False):
-        """ create and show a flyout using the default view
+        """ 创建and 显示 浮出层 using default 视图
 
-        Parameters
+        参数
         ----------
         title: str
-            the title of teaching tip
+            标题 的 教学提示
 
         content: str
-            the content of teaching tip
+            内容 的 教学提示
 
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            the icon of teaching tip
+            图标 的 教学提示
 
         image: str | QPixmap | QImage
-            the image of teaching tip
+            图像 的 教学提示
 
         isClosable: bool
-            whether to show the close button
+            是否 到 显示 关闭 按钮
 
         target: QWidget | QPoint
-            the target widget or position to show flyout
+            目标 部件 或 位置 到 显示 浮出层
 
         parent: QWidget
-            parent window
+            父部件 窗口
 
         aniType: FlyoutAnimationType
-            flyout animation type
+            浮出层 动画 type
 
         isDeleteOnClose: bool
-            whether delete flyout automatically when flyout is closed
+            是否 delete 浮出层 automatically 当 浮出层 is closed
         """
         view = FlyoutView(title, content, icon, image, isClosable)
         w = cls.make(view, target, parent, aniType, isDeleteOnClose, isMacInputMethodEnabled)
@@ -352,7 +352,7 @@ class Flyout(QWidget):
 
 
 class FlyoutAnimationManager(QObject):
-    """ Flyout animation manager """
+    """ 浮出层 动画 管理器 """
 
     managers = {}
 
@@ -376,12 +376,12 @@ class FlyoutAnimationManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ register menu animation manager
+        """ 注册 菜单 动画 管理器
 
-        Parameters
+        参数
         ----------
         name: Any
-            the name of manager, it should be unique
+            name 的 管理器, it should be unique
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -392,7 +392,7 @@ class FlyoutAnimationManager(QObject):
         return wrapper
 
     def exec(self, pos: QPoint):
-        """ start animation """
+        """ 开始动画 """
         raise NotImplementedError
 
     def _adjustPosition(self, pos):
@@ -403,12 +403,12 @@ class FlyoutAnimationManager(QObject):
         return QPoint(x, y)
 
     def position(self, target: QWidget):
-        """ return the top left position relative to the target """
+        """ 返回 top left 位置 relative 到 目标 """
         raise NotImplementedError
 
     @classmethod
     def make(cls, aniType: FlyoutAnimationType, flyout: Flyout) -> "FlyoutAnimationManager":
-        """ mask animation manager """
+        """ 遮罩 动画 管理器 """
         if aniType not in cls.managers:
             raise ValueError(f'`{aniType}` is an invalid animation type.')
 
@@ -417,7 +417,7 @@ class FlyoutAnimationManager(QObject):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.PULL_UP)
 class PullUpFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Pull up flyout animation manager """
+    """ Pull up 浮出层 动画 管理器 """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -435,7 +435,7 @@ class PullUpFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.DROP_DOWN)
 class DropDownFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Drop down flyout animation manager """
+    """ Drop down 浮出层 动画 管理器 """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -453,7 +453,7 @@ class DropDownFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.SLIDE_LEFT)
 class SlideLeftFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Slide left flyout animation manager """
+    """ Slide left 浮出层 动画 管理器 """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -472,7 +472,7 @@ class SlideLeftFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.SLIDE_RIGHT)
 class SlideRightFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Slide right flyout animation manager """
+    """ Slide right 浮出层 动画 管理器 """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -491,7 +491,7 @@ class SlideRightFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.FADE_IN)
 class FadeInFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Fade in flyout animation manager """
+    """ Fade 中的 浮出层 动画 管理器 """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -509,13 +509,13 @@ class FadeInFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.NONE)
 class DummyFlyoutAnimationManager(FlyoutAnimationManager):
-    """ Dummy flyout animation manager """
+    """ Dummy 浮出层 动画 管理器 """
 
     def exec(self, pos: QPoint):
-        """ start animation """
+        """ 开始动画 """
         self.flyout.move(self._adjustPosition(pos))
 
     def position(self, target: QWidget):
-        """ return the top left position relative to the target """
+        """ 返回 top left 位置 relative 到 目标 """
         m = self.flyout.hBoxLayout.contentsMargins()
         return target.mapToGlobal(QPoint(-m.left(), -self.flyout.sizeHint().height()+m.bottom()-8))

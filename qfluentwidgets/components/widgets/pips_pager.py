@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 from PySide6.QtCore import Qt, Signal, QModelIndex, QPoint, Property, QSize, QRectF
 from PySide6.QtGui import QPixmap, QPainter, QColor
@@ -14,14 +14,14 @@ from .scroll_bar import SmoothScrollBar
 
 
 class PipsScrollButtonDisplayMode(Enum):
-    """ Pips pager scroll button display mode """
+    """ Pips pager 滚动按钮 display 模式 """
     ALWAYS = 0
     ON_HOVER = 1
     NEVER = 2
 
 
 class ScrollButton(ToolButton):
-    """ Scroll button """
+    """ 滚动按钮 """
 
     def _postInit(self):
         self.setFixedSize(12, 12)
@@ -47,7 +47,7 @@ class ScrollButton(ToolButton):
 
 
 class PipsDelegate(QStyledItemDelegate):
-    """ Pips delegate """
+    """ Pips 委托 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -62,7 +62,7 @@ class PipsDelegate(QStyledItemDelegate):
         isHover = index.row() == self.hoveredRow
         isPressed = index.row() == self.pressedRow
 
-        # draw pip
+        # 绘制pip
         if isDarkTheme():
             if isHover or isPressed:
                 color = QColor(255, 255, 255, 197)
@@ -99,10 +99,10 @@ class PipsDelegate(QStyledItemDelegate):
 class PipsPager(QListWidget):
     """ Pips pager
 
-    Constructors
+    构造函数
     ------------
-    * PipsPager(`parent`: QWidget = None)
-    * PipsPager(`orient`: Qt.Orientation, `parent`: QWidget = None)
+    * PipsPager(`父部件`: QWidget = None)
+    * PipsPager(`orient`: Qt.Orientation, `父部件`: QWidget = None)
     """
 
     currentIndexChanged = Signal(int)
@@ -165,7 +165,7 @@ class PipsPager(QListWidget):
         self.preButton.setToolTip(self.tr('Previous Page'))
         self.nextButton.setToolTip(self.tr('Next Page'))
 
-        # connect signal to slot
+        # 连接信号与槽函数
         self.preButton.clicked.connect(self.scrollPrevious)
         self.nextButton.clicked.connect(self.scrollNext)
         self.itemPressed.connect(self._setPressedItem)
@@ -179,7 +179,7 @@ class PipsPager(QListWidget):
         self.delegate.setHoveredRow(self.row(item))
 
     def setPageNumber(self, n: int):
-        """ set the number of page """
+        """ 设置页面的number """
         self.clear()
         self.addItems(['15555'] * n)
 
@@ -192,11 +192,11 @@ class PipsPager(QListWidget):
         self.adjustSize()
 
     def getPageNumber(self):
-        """ get the number of page """
+        """ 获取页面的number """
         return self.count()
 
     def getVisibleNumber(self):
-        """ get the number of visible pips """
+        """ 获取可见 pips的number """
         return self._visibleNumber
 
     def setVisibleNumber(self, n: int):
@@ -204,22 +204,22 @@ class PipsPager(QListWidget):
         self.adjustSize()
 
     def scrollNext(self):
-        """ scroll down an item """
+        """ 滚动 down 项 """
         self.setCurrentIndex(self.currentIndex() + 1)
 
     def scrollPrevious(self):
-        """ scroll up an item """
+        """ 滚动 up 项 """
         self.setCurrentIndex(self.currentIndex() - 1)
 
     def scrollToItem(self, item: QListWidgetItem, hint=QListWidget.PositionAtCenter):
-        """ scroll to item """
-        # scroll to center position
+        """ 滚动 到 项 """
+        # 滚动 到 center 位置
         index = self.row(item)
         size = item.sizeHint()
         s = size.width() if self.isHorizontal() else size.height()
         self.scrollBar.scrollTo(s * (index - self.visibleNumber // 2))
 
-        # clear selection
+        # 清空selection
         self.clearSelection()
         item.setSelected(False)
 
@@ -239,7 +239,7 @@ class PipsPager(QListWidget):
         return self.orientation == Qt.Horizontal
 
     def setCurrentIndex(self, index: int):
-        """ set current index """
+        """ 设置当前索引 """
         if not 0 <= index < self.count():
             return
 
@@ -271,12 +271,12 @@ class PipsPager(QListWidget):
         return super().currentIndex().row()
 
     def setPreviousButtonDisplayMode(self, mode: PipsScrollButtonDisplayMode):
-        """ set the display mode of previous button """
+        """ 设置previous 按钮的display 模式 """
         self.previousButtonDisplayMode = mode
         self.preButton.setVisible(self.isPreviousButtonVisible())
 
     def setNextButtonDisplayMode(self, mode: PipsScrollButtonDisplayMode):
-        """ set the display mode of next button """
+        """ 设置next 按钮的display 模式 """
         self.nextButtonDisplayMode = mode
         self.nextButton.setVisible(self.isNextButtonVisible())
 

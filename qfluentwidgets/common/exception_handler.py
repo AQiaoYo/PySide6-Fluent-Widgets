@@ -1,15 +1,15 @@
-# coding:utf-8
+# coding: utf-8
 from copy import deepcopy
 
 
 
 def exceptionHandler(*default):
-    """ decorator for exception handling
+    """ decorator 用于 exception handling
 
-    Parameters
+    参数
     ----------
     *default:
-        the default value returned when an exception occurs
+        default 值 returned 当 exception occurs
     """
 
     def outer(func):

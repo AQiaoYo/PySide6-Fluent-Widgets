@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QSize, QPropertyAnimation, QPoint
 from PySide6.QtGui import QPixmap, QPainter, QColor
 from PySide6.QtWidgets import QWidget, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout
@@ -14,7 +14,7 @@ from .media_player import MediaPlayer, MediaPlayerBase
 
 
 class MediaPlayBarButton(TransparentToolButton):
-    """ Media play bar button """
+    """ 媒体播放栏按钮 """
 
     def _postInit(self):
         super()._postInit()
@@ -24,7 +24,7 @@ class MediaPlayBarButton(TransparentToolButton):
 
 
 class PlayButton(MediaPlayBarButton):
-    """ Play button """
+    """ 播放按钮 """
 
     def _postInit(self):
         super()._postInit()
@@ -41,7 +41,7 @@ class PlayButton(MediaPlayBarButton):
 
 
 class VolumeView(FlyoutViewBase):
-    """ Volume view """
+    """ 音量视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -89,7 +89,7 @@ class VolumeView(FlyoutViewBase):
 
 
 class VolumeButton(MediaPlayBarButton):
-    """ Volume button """
+    """ 音量按钮 """
 
     volumeChanged = Signal(int)
     mutedChanged = Signal(bool)
@@ -127,7 +127,7 @@ class VolumeButton(MediaPlayBarButton):
 
 
 class MediaPlayBarBase(QWidget):
-    """ Play bar base class """
+    """ 播放栏基类 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -148,7 +148,7 @@ class MediaPlayBarBase(QWidget):
         self.playButton.clicked.connect(self.togglePlayState)
 
     def setMediaPlayer(self, player: MediaPlayerBase):
-        """ set media player """
+        """ 设置 媒体播放器 """
         self.player = player
 
         self.player.durationChanged.connect(self.progressSlider.setMaximum)
@@ -157,7 +157,7 @@ class MediaPlayBarBase(QWidget):
         self.player.volumeChanged.connect(self.volumeButton.setVolume)
         self.player.mutedChanged.connect(self.volumeButton.setMuted)
 
-        # don't use valueChanged, otherwise the sound will be interupted
+        # don't use valueChanged, otherwise sound will be interupted
         self.progressSlider.sliderMoved.connect(self.player.setPosition)
         self.progressSlider.clicked.connect(self.player.setPosition)
         self.volumeButton.volumeChanged.connect(self.player.setVolume)
@@ -185,11 +185,11 @@ class MediaPlayBarBase(QWidget):
         self.player.stop()
 
     def setVolume(self, volume: int):
-        """ Sets the volume of player """
+        """ 设置 音量 的 播放器 """
         self.player.setVolume(volume)
 
     def setPosition(self, position: int):
-        """ Sets the position of media in ms """
+        """ 设置 位置 的 media 中的 ms """
         self.player.setPosition(position)
 
     def _onPositionChanged(self, position: int):
@@ -199,7 +199,7 @@ class MediaPlayBarBase(QWidget):
         self.playButton.setPlay(self.player.isPlaying())
 
     def togglePlayState(self):
-        """ toggle the play state of media player """
+        """ 切换the play state 的 媒体播放器 """
         if self.player.isPlaying():
             self.player.pause()
         else:
@@ -223,7 +223,7 @@ class MediaPlayBarBase(QWidget):
 
 
 class SimpleMediaPlayBar(MediaPlayBarBase):
-    """ simple media play bar """
+    """ 简易媒体播放栏 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -239,12 +239,12 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.setMediaPlayer(MediaPlayer(self))
 
     def addButton(self, button: MediaPlayBarButton):
-        """ add button to the right side of play bar """
+        """ 将按钮添加到the right side 的 播放栏 """
         self.hBoxLayout.addWidget(button, 0)
 
 
 class StandardMediaPlayBar(MediaPlayBarBase):
-    """ Standard media play bar """
+    """ 标准媒体播放栏 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -299,7 +299,7 @@ class StandardMediaPlayBar(MediaPlayBarBase):
         self.skipForwardButton.clicked.connect(lambda: self.skipForward(30000))
 
     def skipBack(self, ms: int):
-        """ Back up for specified milliseconds """
+        """ Back up 用于 specified milliseconds """
         self.player.setPosition(self.player.position()-ms)
 
     def skipForward(self, ms: int):

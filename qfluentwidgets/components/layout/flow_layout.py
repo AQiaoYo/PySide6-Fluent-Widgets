@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List
 
 from PySide6.QtCore import QSize, QPoint, Qt, QRect, QPropertyAnimation, QParallelAnimationGroup, QEasingCurve, QEvent, QTimer, QObject
@@ -6,24 +6,24 @@ from PySide6.QtWidgets import QLayout, QWidgetItem, QLayoutItem
 
 
 class FlowLayout(QLayout):
-    """ Flow layout """
+    """ 流式布局 """
 
     def __init__(self, parent=None, needAni=False, isTight=False):
         """
-        Parameters
+        参数
         ----------
         parent:
-            parent window or layout
+            父部件 窗口 或 布局
 
         needAni: bool
-            whether to add moving animation
+            是否 到 添加 moving 动画
 
         isTight: bool
-            whether to use the tight layout when widgets are hidden
+            是否 到 use tight 布局 当 部件 are hidden
         """
         super().__init__(parent)
-        self._items = []    # type: List[QLayoutItem]
-        self._anis = []    # type: List[QPropertyAnimation]
+        self._items = []    # type: 列表[QLayoutItem]
+        self._anis = []    # type: 列表[QPropertyAnimation]
         self._aniGroup = QParallelAnimationGroup(self)
         self._verticalSpacing = 10
         self._horizontalSpacing = 10
@@ -76,15 +76,15 @@ class FlowLayout(QLayout):
             self._anis.insert(index, ani)
 
     def setAnimation(self, duration, ease=QEasingCurve.Linear):
-        """ set the moving animation
+        """ 设置 moving 动画
 
-        Parameters
+        参数
         ----------
         duration: int
-            the duration of animation in milliseconds
+            持续时间 的 动画 中的 milliseconds
 
         ease: QEasingCurve
-            the easing curve of animation
+            easing curve 的 动画
         """
         if not self.needAni:
             return
@@ -124,12 +124,12 @@ class FlowLayout(QLayout):
                 return self.takeAt(i)
 
     def removeAllWidgets(self):
-        """ remove all widgets from layout """
+        """ 移除布局中的全部部件 """
         while self._items:
             self.takeAt(0)
 
     def takeAllWidgets(self):
-        """ remove all widgets from layout and delete them """
+        """ 从布局 和 delete them移除all 部件 """
         while self._items:
             w = self.takeAt(0)
             if w:
@@ -142,7 +142,7 @@ class FlowLayout(QLayout):
         return True
 
     def heightForWidth(self, width: int):
-        """ get the minimal height according to width """
+        """ 获取 minimal 高度 根据 宽度 """
         return self._doLayout(QRect(0, 0, width, 0), False)
 
     def setGeometry(self, rect: QRect):
@@ -168,19 +168,19 @@ class FlowLayout(QLayout):
         return size
 
     def setVerticalSpacing(self, spacing: int):
-        """ set vertical spacing between widgets """
+        """ 设置 vertical spacing between 部件 """
         self._verticalSpacing = spacing
 
     def verticalSpacing(self):
-        """ get vertical spacing between widgets """
+        """ 获取 vertical spacing between 部件 """
         return self._verticalSpacing
 
     def setHorizontalSpacing(self, spacing: int):
-        """ set horizontal spacing between widgets """
+        """ 设置 horizontal spacing between 部件 """
         self._horizontalSpacing = spacing
 
     def horizontalSpacing(self):
-        """ get horizontal spacing between widgets """
+        """ 获取 horizontal spacing between 部件 """
         return self._horizontalSpacing
 
     def eventFilter(self, obj: QObject, event: QEvent) -> bool:
@@ -196,7 +196,7 @@ class FlowLayout(QLayout):
         return super().eventFilter(obj, event)
 
     def _doLayout(self, rect: QRect, move: bool):
-        """ adjust widgets position according to the window size """
+        """ 调整部件 位置 根据 窗口 大小 """
         aniRestart = False
         margin = self.contentsMargins()
         x = rect.x() + margin.left()

@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QObject, QEvent
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import QLabel, QFrame, QVBoxLayout, QHBoxLayout, QPushButton
@@ -13,7 +13,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class Ui_MessageBox:
-    """ Ui of message box """
+    """ Ui 的 message box """
 
     yesSignal = Signal()
     cancelSignal = Signal()
@@ -104,7 +104,7 @@ class Ui_MessageBox:
         self.cancelButton.adjustSize()
 
     def setContentCopyable(self, isCopyable: bool):
-        """ set whether the content is copyable """
+        """ 设置 是否 内容 is copyable """
         if isCopyable:
             self.contentLabel.setTextInteractionFlags(
                 Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -122,7 +122,7 @@ class Ui_MessageBox:
 
 
 class Dialog(FramelessDialog, Ui_MessageBox):
-    """ Dialog box """
+    """ 对话框 box """
 
     yesSignal = Signal()
     cancelSignal = Signal()

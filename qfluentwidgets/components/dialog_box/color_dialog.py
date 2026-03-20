@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import Qt, Signal, QPoint, QRegularExpression, QSize
 from PySide6.QtGui import (QBrush, QColor, QPixmap, QPainter,
                            QPen, QIntValidator, QRegularExpressionValidator, QIcon)
@@ -11,7 +11,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class HuePanel(QWidget):
-    """ Hue panel """
+    """ Hue 面板 """
 
     colorChanged = Signal(QColor)
 
@@ -28,7 +28,7 @@ class HuePanel(QWidget):
         self.setPickerPosition(e.pos())
 
     def setPickerPosition(self, pos):
-        """ set the position of  """
+        """ 设置 位置 of  """
         self.pickerPos = pos
         self.color.setHsv(
             int(max(0, min(1, pos.x() / self.width())) * 359),
@@ -39,7 +39,7 @@ class HuePanel(QWidget):
         self.colorChanged.emit(self.color)
 
     def setColor(self, color):
-        """ set color """
+        """ 设置颜色 """
         self.color = QColor(color)
         self.color.setHsv(self.color.hue(), self.color.saturation(), 255)
         self.pickerPos = QPoint(
@@ -61,12 +61,12 @@ class HuePanel(QWidget):
         painter.setRenderHints(QPainter.Antialiasing |
                                QPainter.SmoothPixmapTransform)
 
-        # draw hue panel
+        # 绘制hue 面板
         painter.setBrush(QBrush(self.huePixmap))
         painter.setPen(QPen(QColor(0, 0, 0, 15), 2.4))
         painter.drawRoundedRect(self.rect(), 5.6, 5.6)
 
-        # draw picker
+        # 绘制picker
         if self.saturation > 153 or 40 < self.hue < 180:
             color = Qt.black
         else:
@@ -79,7 +79,7 @@ class HuePanel(QWidget):
 
 
 class BrightnessSlider(ClickableSlider):
-    """ Brightness slider """
+    """ 亮度 slider """
 
     colorChanged = Signal(QColor)
 
@@ -91,7 +91,7 @@ class BrightnessSlider(ClickableSlider):
         self.valueChanged.connect(self.__onValueChanged)
 
     def setColor(self, color):
-        """ set color """
+        """ 设置颜色 """
         self.color = QColor(color)
         self.setValue(self.color.value())
         qss = FluentStyleSheet.COLOR_DIALOG.content()
@@ -100,14 +100,14 @@ class BrightnessSlider(ClickableSlider):
         self.setStyleSheet(qss)
 
     def __onValueChanged(self, value):
-        """ slider value changed slot """
+        """ slider 值 changed 槽函数 """
         self.color.setHsv(self.color.hue(), self.color.saturation(), value, self.color.alpha())
         self.setColor(self.color)
         self.colorChanged.emit(self.color)
 
 
 class ColorCard(QWidget):
-    """ Color card """
+    """ 颜色 card """
 
     def __init__(self, color, parent=None, enableAlpha=False):
         super().__init__(parent)
@@ -129,7 +129,7 @@ class ColorCard(QWidget):
         return pixmap
 
     def setColor(self, color):
-        """ set the color of card """
+        """ 设置card的颜色 """
         self.color = QColor(color)
         self.update()
 
@@ -137,20 +137,20 @@ class ColorCard(QWidget):
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
-        # draw tiled background
+        # 绘制tiled 背景
         if self.enableAlpha:
             painter.setBrush(QBrush(self.titledPixmap))
             painter.setPen(QColor(0, 0, 0, 13))
             painter.drawRoundedRect(self.rect(), 4, 4)
 
-        # draw color
+        # 绘制颜色
         painter.setBrush(self.color)
         painter.setPen(QColor(0, 0, 0, 13))
         painter.drawRoundedRect(self.rect(), 4, 4)
 
 
 class ColorLineEdit(LineEdit):
-    """ Color line edit """
+    """ 颜色 行编辑器 """
 
     valueChanged = Signal(str)
 
@@ -164,14 +164,14 @@ class ColorLineEdit(LineEdit):
         self.textEdited.connect(self._onTextEdited)
 
     def _onTextEdited(self, text):
-        """ text edited slot """
+        """ 文本 edited 槽函数 """
         state = self.validator().validate(text, 0)[0]
         if state == QIntValidator.Acceptable:
             self.valueChanged.emit(text)
 
 
 class HexColorLineEdit(ColorLineEdit):
-    """ Hex color line edit """
+    """ Hex 颜色 行编辑器 """
 
     def __init__(self, color, parent=None, enableAlpha=False):
         self.colorFormat = QColor.HexArgb if enableAlpha else QColor.HexRgb
@@ -188,12 +188,12 @@ class HexColorLineEdit(ColorLineEdit):
         self.prefixLabel.setObjectName('prefixLabel')
 
     def setColor(self, color):
-        """ set color """
+        """ 设置颜色 """
         self.setText(color.name(self.colorFormat)[1:])
 
 
 class OpacityLineEdit(ColorLineEdit):
-    """ Opacity line edit """
+    """ Opacity 行编辑器 """
 
     def __init__(self, value, parent=None, enableAlpha=False):
         super().__init__(int(value/255*100), parent)
@@ -213,25 +213,25 @@ class OpacityLineEdit(ColorLineEdit):
 
 
 class ColorDialog(MaskDialogBase):
-    """ Color dialog """
+    """ 颜色 对话框 """
 
     colorChanged = Signal(QColor)
 
     def __init__(self, color, title: str, parent=None, enableAlpha=False):
         """
-        Parameters
+        参数
         ----------
         color: `QColor` | `GlobalColor` | str
-            initial color
+            initial 颜色
 
         title: str
-            the title of dialog
+            标题 的 对话框
 
         parent: QWidget
-            parent widget
+            父部件 部件
 
         enableAlpha: bool
-            whether to enable the alpha channel
+            是否 到 启用 透明通道 channel
         """
         super().__init__(parent)
         self.enableAlpha = enableAlpha
@@ -331,7 +331,7 @@ class ColorDialog(MaskDialogBase):
         self.editLabel.adjustSize()
 
     def setColor(self, color, movePicker=True):
-        """ set color """
+        """ 设置颜色 """
         self.color = QColor(color)
         self.brightSlider.setColor(color)
         self.newColorCard.setColor(color)
@@ -343,50 +343,50 @@ class ColorDialog(MaskDialogBase):
             self.huePanel.setColor(color)
 
     def __onHueChanged(self, color):
-        """ hue changed slot """
+        """ hue changed 槽函数 """
         self.color.setHsv(
             color.hue(), color.saturation(), self.color.value(), self.color.alpha())
         self.setColor(self.color)
 
     def __onBrightnessChanged(self, color):
-        """ brightness changed slot """
+        """ 亮度 changed 槽函数 """
         self.color.setHsv(
             self.color.hue(), self.color.saturation(), color.value(), color.alpha())
         self.setColor(self.color, False)
 
     def __onRedChanged(self, red):
-        """ red channel changed slot """
+        """ red channel changed 槽函数 """
         self.color.setRed(int(red))
         self.setColor(self.color)
 
     def __onBlueChanged(self, blue):
-        """ blue channel changed slot """
+        """ blue channel changed 槽函数 """
         self.color.setBlue(int(blue))
         self.setColor(self.color)
 
     def __onGreenChanged(self, green):
-        """ green channel changed slot """
+        """ green channel changed 槽函数 """
         self.color.setGreen(int(green))
         self.setColor(self.color)
 
     def __onOpacityChanged(self, opacity):
-        """ opacity channel changed slot """
+        """ opacity channel changed 槽函数 """
         self.color.setAlpha(int(int(opacity)/100*255))
         self.setColor(self.color)
 
     def __onHexColorChanged(self, color):
-        """ hex color changed slot """
+        """ hex 颜色 changed 槽函数 """
         self.color.setNamedColor("#" + color)
         self.setColor(self.color)
 
     def __onYesButtonClicked(self):
-        """ yes button clicked slot """
+        """ yes 按钮 clicked 槽函数 """
         self.accept()
         if self.color != self.oldColor:
             self.colorChanged.emit(self.color)
 
     def updateStyle(self):
-        """ update style sheet """
+        """ 更新style sheet """
         self.setStyle(QApplication.style())
         self.titleLabel.adjustSize()
         self.editLabel.adjustSize()
@@ -400,7 +400,7 @@ class ColorDialog(MaskDialogBase):
         super().showEvent(e)
 
     def __connectSignalToSlot(self):
-        """ connect signal to slot """
+        """ 连接信号与槽函数 """
         self.cancelButton.clicked.connect(self.reject)
         self.yesButton.clicked.connect(self.__onYesButtonClicked)
 

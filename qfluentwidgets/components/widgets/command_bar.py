@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Iterable, List, Tuple, Union
 
 from PySide6.QtCore import Qt, QSize, QRectF, QRect, QPoint, QEvent
@@ -15,12 +15,12 @@ from .flyout import FlyoutViewBase, Flyout
 
 
 class CommandButton(TransparentToggleToolButton):
-    """ Command button
+    """ Command 按钮
 
-    Constructors
+    构造函数
     ------------
-    * CommandButton(`parent`: QWidget = None)
-    * CommandButton(`icon`: QIcon | str | FluentIconBase = None, `parent`: QWidget = None)
+    * CommandButton(`父部件`: QWidget = None)
+    * CommandButton(`图标`: QIcon | str | FluentIconBase = None, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -44,7 +44,7 @@ class CommandButton(TransparentToggleToolButton):
         if self.isIconOnly():
             return QSize(36, 34) if self.isTight() else QSize(48, 34)
 
-        # get the width of text
+        # 获取文本的宽度
         tw = self.fontMetrics().boundingRect(self.text()).width()
 
         style = self.toolButtonStyle()
@@ -110,7 +110,7 @@ class CommandButton(TransparentToggleToolButton):
         elif self.isPressed:
             painter.setOpacity(0.63)
 
-        # draw icon and text
+        # 绘制图标 和 文本
         style = self.toolButtonStyle()
         iw, ih = self.iconSize().width(), self.iconSize().height()
 
@@ -135,14 +135,14 @@ class CommandButton(TransparentToggleToolButton):
 
 
 class CommandToolTipFilter(ToolTipFilter):
-    """ Command tool tip filter """
+    """ Command 工具提示 filter """
 
     def _canShowToolTip(self) -> bool:
         return super()._canShowToolTip() and self.parent().isIconOnly()
 
 
 class MoreActionsButton(CommandButton):
-    """ More action button """
+    """ More action 按钮 """
 
     def _postInit(self):
         super()._postInit()
@@ -158,7 +158,7 @@ class MoreActionsButton(CommandButton):
 
 
 class CommandSeparator(QWidget):
-    """ Command separator """
+    """ Command 分隔符 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -172,7 +172,7 @@ class CommandSeparator(QWidget):
 
 
 class CommandMenu(RoundMenu):
-    """ Command menu """
+    """ Command 菜单 """
 
     def __init__(self, parent=None):
         super().__init__("", parent)
@@ -184,13 +184,13 @@ class CommandMenu(RoundMenu):
 
 
 class CommandBar(QFrame):
-    """ Command bar """
+    """ 命令栏 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self._widgets = []  # type: List[QWidget]
-        self._hiddenWidgets = []  # type: List[QWidget]
-        self._hiddenActions = []  # type: List[QAction]
+        self._widgets = []  # type: 列表[QWidget]
+        self._hiddenWidgets = []  # type: 列表[QWidget]
+        self._hiddenActions = []  # type: 列表[QAction]
 
         self._menuAnimation = MenuAnimationType.DROP_DOWN
         self._toolButtonStyle = Qt.ToolButtonIconOnly
@@ -216,12 +216,12 @@ class CommandBar(QFrame):
         return self._spacing
 
     def addAction(self, action: QAction):
-        """ add action
+        """ 添加 action
 
-        Parameters
+        参数
         ----------
         action: QAction
-            the action to add
+            action 到 添加
         """
         if action in self.actions():
             return
@@ -236,7 +236,7 @@ class CommandBar(QFrame):
             self.addAction(action)
 
     def addHiddenAction(self, action: QAction):
-        """ add hidden action """
+        """ 添加 hidden action """
         if action in self.actions():
             return
 
@@ -245,7 +245,7 @@ class CommandBar(QFrame):
         super().addAction(action)
 
     def addHiddenActions(self, actions: List[QAction]):
-        """ add hidden action """
+        """ 添加 hidden action """
         for action in actions:
             self.addHiddenAction(action)
 
@@ -266,7 +266,7 @@ class CommandBar(QFrame):
         self._insertWidgetToLayout(index, CommandSeparator(self))
 
     def addWidget(self, widget: QWidget):
-        """ add widget to command bar """
+        """ 将部件添加到command 栏 """
         self._insertWidgetToLayout(-1, widget)
 
     def removeAction(self, action: QAction):
@@ -294,7 +294,7 @@ class CommandBar(QFrame):
             self._hiddenActions.remove(action)
 
     def setToolButtonStyle(self, style: Qt.ToolButtonStyle):
-        """ set the style of tool button """
+        """ 设置tool 按钮的style """
         if self.toolButtonStyle() == style:
             return
 
@@ -334,7 +334,7 @@ class CommandBar(QFrame):
         self.updateGeometry()
 
     def _createButton(self, action: QAction):
-        """ create command button """
+        """ 创建command 按钮 """
         button = CommandButton(self)
         button.setAction(action)
         button.setToolButtonStyle(self.toolButtonStyle())
@@ -344,7 +344,7 @@ class CommandBar(QFrame):
         return button
 
     def _insertWidgetToLayout(self, index: int, widget: QWidget):
-        """ add widget to layout """
+        """ 将部件添加到布局 """
         widget.setParent(self)
         widget.show()
 
@@ -372,7 +372,7 @@ class CommandBar(QFrame):
             widget.move(x, (h - widget.height()) // 2)
             x += (widget.width() + self.spacing())
 
-        # show more actions button
+        # 显示more actions 按钮
         if self._hiddenActions or len(visibles) < len(self._widgets):
             self.moreButton.show()
             self.moreButton.move(x, (h - self.moreButton.height()) // 2)
@@ -382,8 +382,8 @@ class CommandBar(QFrame):
             self._hiddenWidgets.append(widget)
 
     def _visibleWidgets(self) -> List[QWidget]:
-        """ return the visible widgets in layout """
-        # have enough spacing to show all widgets
+        """ 返回 可见 部件 中的 布局 """
+        # have enough spacing 到 显示 all 部件
         if self.suitableWidth() <= self.width():
             return self._widgets
 
@@ -418,7 +418,7 @@ class CommandBar(QFrame):
         return [w for w in self._widgets if isinstance(w, CommandButton)]
 
     def setMenuDropDown(self, down: bool):
-        """ set the animation direction of more actions menu """
+        """ 设置more actions 菜单的动画 方向 """
         if down:
             self._menuAnimation = MenuAnimationType.DROP_DOWN
         else:
@@ -428,7 +428,7 @@ class CommandBar(QFrame):
         return self._menuAnimation == MenuAnimationType.DROP_DOWN
 
     def _showMoreActionsMenu(self):
-        """ show more actions menu """
+        """ 显示more actions 菜单 """
         self.moreButton.clearState()
 
         actions = self._hiddenActions.copy()
@@ -452,7 +452,7 @@ class CommandBar(QFrame):
 
 
 class CommandViewMenu(CommandMenu):
-    """ Command view menu """
+    """ Command 视图 菜单 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -468,14 +468,14 @@ class CommandViewMenu(CommandMenu):
 
 
 class CommandViewBar(CommandBar):
-    """ Command view bar """
+    """ Command 视图 栏 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setMenuDropDown(True)
 
     def setMenuDropDown(self, down: bool):
-        """ set the animation direction of more actions menu """
+        """ 设置more actions 菜单的动画 方向 """
         if down:
             self._menuAnimation = MenuAnimationType.FADE_IN_DROP_DOWN
         else:
@@ -496,15 +496,15 @@ class CommandViewBar(CommandBar):
         menu = CommandViewMenu(self)
         menu.addActions(actions)
 
-        # adjust the shape of view
+        # 调整the shape 的 视图
         view = self.parent()  # type: CommandBarView
         view.setMenuVisible(True)
 
-        # adjust the shape of menu
+        # 调整the shape 的 菜单
         menu.closedSignal.connect(lambda: view.setMenuVisible(False))
         menu.setDropDown(self.isMenuDropDown(), menu.view.width() > view.width()+5)
 
-        # adjust menu size
+        # 调整菜单 大小
         if menu.view.width() < view.width():
             menu.view.setFixedWidth(view.width())
             menu.adjustSize()
@@ -523,7 +523,7 @@ class CommandViewBar(CommandBar):
 
 
 class CommandBarView(FlyoutViewBase):
-    """ Command bar view """
+    """ 命令栏 视图 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

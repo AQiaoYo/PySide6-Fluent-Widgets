@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 import warnings
 from  typing import Union
 
@@ -54,23 +54,23 @@ class BlurCoverThread(QThread):
 
 
 class AcrylicTextureLabel(QLabel):
-    """ Acrylic texture label """
+    """ 亚克力 texture 标签 """
 
     def __init__(self, tintColor: QColor, luminosityColor: QColor, noiseOpacity=0.03, parent=None):
         """
-        Parameters
+        参数
         ----------
         tintColor: QColor
-            RGB tint color
+            RGB tint 颜色
 
         luminosityColor: QColor
-            luminosity layer color
+            luminosity layer 颜色
 
         noiseOpacity: float
             noise layer opacity
 
         parent:
-            parent window
+            父部件 窗口
         """
         super().__init__(parent=parent)
         self.tintColor = QColor(tintColor)
@@ -86,14 +86,14 @@ class AcrylicTextureLabel(QLabel):
     def paintEvent(self, e):
         acrylicTexture = QImage(64, 64, QImage.Format_ARGB32_Premultiplied)
 
-        # paint luminosity layer
+        # 绘制luminosity layer
         acrylicTexture.fill(self.luminosityColor)
 
-        # paint tint color
+        # 绘制tint 颜色
         painter = QPainter(acrylicTexture)
         painter.fillRect(acrylicTexture.rect(), self.tintColor)
 
-        # paint noise
+        # 绘制noise
         painter.setOpacity(self.noiseOpacity)
         painter.drawImage(acrylicTexture.rect(), self.noiseImage)
 
@@ -103,27 +103,27 @@ class AcrylicTextureLabel(QLabel):
 
 
 class AcrylicLabel(QLabel):
-    """ Acrylic label """
+    """ 亚克力 标签 """
 
     def __init__(self, blurRadius: int, tintColor: QColor, luminosityColor=QColor(255, 255, 255, 0),
                  maxBlurSize: tuple = None, parent=None):
         """
-        Parameters
+        参数
         ----------
         blurRadius: int
-            blur radius
+            blur 半径
 
         tintColor: QColor
-            tint color
+            tint 颜色
 
         luminosityColor: QColor
-            luminosity layer color
+            luminosity layer 颜色
 
         maxBlurSize: tuple
-            maximum image size
+            maximum 图像 大小
 
         parent:
-            parent window
+            父部件 窗口
         """
         super().__init__(parent=parent)
         checkAcrylicAvailability()
@@ -138,13 +138,13 @@ class AcrylicLabel(QLabel):
         self.blurThread.blurFinished.connect(self.__onBlurFinished)
 
     def __onBlurFinished(self, blurPixmap: QPixmap):
-        """ blur finished slot """
+        """ blur finished 槽函数 """
         self.blurPixmap = blurPixmap
         self.setPixmap(self.blurPixmap)
         self.adjustSize()
 
     def setImage(self, imagePath: str):
-        """ set the image to be blurred """
+        """ 设置 图像 到 be blurred """
         self.imagePath = imagePath
         self.blurThread.blur(imagePath, self.blurRadius, self.maxBlurSize)
 
@@ -161,7 +161,7 @@ class AcrylicLabel(QLabel):
 
 
 class AcrylicBrush:
-    """ Acrylic brush """
+    """ 亚克力 brush """
 
     def __init__(self, device: QWidget, blurRadius: int, tintColor=QColor(242, 242, 242, 150),
                  luminosityColor=QColor(255, 255, 255, 10), noiseOpacity=0.03):
@@ -195,9 +195,9 @@ class AcrylicBrush:
         return isAcrylicAvailable
 
     def grabImage(self, rect: QRect):
-        """ grab image from screen
+        """ grab 图像 从 屏幕
 
-        Parameters
+        参数
         ----------
         rect: QRect
             grabbed region
@@ -212,7 +212,7 @@ class AcrylicBrush:
         self.setImage(screen.grabWindow(0, x, y, w, h))
 
     def setImage(self, image: Union[str, QImage, QPixmap]):
-        """ set blurred image """
+        """ 设置 blurred 图像 """
         if isinstance(image, str):
             image = QPixmap(image)
         elif isinstance(image, QImage):
@@ -234,11 +234,11 @@ class AcrylicBrush:
         texture = QImage(64, 64, QImage.Format_ARGB32_Premultiplied)
         texture.fill(self.luminosityColor)
 
-        # paint tint color
+        # 绘制tint 颜色
         painter = QPainter(texture)
         painter.fillRect(texture.rect(), self.tintColor)
 
-        # paint noise
+        # 绘制noise
         painter.setOpacity(self.noiseOpacity)
         painter.drawImage(texture.rect(), self.noiseImage)
 
@@ -253,9 +253,9 @@ class AcrylicBrush:
         if not self.clipPath.isEmpty():
             painter.setClipPath(self.clipPath)
 
-        # paint image
+        # 绘制图像
         image = self.image.scaled(device.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
         painter.drawPixmap(0, 0, image)
 
-        # paint acrylic texture
+        # 绘制亚克力 texture
         painter.fillRect(device.rect(), QBrush(self.textureImage()))

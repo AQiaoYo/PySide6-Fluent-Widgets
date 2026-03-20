@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtCore import QEasingCurve, QPropertyAnimation, Qt, QEvent, QPoint
 from PySide6.QtGui import QColor, QResizeEvent
 from PySide6.QtWidgets import (QDialog, QGraphicsDropShadowEffect,
@@ -8,7 +8,7 @@ from ...common.config import isDarkTheme
 
 
 class MaskDialogBase(QDialog):
-    """ Dialog box base class with a mask """
+    """ 对话框 box 基类 使用 遮罩 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -18,7 +18,7 @@ class MaskDialogBase(QDialog):
         self._hBoxLayout = QHBoxLayout(self)
         self.windowMask = QWidget(self)
 
-        # dialog box in the center of mask, all widgets take it as parent
+        # 对话框 box 中的 center 的 遮罩, all 部件 take it as 父部件
         self.widget = QFrame(self, objectName='centerWidget')
         self.setWindowFlags(Qt.FramelessWindowHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
@@ -35,7 +35,7 @@ class MaskDialogBase(QDialog):
         self.widget.installEventFilter(self)
 
     def setShadowEffect(self, blurRadius=60, offset=(0, 10), color=QColor(0, 0, 0, 100)):
-        """ add shadow to dialog """
+        """ 将shadow添加到对话框 """
         shadowEffect = QGraphicsDropShadowEffect(self.widget)
         shadowEffect.setBlurRadius(blurRadius)
         shadowEffect.setOffset(*offset)
@@ -44,7 +44,7 @@ class MaskDialogBase(QDialog):
         self.widget.setGraphicsEffect(shadowEffect)
 
     def setMaskColor(self, color: QColor):
-        """ set the color of mask """
+        """ 设置遮罩的颜色 """
         self.windowMask.setStyleSheet(f"""
             background: rgba({color.red()}, {color.green()}, {color.blue()}, {color.alpha()})
         """)
@@ -63,7 +63,7 @@ class MaskDialogBase(QDialog):
         super().showEvent(e)
 
     def done(self, code):
-        """ fade out """
+        """ 淡出 """
         self.widget.setGraphicsEffect(None)
         opacityEffect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(opacityEffect)

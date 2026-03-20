@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 from PySide6.QtCore import (QEvent, QEasingCurve, Qt, Signal, QPropertyAnimation, Property, QRectF,
                           QTimer, QPoint, QObject)
@@ -11,7 +11,7 @@ from ...common.style_sheet import isDarkTheme
 from ...common.smooth_scroll import SmoothScroll
 
 class ArrowButton(QToolButton):
-    """ Arrow button """
+    """ Arrow 按钮 """
 
     def __init__(self, icon: FluentIcon, parent=None):
         super().__init__(parent=parent)
@@ -46,7 +46,7 @@ class ArrowButton(QToolButton):
 
 
 class ScrollBarGroove(QWidget):
-    """ Scroll bar groove """
+    """ 滚动条 groove """
 
     def __init__(self, orient: Qt.Orientation, parent):
         super().__init__(parent=parent)
@@ -120,7 +120,7 @@ class ScrollBarGroove(QWidget):
 
 
 class ScrollBarHandle(QWidget):
-    """ Scroll bar handle """
+    """ 滚动条 处理 """
 
     def __init__(self, orient: Qt.Orientation, parent=None):
         super().__init__(parent)
@@ -177,14 +177,14 @@ class ScrollBarHandle(QWidget):
 
 
 class ScrollBarHandleDisplayMode(Enum):
-    """Scroll bar handle display mode"""
+    """滚动条 处理 display 模式"""
 
     ALWAYS = 0
     ON_HOVER = 1
 
 
 class ScrollBar(QWidget):
-    """ Fluent scroll bar """
+    """ Fluent 滚动条 """
 
     rangeChanged = Signal(tuple)
     valueChanged = Signal(int)
@@ -262,7 +262,7 @@ class ScrollBar(QWidget):
         self._value = value
         self.valueChanged.emit(value)
 
-        # adjust the position of handle
+        # 调整the 位置 的 处理
         self._adjustHandlePos()
 
     def minimum(self):
@@ -329,23 +329,23 @@ class ScrollBar(QWidget):
             self.sliderReleased.emit()
 
     def setHandleColor(self, light, dark):
-        """set the color of handle
+        """设置处理的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: QColor | str | Qt.GlobalColor
-            the color in  light/dark theme mode
+        亮色, dark: QColor | str | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.handle.setLightColor(light)
         self.handle.setDarkColor(dark)
 
     def setArrowColor(self, light, dark):
-        """set the color of arrow button
+        """设置arrow 按钮的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: QColor | str | Qt.GlobalColor
-            the color in  light/dark theme mode
+        亮色, dark: QColor | str | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.groove.upButton.setLightColor(light)
         self.groove.upButton.setDarkColor(dark)
@@ -353,18 +353,18 @@ class ScrollBar(QWidget):
         self.groove.downButton.setDarkColor(dark)
 
     def setGrooveColor(self, light, dark):
-        """set the color of groove
+        """设置groove的颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: QColor | str | Qt.GlobalColor
-            the color in  light/dark theme mode
+        亮色, dark: QColor | str | Qt.GlobalColor
+            颜色 中的 亮色/暗色主题模式
         """
         self.groove.setLightBackgroundColor(light)
         self.groove.setDarkBackgroundColor(dark)
 
     def setHandleDisplayMode(self, mode: ScrollBarHandleDisplayMode):
-        """set the display mode of handle"""
+        """设置处理的display 模式"""
         if mode == self.handleDisplayMode:
             return
 
@@ -375,7 +375,7 @@ class ScrollBar(QWidget):
             self.handle.fadeIn()
 
     def expand(self):
-        """ expand scroll bar """
+        """ 展开滚动 栏 """
         if self._isExpanded or not self._isEnter:
             return
 
@@ -384,7 +384,7 @@ class ScrollBar(QWidget):
         self.handle.fadeIn()
 
     def collapse(self):
-        """ collapse scroll bar """
+        """ 折叠滚动 栏 """
         if not self._isExpanded or self._isEnter:
             return
 
@@ -406,7 +406,7 @@ class ScrollBar(QWidget):
         if obj is not self.parent():
             return super().eventFilter(obj, e)
 
-        # adjust the position of slider
+        # 调整the 位置 的 slider
         if e.type() == QEvent.Resize:
             self._adjustPos(e.size())
 
@@ -448,7 +448,7 @@ class ScrollBar(QWidget):
         else:
             dv = e.pos().x() - self._pressedPos.x()
 
-        # don't use `self.setValue()`, because it could be reimplemented
+        # don't use `self.setValue()`, 因为 it could be reimplemented
         dv = int(dv / max(self._slideLength(), 1) * (self.maximum() - self.minimum()))
         ScrollBar.setValue(self, self.value() + dv)
 
@@ -513,7 +513,7 @@ class ScrollBar(QWidget):
         self._adjustHandlePos()
 
     def setForceHidden(self, isHidden: bool):
-        """ whether to force the scrollbar to be hidden """
+        """ 是否 到 force scrollbar 到 be hidden """
         self._isForceHidden = isHidden
         self.setVisible(self.maximum() > 0 and not isHidden)
 
@@ -522,7 +522,7 @@ class ScrollBar(QWidget):
 
 
 class SmoothScrollBar(ScrollBar):
-    """ Smooth scroll bar """
+    """ Smooth 滚动条 """
 
     def __init__(self, orient: Qt.Orientation, parent):
         super().__init__(orient, parent)
@@ -539,14 +539,14 @@ class SmoothScrollBar(ScrollBar):
         if value == self.value():
             return
 
-        # stop running animation
+        # 停止running 动画
         self.ani.stop()
 
         if not useAni:
             self.val = value
             return
 
-        # adjust the duration
+        # 调整the 持续时间
         dv = abs(value - self.value())
         if dv < 50:
             self.ani.setDuration(int(self.duration * dv / 70))
@@ -558,14 +558,14 @@ class SmoothScrollBar(ScrollBar):
         self.ani.start()
 
     def scrollValue(self, value, useAni=True):
-        """ scroll the specified distance """
+        """ 滚动 specified distance """
         self.__value += value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
         self.setValue(self.__value, useAni)
 
     def scrollTo(self, value, useAni=True):
-        """ scroll to the specified position """
+        """ 滚动 到 specified 位置 """
         self.__value = value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
@@ -585,15 +585,15 @@ class SmoothScrollBar(ScrollBar):
         self.__value = self.value()
 
     def setScrollAnimation(self, duration, easing=QEasingCurve.OutCubic):
-        """ set scroll animation
+        """ 设置 滚动 动画
 
-        Parameters
+        参数
         ----------
         duration: int
-            scroll duration
+            滚动 持续时间
 
         easing: QEasingCurve
-            animation type
+            动画 type
         """
         self.duration = duration
         self.ani.setDuration(duration)
@@ -601,17 +601,17 @@ class SmoothScrollBar(ScrollBar):
 
 
 class SmoothScrollDelegate(QObject):
-    """ Smooth scroll delegate """
+    """ Smooth 滚动 委托 """
 
     def __init__(self, parent: QAbstractScrollArea, useAni=False):
         """
-        Parameters
+        参数
         ----------
         parent: QAbstractScrollArea
-            the scrolling area being delegated
+            scrolling area being delegated
 
         useAni: bool
-            whether to use `QPropertyAnimation` to achieve smooth scrolling
+            是否 到 use `QPropertyAnimation` 到 achieve smooth scrolling
         """
         super().__init__(parent)
         self.useAni = useAni
@@ -633,11 +633,11 @@ class SmoothScrollDelegate(QObject):
 
     def eventFilter(self, obj, e: QEvent):
         if e.type() == QEvent.Type.Wheel:
-            # Check if the vertical scroll is at its limit
+            # Check 如果 vertical 滚动 is at its limit
             verticalAtEnd = (e.angleDelta().y() < 0 and self.vScrollBar.value() == self.vScrollBar.maximum()) or \
                             (e.angleDelta().y() > 0 and self.vScrollBar.value() == self.vScrollBar.minimum())
 
-            # Check if the horizontal scroll is at its limit
+            # Check 如果 horizontal 滚动 is at its limit
             horizontalAtEnd = (e.angleDelta().x() < 0 and self.hScrollBar.value() == self.hScrollBar.maximum()) or \
                               (e.angleDelta().x() > 0 and self.hScrollBar.value() == self.hScrollBar.minimum())
 

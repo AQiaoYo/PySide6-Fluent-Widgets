@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Iterable
 
 from PySide6.QtCore import Qt, Signal, QSize, QEvent, QRectF, QEasingCurve, QTime
@@ -10,7 +10,7 @@ from ...common.icon import FluentIcon, isDarkTheme
 
 
 class ScrollButton(QToolButton):
-    """ Scroll button """
+    """ 滚动按钮 """
 
     def __init__(self, icon: FluentIcon, parent=None):
         super().__init__(parent=parent)
@@ -49,25 +49,25 @@ class ScrollButton(QToolButton):
 
 
 class CycleListWidget(QListWidget):
-    """ Cycle list widget """
+    """ Cycle 列表 部件 """
 
     currentItemChanged = Signal(QListWidgetItem)
 
     def __init__(self, items: Iterable, itemSize: QSize, align=Qt.AlignCenter, parent=None):
         """
-        Parameters
+        参数
         ----------
         items: Iterable[Any]
-            the items to be added
+            项 到 be added
 
         itemSize: QSize
-            the size of item
+            大小 的 项
 
         align: Qt.AlignmentFlag
-            the text alignment of item
+            文本 alignment 的 项
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(parent=parent)
         self.itemSize = itemSize
@@ -83,7 +83,7 @@ class CycleListWidget(QListWidget):
         self.vScrollBar = SmoothScrollBar(Qt.Vertical, self)
         self.visibleNumber = 9
 
-        # repeat adding items to achieve circular scrolling
+        # repeat adding 项 到 achieve circular scrolling
         self.setItems(items)
 
         self.setVerticalScrollMode(self.ScrollMode.ScrollPerPixel)
@@ -94,14 +94,14 @@ class CycleListWidget(QListWidget):
         self.setFixedSize(itemSize.width()+8,
                           itemSize.height()*self.visibleNumber)
 
-        # hide scroll bar
+        # 隐藏滚动 栏
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
         self.itemClicked.connect(self._onItemClicked)
         self.installEventFilter(self)
 
-        # enable auto-repeat by default
+        # 启用auto-repeat by default
         self.upButton.clicked.connect(self.scrollUp)
         self.downButton.clicked.connect(self.scrollDown)
         self.upButton.setAutoRepeatDelay(500)
@@ -113,18 +113,18 @@ class CycleListWidget(QListWidget):
         self._setButtonsVisible(False)
 
     def setItems(self, items: list):
-        """ set items in the list
+        """ 设置 项 中的 列表
 
-        Parameters
+        参数
         ----------
         items: Iterable[Any]
-            the items to be added
+            项 到 be added
 
         itemSize: QSize
-            the size of item
+            大小 的 项
 
         align: Qt.AlignmentFlag
-            the text alignment of item
+            文本 alignment 的 项
         """
         self.clear()
         self._createItems(items)
@@ -141,7 +141,7 @@ class CycleListWidget(QListWidget):
             super().scrollToItem(
                 self.item(self.currentIndex()-self.visibleNumber//2), QListWidget.PositionAtTop)
         else:
-            n = self.visibleNumber // 2  # add empty items to enable scrolling
+            n = self.visibleNumber // 2  # 将empty 项添加到启用 scrolling
 
             self._addColumnItems(['']*n, True)
             self._addColumnItems(items)
@@ -164,7 +164,7 @@ class CycleListWidget(QListWidget):
         self.scrollToItem(self.currentItem())
 
     def setSelectedItem(self, text: str):
-        """ set the selected item """
+        """ 设置 选中项 """
         if text is None:
             return
 
@@ -180,13 +180,13 @@ class CycleListWidget(QListWidget):
         super().scrollToItem(self.currentItem(), QListWidget.ScrollHint.PositionAtCenter)
 
     def scrollToItem(self, item: QListWidgetItem, hint=QListWidget.ScrollHint.PositionAtCenter):
-        """ scroll to item """
-        # scroll to center position
+        """ 滚动 到 项 """
+        # 滚动 到 center 位置
         index = self.row(item)
         y = item.sizeHint().height() * (index - self.visibleNumber // 2)
         self.vScrollBar.scrollTo(y)
 
-        # clear selection
+        # 清空selection
         self.clearSelection()
         item.setSelected(False)
 
@@ -199,7 +199,7 @@ class CycleListWidget(QListWidget):
             self.scrollUp()
 
     def setScrollButtonRepeatEnabled(self, isEnabled: bool):
-        """ set whether to enable scroll button auto repeat """
+        """ 设置 是否 到 启用 滚动按钮 auto repeat """
         if self._scrollButtonRepeatEnabled == isEnabled:
             return
 
@@ -208,12 +208,12 @@ class CycleListWidget(QListWidget):
         self.downButton.setAutoRepeat(isEnabled)
 
     def _scrollWithAnimation(self, index: int):
-        """ scroll with adaptive animation """
+        """ 滚动 使用 adaptive 动画 """
         t = QTime.currentTime()
         elapsed = self._lastScrollTime.msecsTo(t)
         self._lastScrollTime = t
 
-        # fast linear animation for rapid repeat, smooth for single click
+        # fast linear 动画 用于 rapid repeat, smooth 用于 single 点击
         if (self.upButton.isDown() or self.downButton.isDown()) and elapsed < 200:
             duration, easing = 100, QEasingCurve.Linear
         else:
@@ -224,15 +224,15 @@ class CycleListWidget(QListWidget):
         self.scrollToItem(self.currentItem())
 
     def scrollDown(self):
-        """ scroll down an item """
+        """ 滚动 down 项 """
         self._scrollWithAnimation(self.currentIndex() + 1)
 
     def scrollUp(self):
-        """ scroll up an item """
+        """ 滚动 up 项 """
         self._scrollWithAnimation(self.currentIndex() - 1)
 
     def _setButtonsVisible(self, visible: bool):
-        """ set scroll buttons visibility """
+        """ 设置 滚动 按钮 可见性 """
         self.upButton.setVisible(visible)
         self.downButton.setVisible(visible)
 
@@ -277,7 +277,7 @@ class CycleListWidget(QListWidget):
             m = (self.visibleNumber + 1) // 2
             self._currentIndex = index
 
-            # scroll to center to achieve circular scrolling
+            # 滚动 到 center 到 achieve circular scrolling
             if index >= self.count() - m:
                 self._currentIndex = N + index - self.count()
                 super().scrollToItem(self.item(self.currentIndex() - 1), self.ScrollHint.PositionAtCenter)

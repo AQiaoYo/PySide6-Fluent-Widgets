@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from PySide6.QtGui import QPixmap, QPainter, QColor
 from PySide6.QtWidgets import QWidget
 
@@ -6,7 +6,7 @@ from ...common.style_sheet import isDarkTheme
 
 
 class HorizontalSeparator(QWidget):
-    """ Horizontal separator """
+    """ Horizontal 分隔符 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -25,7 +25,7 @@ class HorizontalSeparator(QWidget):
 
 
 class VerticalSeparator(QWidget):
-    """ Vertical separator """
+    """ Vertical 分隔符 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

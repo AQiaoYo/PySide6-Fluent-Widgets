@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 
 from typing import List, Union
 
@@ -16,7 +16,7 @@ from .menu import LabelContextMenu
 
 
 class PixmapLabel(QLabel):
-    """ Label for high dpi pixmap """
+    """ 标签 用于 high dpi pixmap """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -42,12 +42,12 @@ class PixmapLabel(QLabel):
 
 
 class FluentLabelBase(QLabel):
-    """ Fluent label base class
+    """ Fluent 标签 基类
 
-    Constructors
+    构造函数
     ------------
-    * FluentLabelBase(`parent`: QWidget = None)
-    * FluentLabelBase(`text`: str, `parent`: QWidget = None)
+    * FluentLabelBase(`父部件`: QWidget = None)
+    * FluentLabelBase(`文本`: str, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod
@@ -74,12 +74,12 @@ class FluentLabelBase(QLabel):
 
     @exceptionHandler()
     def setTextColor(self, light=QColor(0, 0, 0), dark=QColor(255, 255, 255)):
-        """ set the text color of label
+        """ 设置标签的文本 颜色
 
-        Parameters
+        参数
         ----------
-        light, dark: QColor | Qt.GlobalColor | str
-            text color in light/dark mode
+        亮色, dark: QColor | Qt.GlobalColor | str
+            文本颜色 中的 light/dark 模式
         """
         self._lightColor = QColor(light)
         self._darkColor = QColor(dark)
@@ -143,12 +143,12 @@ class FluentLabelBase(QLabel):
 
 
 class CaptionLabel(FluentLabelBase):
-    """ Caption text label
+    """ Caption 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * CaptionLabel(`parent`: QWidget = None)
-    * CaptionLabel(`text`: str, `parent`: QWidget = None)
+    * CaptionLabel(`父部件`: QWidget = None)
+    * CaptionLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -156,12 +156,12 @@ class CaptionLabel(FluentLabelBase):
 
 
 class BodyLabel(FluentLabelBase):
-    """ Body text label
+    """ Body 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * BodyLabel(`parent`: QWidget = None)
-    * BodyLabel(`text`: str, `parent`: QWidget = None)
+    * BodyLabel(`父部件`: QWidget = None)
+    * BodyLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -169,12 +169,12 @@ class BodyLabel(FluentLabelBase):
 
 
 class StrongBodyLabel(FluentLabelBase):
-    """ Strong body text label
+    """ Strong body 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * StrongBodyLabel(`parent`: QWidget = None)
-    * StrongBodyLabel(`text`: str, `parent`: QWidget = None)
+    * StrongBodyLabel(`父部件`: QWidget = None)
+    * StrongBodyLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -182,12 +182,12 @@ class StrongBodyLabel(FluentLabelBase):
 
 
 class SubtitleLabel(FluentLabelBase):
-    """ Subtitle text label
+    """ Subtitle 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * SubtitleLabel(`parent`: QWidget = None)
-    * SubtitleLabel(`text`: str, `parent`: QWidget = None)
+    * SubtitleLabel(`父部件`: QWidget = None)
+    * SubtitleLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -195,12 +195,12 @@ class SubtitleLabel(FluentLabelBase):
 
 
 class TitleLabel(FluentLabelBase):
-    """ Sub title text label
+    """ Sub 标题 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * TitleLabel(`parent`: QWidget = None)
-    * TitleLabel(`text`: str, `parent`: QWidget = None)
+    * TitleLabel(`父部件`: QWidget = None)
+    * TitleLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -208,12 +208,12 @@ class TitleLabel(FluentLabelBase):
 
 
 class LargeTitleLabel(FluentLabelBase):
-    """ Large title text label
+    """ Large 标题 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * LargeTitleLabel(`parent`: QWidget = None)
-    * LargeTitleLabel(`text`: str, `parent`: QWidget = None)
+    * LargeTitleLabel(`父部件`: QWidget = None)
+    * LargeTitleLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -221,12 +221,12 @@ class LargeTitleLabel(FluentLabelBase):
 
 
 class DisplayLabel(FluentLabelBase):
-    """ Display text label
+    """ Display 文本 标签
 
-    Constructors
+    构造函数
     ------------
-    * DisplayLabel(`parent`: QWidget = None)
-    * DisplayLabel(`text`: str, `parent`: QWidget = None)
+    * DisplayLabel(`父部件`: QWidget = None)
+    * DisplayLabel(`文本`: str, `父部件`: QWidget = None)
     """
 
     def getFont(self):
@@ -234,12 +234,12 @@ class DisplayLabel(FluentLabelBase):
 
 
 class ImageLabel(QLabel):
-    """ Image label
+    """ 图像 标签
 
-    Constructors
+    构造函数
     ------------
-    * ImageLabel(`parent`: QWidget = None)
-    * ImageLabel(`image`: str | QImage | QPixmap, `parent`: QWidget = None)
+    * ImageLabel(`父部件`: QWidget = None)
+    * ImageLabel(`图像`: str | QImage | QPixmap, `父部件`: QWidget = None)
     """
 
     clicked = Signal()
@@ -274,7 +274,7 @@ class ImageLabel(QLabel):
         self.update()
 
     def setBorderRadius(self, topLeft: int, topRight: int, bottomLeft: int, bottomRight: int):
-        """ set the border radius of image """
+        """ 设置图像的边框 半径 """
         self._topLeftRadius = topLeft
         self._topRightRadius = topRight
         self._bottomLeftRadius = bottomLeft
@@ -282,7 +282,7 @@ class ImageLabel(QLabel):
         self.update()
 
     def setImage(self, image: Union[str, QPixmap, QImage] = None):
-        """ set the image of label """
+        """ 设置标签的图像 """
         self.image = image or QImage()
 
         if isinstance(image, str):
@@ -384,7 +384,7 @@ class ImageLabel(QLabel):
         d = self.topLeftRadius * 2
         path.arcTo(0, 0, d, d, -180, -90)
 
-        # draw image
+        # 绘制图像
         image = self.image.scaled(
             self.size()*self.devicePixelRatioF(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
 
@@ -427,12 +427,12 @@ class ImageLabel(QLabel):
 
 
 class AvatarWidget(ImageLabel):
-    """ Avatar widget
+    """ Avatar 部件
 
-    Constructors
+    构造函数
     ------------
-    * AvatarWidget(`parent`: QWidget = None)
-    * AvatarWidget(`image`: str | QImage | QPixmap, `parent`: QWidget = None)
+    * AvatarWidget(`父部件`: QWidget = None)
+    * AvatarWidget(`图像`: str | QImage | QPixmap, `父部件`: QWidget = None)
     """
 
     def _postInit(self):
@@ -468,7 +468,7 @@ class AvatarWidget(ImageLabel):
             self._drawTextAvatar(painter)
 
     def _drawImageAvatar(self, painter: QPainter):
-        # center crop image
+        # center crop 图像
         image = self.image.scaled(
             self.size()*self.devicePixelRatioF(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)  # type: QImage
 
@@ -477,7 +477,7 @@ class AvatarWidget(ImageLabel):
         x, y = (iw - d) / 2, (ih - d) / 2
         image = image.copy(int(x), int(y), int(d), int(d))
 
-        # draw image
+        # 绘制图像
         path = QPainterPath()
         path.addEllipse(QRectF(self.rect()))
 
@@ -501,13 +501,13 @@ class AvatarWidget(ImageLabel):
 
 
 class HyperlinkLabel(QPushButton):
-    """ Hyperlink label
+    """ Hyperlink 标签
 
-    Constructors
+    构造函数
     ------------
-    * HyperlinkLabel(`parent`: QWidget = None)
-    * HyperlinkLabel(`text`: str, `parent`: QWidget = None)
-    * HyperlinkLabel(`url`: QUrl, `parent`: QWidget = None)
+    * HyperlinkLabel(`父部件`: QWidget = None)
+    * HyperlinkLabel(`文本`: str, `父部件`: QWidget = None)
+    * HyperlinkLabel(`url`: QUrl, `父部件`: QWidget = None)
     """
 
     @singledispatchmethod

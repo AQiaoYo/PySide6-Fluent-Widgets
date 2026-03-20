@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List, Union
 
 from PySide6.QtCore import Qt, Signal, QModelIndex, QSize, Property, QRectF, QPropertyAnimation, QSizeF
@@ -13,7 +13,7 @@ from .button import ToolButton
 
 
 class ScrollButton(ToolButton):
-    """ Scroll button """
+    """ 滚动按钮 """
 
     def _postInit(self):
         self._opacity = 0
@@ -46,7 +46,7 @@ class ScrollButton(ToolButton):
         painter.setPen(Qt.NoPen)
         painter.setOpacity(self.opacity)
 
-        # draw background
+        # 绘制背景
         if not isDarkTheme():
             painter.setBrush(QColor(252, 252, 252, 217))
         else:
@@ -54,7 +54,7 @@ class ScrollButton(ToolButton):
 
         painter.drawRoundedRect(self.rect(), 4, 4)
 
-        # draw icon
+        # 绘制图标
         if isDarkTheme():
             color = QColor(255, 255, 255)
             opacity = 0.773 if self.isHover or self.isPressed else 0.541
@@ -73,7 +73,7 @@ class ScrollButton(ToolButton):
 
 
 class FlipImageDelegate(QStyledItemDelegate):
-    """ Flip view image delegate """
+    """ Flip 视图 图像 委托 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -95,13 +95,13 @@ class FlipImageDelegate(QStyledItemDelegate):
         size = self.itemSize(index.row())  # type: QSize
         p = self.parent()  # type: FlipView
 
-        # draw image
+        # 绘制图像
         r = p.devicePixelRatioF()
         image = index.data(Qt.UserRole)  # type: QImage
         if image is None:
             return painter.restore()
 
-        # lazy load image
+        # lazy load 图像
         if image.isNull() and index.data(Qt.ItemDataRole.DisplayRole):
             image.load(index.data(Qt.ItemDataRole.DisplayRole))
             index.model().setData(index, image, Qt.ItemDataRole.UserRole)
@@ -120,7 +120,7 @@ class FlipImageDelegate(QStyledItemDelegate):
         image = image.scaled(size * r, p.aspectRatioMode, Qt.SmoothTransformation)
         painter.setClipPath(path)
 
-        # center crop image
+        # center crop 图像
         if p.aspectRatioMode == Qt.AspectRatioMode.KeepAspectRatioByExpanding:
             iw, ih = image.width(), image.height()
             size = QSizeF(size) * r
@@ -132,12 +132,12 @@ class FlipImageDelegate(QStyledItemDelegate):
 
 
 class FlipView(QListWidget):
-    """ Flip view
+    """ Flip 视图
 
-    Constructors
+    构造函数
     ------------
-    * FlipView(`parent`: QWidget = None)
-    * FlipView(`orient`: Qt.Orientation, `parent`: QWidget = None)
+    * FlipView(`父部件`: QWidget = None)
+    * FlipView(`orient`: Qt.Orientation, `父部件`: QWidget = None)
     """
 
     currentIndexChanged = Signal(int)
@@ -188,7 +188,7 @@ class FlipView(QListWidget):
             self.preButton.setFixedSize(38, 16)
             self.nextButton.setFixedSize(38, 16)
 
-        # connect signal to slot
+        # 连接信号与槽函数
         self.preButton.clicked.connect(self.scrollPrevious)
         self.nextButton.clicked.connect(self.scrollNext)
 
@@ -196,7 +196,7 @@ class FlipView(QListWidget):
         return self.orientation == Qt.Horizontal
 
     def setItemSize(self, size: QSize):
-        """ set the size of item """
+        """ 设置项的大小 """
         if size == self.itemSize:
             return
 
@@ -208,32 +208,32 @@ class FlipView(QListWidget):
         self.viewport().update()
 
     def getItemSize(self):
-        """ get the size of item """
+        """ 获取项的大小 """
         return self._itemSize
 
     def setBorderRadius(self, radius: int):
-        """ set the border radius of item """
+        """ 设置项的边框 半径 """
         self.delegate.setBorderRadius(radius)
 
     def getBorderRadius(self):
         return self.delegate.borderRadius
 
     def scrollPrevious(self):
-        """ scroll to previous item """
+        """ 滚动 到 previous 项 """
         self.setCurrentIndex(self.currentIndex() - 1)
 
     def scrollNext(self):
-        """ scroll to next item """
+        """ 滚动 到 next 项 """
         self.setCurrentIndex(self.currentIndex() + 1)
 
     def setCurrentIndex(self, index: int):
-        """ set current index """
+        """ 设置当前索引 """
         if not 0 <= index < self.count() or index == self.currentIndex():
             return
 
         self.scrollToIndex(index)
 
-        # update the visibility of scroll button
+        # 更新the 可见性 的 滚动按钮
         if index == 0:
             self.preButton.fadeOut()
         elif self.preButton.isTransparent() and self.isHover:
@@ -244,7 +244,7 @@ class FlipView(QListWidget):
         elif self.nextButton.isTransparent() and self.isHover:
             self.nextButton.fadeIn()
 
-        # fire signal
+        # fire 信号
         self.currentIndexChanged.emit(index)
 
     def scrollToIndex(self, index):
@@ -271,11 +271,11 @@ class FlipView(QListWidget):
         return self.item(index).data(Qt.UserRole)
 
     def addImage(self, image: Union[QImage, QPixmap, str]):
-        """ add image """
+        """ 添加 图像 """
         self.addImages([image])
 
     def addImages(self, images: List[Union[QImage, QPixmap, str]], targetSize: QSize = None):
-        """ add images """
+        """ 添加 images """
         if not images:
             return
 
@@ -289,13 +289,13 @@ class FlipView(QListWidget):
             self._currentIndex = 0
 
     def setItemImage(self, index: int, image: Union[QImage, QPixmap, str], targetSize: QSize = None):
-        """ set the image of specified item """
+        """ 设置specified 项的图像 """
         if not 0 <= index < self.count():
             return
 
         item = self.item(index)
 
-        # convert image to QImage
+        # 将图像转换为QImage
         if isinstance(image, QPixmap):
             image = image.toImage()
 
@@ -330,15 +330,15 @@ class FlipView(QListWidget):
         item.setSizeHint(QSize(w, h))
 
     def itemImage(self, index: int, load=True) -> QImage:
-        """ get the image of specified item
+        """ 获取specified 项的图像
 
-        Parameters
+        参数
         ----------
         index: int
-            the index of image
+            索引 的 图像
 
         load: bool
-            whether to load image data
+            是否 到 load 图像 数据
         """
         if not 0 <= index < self.count():
             return
@@ -417,14 +417,14 @@ class FlipView(QListWidget):
 
 
 class HorizontalFlipView(FlipView):
-    """ Horizontal flip view """
+    """ Horizontal flip 视图 """
 
     def __init__(self, parent=None):
         super().__init__(Qt.Horizontal, parent)
 
 
 class VerticalFlipView(FlipView):
-    """ Vertical flip view """
+    """ Vertical flip 视图 """
 
     def __init__(self, parent=None):
         super().__init__(Qt.Vertical, parent)

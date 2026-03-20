@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from enum import Enum
 import sys
 from typing import Union
@@ -19,7 +19,7 @@ from .button import TransparentToolButton
 
 
 class InfoBarIcon(FluentIconBase, Enum):
-    """ Info bar icon """
+    """ 信息栏 图标 """
 
     INFORMATION = "Info"
     SUCCESS = "Success"
@@ -36,7 +36,7 @@ class InfoBarIcon(FluentIconBase, Enum):
 
 
 class InfoBarPosition(Enum):
-    """ Info bar position """
+    """ 信息栏位置 """
     TOP = 0
     BOTTOM = 1
     TOP_LEFT = 2
@@ -47,7 +47,7 @@ class InfoBarPosition(Enum):
 
 
 class InfoIconWidget(QWidget):
-    """ Icon widget """
+    """ 图标 部件 """
 
     def __init__(self, icon: InfoBarIcon, parent=None):
         super().__init__(parent=parent)
@@ -67,7 +67,7 @@ class InfoIconWidget(QWidget):
 
 
 class InfoBar(QFrame):
-    """ Information bar """
+    """ Information 栏 """
 
     closedSignal = Signal()
     _desktopView = None     # type: DesktopInfoBarView
@@ -76,29 +76,29 @@ class InfoBar(QFrame):
                  orient=Qt.Horizontal, isClosable=True, duration=1000, position=InfoBarPosition.TOP_RIGHT,
                  parent=None):
         """
-        Parameters
+        参数
         ----------
         icon: InfoBarIcon | FluentIconBase | QIcon | str
-            the icon of info bar
+            图标 的 信息栏
 
         title: str
-            the title of info bar
+            标题 的 信息栏
 
         content: str
-            the content of info bar
+            内容 的 信息栏
 
         orient: Qt.Orientation
-            the layout direction of info bar, use `Qt.Horizontal` for short content
+            布局 方向 的 信息栏, use `Qt.Horizontal` 用于 short 内容
 
         isClosable: bool
-            whether to show the close button
+            是否 到 显示 关闭 按钮
 
         duraction: int
-            the time for info bar to display in milliseconds. If duration is less than zero,
-            info bar will never disappear.
+            时间 用于 信息栏 到 display 中的 milliseconds. 如果 持续时间 is less than zero,
+            信息栏 will never disappear.
 
         parent: QWidget
-            parent widget
+            父部件 部件
         """
         super().__init__(parent=parent)
         self.title = title
@@ -151,14 +151,14 @@ class InfoBar(QFrame):
         self.hBoxLayout.setSpacing(0)
         self.textLayout.setSpacing(5)
 
-        # add icon to layout
+        # 将图标添加到布局
         self.hBoxLayout.addWidget(self.iconWidget, 0, Qt.AlignTop | Qt.AlignLeft)
 
-        # add title to layout
+        # 将标题添加到布局
         self.textLayout.addWidget(self.titleLabel, 1, Qt.AlignTop)
         self.titleLabel.setVisible(bool(self.title))
 
-        # add content label to layout
+        # 将内容 标签添加到布局
         if self.orient == Qt.Horizontal:
             self.textLayout.addSpacing(7)
 
@@ -166,14 +166,14 @@ class InfoBar(QFrame):
         self.contentLabel.setVisible(bool(self.content))
         self.hBoxLayout.addLayout(self.textLayout)
 
-        # add widget layout
+        # 添加 部件 布局
         if self.orient == Qt.Horizontal:
             self.hBoxLayout.addLayout(self.widgetLayout)
             self.widgetLayout.setSpacing(10)
         else:
             self.textLayout.addLayout(self.widgetLayout)
 
-        # add close button to layout
+        # 将关闭 按钮添加到布局
         self.hBoxLayout.addSpacing(12)
         self.hBoxLayout.addWidget(self.closeButton, 0, Qt.AlignTop | Qt.AlignLeft)
 
@@ -188,8 +188,8 @@ class InfoBar(QFrame):
         FluentStyleSheet.INFO_BAR.apply(self)
 
     def __fadeOut(self):
-        """ fade out """
-        # After compiling to executable file by nuitka, RuntimeError will be thrown if we close the InfoBar manually
+        """ 淡出 """
+        # After compiling 到 executable file by nuitka, RuntimeError will be thrown 如果 we 关闭 InfoBar manually
         try:
             self.opacityAni.setDuration(200)
             self.opacityAni.setStartValue(1)
@@ -202,28 +202,28 @@ class InfoBar(QFrame):
     def _adjustText(self):
         w = 900 if not self.parent() else (self.parent().width() - 50)
 
-        # adjust title
+        # 调整标题
         chars = max(min(w / 10, 120), 30)
         self.titleLabel.setText(TextWrap.wrap(self.title, chars, False)[0])
 
-        # adjust content
+        # 调整内容
         chars = max(min(w / 9, 120), 30)
         self.contentLabel.setText(TextWrap.wrap(self.content, chars, False)[0])
         self.adjustSize()
 
     def addWidget(self, widget: QWidget, stretch=0):
-        """ add widget to info bar """
+        """ 将部件添加到info 栏 """
         self.widgetLayout.addSpacing(6)
         align = Qt.AlignTop if self.orient == Qt.Vertical else Qt.AlignVCenter
         self.widgetLayout.addWidget(widget, stretch, Qt.AlignLeft | align)
 
     def setCustomBackgroundColor(self, light, dark):
-        """ set the custom background color
+        """ 设置 自定义 背景色
 
-        Parameters
+        参数
         ----------
-        light, dark: str | Qt.GlobalColor | QColor
-            background color in light/dark theme mode
+        亮色, dark: str | Qt.GlobalColor | QColor
+            背景色 中的 亮色/暗色主题模式
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
@@ -302,7 +302,7 @@ class InfoBar(QFrame):
 
     @classmethod
     def desktopView(cls):
-        """ Returns the desktop container """
+        """ 返回 desktop container """
         if not cls._desktopView:
             cls._desktopView = DesktopInfoBarView()
             cls._desktopView.show()
@@ -311,7 +311,7 @@ class InfoBar(QFrame):
 
 
 class InfoBarManager(QObject):
-    """ Info bar manager """
+    """ 信息栏 管理器 """
 
     _instance = None
     managers = {}
@@ -338,7 +338,7 @@ class InfoBarManager(QObject):
         self.__initialized = True
 
     def add(self, infoBar: InfoBar):
-        """ add info bar """
+        """ 添加 信息栏 """
         p = infoBar.parent()    # type:QWidget
         if not p:
             return
@@ -351,7 +351,7 @@ class InfoBarManager(QObject):
         if infoBar in self.infoBars[p]:
             return
 
-        # add drop animation
+        # 添加 drop 动画
         if self.infoBars[p]:
             dropAni = QPropertyAnimation(infoBar, b'pos')
             dropAni.setDuration(200)
@@ -361,7 +361,7 @@ class InfoBarManager(QObject):
 
             infoBar.setProperty('dropAni', dropAni)
 
-        # add slide animation
+        # 添加 slide 动画
         self.infoBars[p].append(infoBar)
         slideAni = self._createSlideAni(infoBar)
         self.slideAnis.append(slideAni)
@@ -372,7 +372,7 @@ class InfoBarManager(QObject):
         slideAni.start()
 
     def remove(self, infoBar: InfoBar):
-        """ remove info bar """
+        """ 移除 信息栏 """
         p = infoBar.parent()
         if p not in self.infoBars:
             return
@@ -382,18 +382,18 @@ class InfoBarManager(QObject):
 
         self.infoBars[p].remove(infoBar)
 
-        # remove drop animation
+        # 移除 drop 动画
         dropAni = infoBar.property('dropAni')   # type: QPropertyAnimation
         if dropAni:
             self.aniGroups[p].removeAnimation(dropAni)
             self.dropAnis.remove(dropAni)
 
-        # remove slider animation
+        # 移除 slider 动画
         slideAni = infoBar.property('slideAni')
         if slideAni:
             self.slideAnis.remove(slideAni)
 
-        # adjust the position of the remaining info bars
+        # 调整the 位置 的 remaining info bars
         self._updateDropAni(p)
         self.aniGroups[p].start()
 
@@ -417,15 +417,15 @@ class InfoBarManager(QObject):
             ani.setEndValue(self._pos(bar))
 
     def _pos(self, infoBar: InfoBar, parentSize=None) -> QPoint:
-        """ return the position of info bar """
+        """ 返回info 栏的位置 """
         raise NotImplementedError
 
     def _slideStartPos(self, infoBar: InfoBar) -> QPoint:
-        """ return the start position of slide animation  """
+        """ 返回slide 动画的开始 位置  """
         raise NotImplementedError
 
     def eventFilter(self, obj, e: QEvent):
-        # After compiling to executable file, RuntimeError will be thrown when closing app
+        # After compiling 到 executable file, RuntimeError will be thrown 当 closing app
         try:
             if obj not in self.infoBars:
                 return False
@@ -441,12 +441,12 @@ class InfoBarManager(QObject):
 
     @classmethod
     def register(cls, name):
-        """ register menu animation manager
+        """ 注册 菜单 动画 管理器
 
-        Parameters
+        参数
         ----------
         name: Any
-            the name of manager, it should be unique
+            name 的 管理器, it should be unique
         """
         def wrapper(Manager):
             if name not in cls.managers:
@@ -458,7 +458,7 @@ class InfoBarManager(QObject):
 
     @classmethod
     def make(cls, position: InfoBarPosition):
-        """ mask info bar manager according to the display position """
+        """ 遮罩 信息栏 管理器 根据 display 位置 """
         if position not in cls.managers:
             raise ValueError(f'`{position}` is an invalid animation type.')
 
@@ -467,7 +467,7 @@ class InfoBarManager(QObject):
 
 @InfoBarManager.register(InfoBarPosition.TOP)
 class TopInfoBarManager(InfoBarManager):
-    """ Top position info bar manager """
+    """ Top 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize=None):
         p = infoBar.parent()
@@ -488,7 +488,7 @@ class TopInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.TOP_RIGHT)
 class TopRightInfoBarManager(InfoBarManager):
-    """ Top right position info bar manager """
+    """ Top right 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize=None):
         p = infoBar.parent()
@@ -508,7 +508,7 @@ class TopRightInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM_RIGHT)
 class BottomRightInfoBarManager(InfoBarManager):
-    """ Bottom right position info bar manager """
+    """ Bottom right 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize=None) -> QPoint:
         p = infoBar.parent()
@@ -529,7 +529,7 @@ class BottomRightInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.TOP_LEFT)
 class TopLeftInfoBarManager(InfoBarManager):
-    """ Top left position info bar manager """
+    """ Top left 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize=None) -> QPoint:
         p = infoBar.parent()
@@ -549,7 +549,7 @@ class TopLeftInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM_LEFT)
 class BottomLeftInfoBarManager(InfoBarManager):
-    """ Bottom left position info bar manager """
+    """ Bottom left 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize: QSize = None) -> QPoint:
         p = infoBar.parent()
@@ -569,7 +569,7 @@ class BottomLeftInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM)
 class BottomInfoBarManager(InfoBarManager):
-    """ Bottom position info bar manager """
+    """ Bottom 位置 信息栏 管理器 """
 
     def _pos(self, infoBar: InfoBar, parentSize: QSize = None) -> QPoint:
         p = infoBar.parent()

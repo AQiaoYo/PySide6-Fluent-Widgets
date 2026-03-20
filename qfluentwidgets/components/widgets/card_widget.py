@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List, Union
 from PySide6.QtCore import Qt, Signal, QRectF, Property, QPropertyAnimation, QPoint, QSize
 from PySide6.QtGui import QPixmap, QPainter, QColor, QPainterPath, QFont, QIcon
@@ -14,7 +14,7 @@ from .icon_widget import IconWidget
 
 
 class CardWidget(BackgroundAnimationWidget, QFrame):
-    """ Card widget """
+    """ Card 部件 """
 
     clicked = Signal()
 
@@ -60,7 +60,7 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
 
         isDark = isDarkTheme()
 
-        # draw top border
+        # 绘制top 边框
         path = QPainterPath()
         # path.moveTo(1, h - r)
         path.arcMoveTo(1, h - d - 1, d, d, 240)
@@ -83,7 +83,7 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
 
         painter.strokePath(path, topBorderColor)
 
-        # draw bottom border
+        # 绘制bottom 边框
         path = QPainterPath()
         path.arcMoveTo(1, h - d - 1, d, d, 240)
         path.arcTo(1, h - d - 1, d, d, 240, 30)
@@ -96,7 +96,7 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
 
         painter.strokePath(path, bottomBorderColor)
 
-        # draw background
+        # 绘制背景
         painter.setPen(Qt.NoPen)
         rect = self.rect().adjusted(1, 1, -1, -1)
         painter.setBrush(self.backgroundColor)
@@ -107,7 +107,7 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
 
 
 class SimpleCardWidget(CardWidget):
-    """ Simple card widget """
+    """ 简易 card 部件 """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -137,7 +137,7 @@ class SimpleCardWidget(CardWidget):
 
 
 class ElevatedCardWidget(SimpleCardWidget):
-    """ Card widget with shadow effect """
+    """ Card 部件 使用 shadow effect """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -181,7 +181,7 @@ class ElevatedCardWidget(SimpleCardWidget):
 
 
 class CardSeparator(QWidget):
-    """ Card separator """
+    """ Card 分隔符 """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -200,7 +200,7 @@ class CardSeparator(QWidget):
 
 
 class HeaderCardWidget(SimpleCardWidget):
-    """ Header card widget """
+    """ Header card 部件 """
 
     @singledispatchmethod
     def __init__(self, parent=None):
@@ -323,11 +323,11 @@ class CardGroupWidget(QWidget):
 
 
 class GroupHeaderCardWidget(HeaderCardWidget):
-    """ Group header card widget """
+    """ 分组 header card 部件 """
 
     def _postInit(self):
         super()._postInit()
-        self.groupWidgets = []  # type: List[CardGroupWidget]
+        self.groupWidgets = []  # type: 列表[CardGroupWidget]
         self.groupLayout = QVBoxLayout()
 
         self.groupLayout.setSpacing(0)
@@ -336,24 +336,24 @@ class GroupHeaderCardWidget(HeaderCardWidget):
         self.viewLayout.addLayout(self.groupLayout)
 
     def addGroup(self, icon: Union[str, FluentIconBase, QIcon], title: str, content: str, widget: QWidget, stretch=0) -> CardGroupWidget:
-        """ add widget to a new group
+        """ 将部件添加到a new 分组
 
-        Parameters
+        参数
         ----------
         icon: str | QIcon | FluentIconBase
-            the icon to be drawn
+            图标 到 be drawn
 
         title: str
-            the title of card
+            标题 的 card
 
         content: str
-            the content of card
+            内容 的 card
 
         widget: QWidget
-            the widget to be added
+            部件 到 be added
 
         stretch: int
-            the layout stretch of widget
+            布局 stretch 的 部件
         """
         group = CardGroupWidget(icon, title, content, self)
         group.addWidget(widget, stretch=stretch)

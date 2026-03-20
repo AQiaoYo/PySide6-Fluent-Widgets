@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import Dict, List
 from itertools import groupby
 
@@ -7,7 +7,7 @@ from PySide6.QtWidgets import QWidget, QStackedWidget
 
 
 class RouteItem:
-    """ Route item """
+    """ Route 项 """
 
     def __init__(self, stacked: QStackedWidget, routeKey: str):
         self.stacked = stacked
@@ -26,7 +26,7 @@ class StackedHistory:
     def __init__(self, stacked: QStackedWidget):
         self.stacked = stacked
         self.defaultRouteKey = None  # type: str
-        self.history = [self.defaultRouteKey]   # type: List[str]
+        self.history = [self.defaultRouteKey]   # type: 列表[str]
 
     def __len__(self):
         return len(self.history)
@@ -76,11 +76,11 @@ class Router(QObject):
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
-        self.history = []   # type: List[RouteItem]
+        self.history = []   # type: 列表[RouteItem]
         self.stackHistories = {}  # type: Dict[QStackedWidget, StackedHistory]
 
     def setDefaultRouteKey(self, stacked: QStackedWidget, routeKey: str):
-        """ set the default route key of stacked widget """
+        """ 设置stacked 部件的default 路由键 """
         if stacked not in self.stackHistories:
             self.stackHistories[stacked] = StackedHistory(stacked)
 
@@ -89,20 +89,20 @@ class Router(QObject):
     def push(self, stacked: QStackedWidget, routeKey: str):
         """ push history
 
-        Parameters
+        参数
         ----------
         stacked: QStackedWidget
-            stacked widget
+            stacked 部件
 
         routeKey: str
-            route key of sub insterface, it should be the object name of sub interface
+            路由键 的 sub insterface, it should be 对象 name 的 子界面
         """
         item = RouteItem(stacked, routeKey)
 
         if stacked not in self.stackHistories:
             self.stackHistories[stacked] = StackedHistory(stacked)
 
-        # don't add duplicated history
+        # don't 添加 duplicated history
         success = self.stackHistories[stacked].push(routeKey)
         if success:
             self.history.append(item)
@@ -119,7 +119,7 @@ class Router(QObject):
         self.stackHistories[item.stacked].pop()
 
     def remove(self, routeKey: str):
-        """ remove history """
+        """ 移除 history """
         self.history = [i for i in self.history if i.routeKey != routeKey]
         self.history = [list(g)[0] for k, g in groupby(self.history, lambda i: i.routeKey)]
         self.emptyChanged.emit(not bool(self.history))

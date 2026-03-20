@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from collections import deque
 from enum import Enum
 from math import cos, pi, ceil
@@ -9,20 +9,20 @@ from PySide6.QtWidgets import QApplication, QScrollArea, QAbstractScrollArea
 
 
 class SmoothScroll:
-    """ Scroll smoothly """
+    """ 滚动 smoothly """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical, dynamicEngineEnabled=True):
         """
-        Parameters
+        参数
         ----------
         widget: QScrollArea
-            scroll area to scroll smoothly
+            滚动区域 到 滚动 smoothly
 
         orient: Orientation
-            scroll orientation
+            滚动 orientation
 
         dynamicEngineEnabled: bool
-            whether to choose scroll engine dynamically based on the screen dpi
+            是否 到 choose 滚动 engine dynamically based 上的 屏幕 dpi
         """
         self.widget = widget
         self.orient = orient
@@ -35,17 +35,17 @@ class SmoothScroll:
         self.adaptiveScrollEngine = AdaptiveSmoothScrollEngine(widget, orient)
 
     def setDynamicEngineEnabled(self, isEnabled: bool):
-        """ set whether to use dynamic engine """
+        """ 设置 是否 到 use dynamic engine """
         self.dynamicEngineEnabled = isEnabled
 
     def setSmoothMode(self, smoothMode):
-        """ set smooth mode """
+        """ 设置 平滑模式 """
         self.smoothMode = smoothMode
         self.fixedStepScrollEngine.setSmoothMode(smoothMode)
         self.adaptiveScrollEngine.setSmoothMode(smoothMode)
 
     def wheelEvent(self, e):
-        # only process the wheel events triggered by mouse, fixes issue #75
+        # 仅 process wheel 事件 triggered by mouse, 修复 issue #75
         delta = e.angleDelta().y() if e.angleDelta().y() != 0 else e.angleDelta().x()
         if self.smoothMode == SmoothMode.NO_SMOOTH or abs(delta) % 120 != 0:
             QAbstractScrollArea.wheelEvent(self.widget, e)
@@ -55,8 +55,8 @@ class SmoothScroll:
         engine.wheelEvent(e, delta)
 
     def _chooseScrollEngine(self) -> "SmoothScrollEngineBase":
-        """ choose scroll engine """
-        # ellapse time driven adaptive scroll engine for HiDPI screen
+        """ choose 滚动 engine """
+        # ellapse 时间 driven adaptive 滚动 engine 用于 HiDPI 屏幕
         if self.dynamicEngineEnabled and self.widget.width()*self.widget.devicePixelRatioF() > self.widthThreshold:
             return self.adaptiveScrollEngine
 
@@ -64,7 +64,7 @@ class SmoothScroll:
 
 
 class SmoothMode(Enum):
-    """ Smooth mode """
+    """ 平滑模式 """
     NO_SMOOTH = 0
     CONSTANT = 1
     LINEAR = 2
@@ -93,7 +93,7 @@ class SmoothScrollEngineBase(QObject):
         self.smoothMoveTimer.timeout.connect(self._smoothMove)
 
     def setSmoothMode(self, smoothMode):
-        """ set smooth mode """
+        """ 设置 平滑模式 """
         self.smoothMode = smoothMode
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
@@ -103,11 +103,11 @@ class SmoothScrollEngineBase(QObject):
         if not self.stepsLeftQueue:
             return
 
-        # send interpolated scroll event to scroll bar
+        # send interpolated 滚动 事件 到 滚动条
         totalDelta = self._getTotalDelta()
         self.sendScrollEventToScrollBar(totalDelta)
 
-        # stop scrolling if the queque is empty
+        # 停止scrolling 如果 queque is empty
         if not self.stepsLeftQueue:
             self.smoothMoveTimer.stop()
 
@@ -115,7 +115,7 @@ class SmoothScrollEngineBase(QObject):
         raise NotImplementedError
 
     def sendScrollEventToScrollBar(self, totalDelta):
-        # construct wheel event
+        # construct wheel 事件
         if self.orient == Qt.Vertical:
             pixelDelta = QPoint(round(totalDelta), 0)
             bar = self.widget.verticalScrollBar()
@@ -134,57 +134,57 @@ class SmoothScrollEngineBase(QObject):
             False,
         )
 
-        # send wheel event to app
+        # send wheel 事件 到 app
         QApplication.sendEvent(bar, e)
 
 
 class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
-    """ Scroll smoothly (fixed step) """
+    """ 滚动 smoothly (fixed step) """
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
-        # push current time to queque
+        # push 当前 时间 到 queque
         now = QDateTime.currentDateTime().toMSecsSinceEpoch()
         self.scrollStamps.append(now)
         while now - self.scrollStamps[0] > 500:
             self.scrollStamps.popleft()
 
-        # adjust the acceration ratio based on unprocessed events
+        # 调整the acceration ratio based 上的 unprocessed 事件
         accerationRatio = min(len(self.scrollStamps) / 15, 1)
         self.lastWheelPos = e.position()
         self.lastWheelGlobalPos = e.globalPosition()
 
-        # get the number of steps
+        # 获取steps的number
         self.stepsTotal = self.fps * self.duration / 1000
 
-        # get the moving distance corresponding to each event
+        # 获取 moving distance corresponding 到 each 事件
         delta = delta * self.stepRatio
         if self.acceleration > 0:
             delta += delta * self.acceleration * accerationRatio
 
-        # form a list of moving distances and steps, and insert it into the queue for processing.
+        # form 列表 的 moving distances 和 steps, 和 插入 it into 队列 用于 processing.
         self.stepsLeftQueue.append([delta, self.stepsTotal])
 
-        # overflow time of timer: 1000ms/frames
+        # 溢出 时间 的 timer: 1000ms/frames
         self.smoothMoveTimer.start(int(1000 / self.fps))
 
     def _getTotalDelta(self):
-        """ scroll smoothly when timer time out """
+        """ 滚动 smoothly 当 定时器 时间 out """
         totalDelta = 0
 
-        # Calculate the scrolling distance of all unprocessed events,
-        # the timer will reduce the number of steps by 1 each time it overflows.
+        # 计算the scrolling distance 的 all unprocessed 事件,
+        # 定时器 will reduce number 的 steps by 1 each 时间 it overflows.
         for i in self.stepsLeftQueue:
             totalDelta += self._subDelta(i[0], i[1])
             i[1] -= 1
 
-        # If the event has been processed, move it out of the queue
+        # If 事件 has been processed, move it out 的 队列
         while self.stepsLeftQueue and self.stepsLeftQueue[0][1] == 0:
             self.stepsLeftQueue.popleft()
 
         return totalDelta
 
     def _subDelta(self, delta, stepsLeft):
-        """ get the interpolation for each step """
+        """ 获取 interpolation 用于 each step """
         m = self.stepsTotal / 2
         x = abs(self.stepsTotal - stepsLeft - m)
 
@@ -204,7 +204,7 @@ class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
 
 
 class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
-    """ Scroll smoothly (time-based, adaptive, HiDPI friendly) """
+    """ 滚动 smoothly (time-based, adaptive, HiDPI friendly) """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
         super().__init__(widget, orient)
@@ -213,7 +213,7 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         self.minDuration = 120
 
     def setSmoothMode(self, smoothMode):
-        """ set smooth mode """
+        """ 设置 平滑模式 """
         self.smoothMode = smoothMode
 
     def wheelEvent(self, e, delta: int):
@@ -227,19 +227,19 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         self.lastWheelPos = e.position()
         self.lastWheelGlobalPos = e.globalPosition()
 
-        # Calculate adaptive duration based on queue pressure
+        # 计算adaptive 持续时间 based 上的 队列 pressure
         queuePressure = len(self.stepsLeftQueue)
         pressureRatio = min(queuePressure / self.maxQueueSize, 1)
 
         effectiveDuration = self.duration * (1 - 0.6 * pressureRatio)
         effectiveDuration = max(self.minDuration, effectiveDuration)
 
-        # Calculate delta
+        # 计算delta
         delta = delta * self.stepRatio
         if self.acceleration > 0:
             delta += delta * self.acceleration * accelerationRatio
 
-        # Merge events if queue is full
+        # Merge 事件 如果 队列 is full
         if len(self.stepsLeftQueue) >= self.maxQueueSize:
             last = self.stepsLeftQueue[-1]
             last[0] += delta
@@ -252,11 +252,11 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         else:
             self.elapsedTimer.restart()
 
-        # Start timer with adaptive fps
+        # 开始定时器 使用 adaptive fps
         self.smoothMoveTimer.start(int(1000 / self.fps))
 
     def _getTotalDelta(self):
-        dt = self.elapsedTimer.restart()  # elapsed time in ms
+        dt = self.elapsedTimer.restart()  # elapsed 时间 中的 ms
         totalDelta = 0.0
 
         for item in self.stepsLeftQueue:
@@ -273,14 +273,14 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
             item[1] -= consumeTime
             totalDelta += subDelta
 
-        # Remove finished items
+        # 移除 finished 项
         while self.stepsLeftQueue and self.stepsLeftQueue[0][1] <= 0:
             self.stepsLeftQueue.popleft()
 
         return totalDelta
 
     def _subDelta(self, delta, ratio):
-        """ Calculate interpolated delta for current frame """
+        """ 计算interpolated delta 用于 当前 frame """
         if self.smoothMode == SmoothMode.CONSTANT:
             return delta * ratio
         if self.smoothMode == SmoothMode.LINEAR:

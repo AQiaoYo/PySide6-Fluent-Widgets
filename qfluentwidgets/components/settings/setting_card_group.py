@@ -1,4 +1,4 @@
-# coding:utf-8
+# coding: utf-8
 from typing import List
 
 from PySide6.QtCore import Qt
@@ -10,7 +10,7 @@ from ..layout.expand_layout import ExpandLayout
 
 
 class SettingCardGroup(QWidget):
-    """ Setting card group """
+    """ Setting card 分组 """
 
     def __init__(self, title: str, parent=None):
         super().__init__(parent=parent)
@@ -33,13 +33,13 @@ class SettingCardGroup(QWidget):
         self.titleLabel.adjustSize()
 
     def addSettingCard(self, card: QWidget):
-        """ add setting card to group """
+        """ 将setting card添加到分组 """
         card.setParent(self)
         self.cardLayout.addWidget(card)
         self.adjustSize()
 
     def addSettingCards(self, cards: List[QWidget]):
-        """ add setting cards to group """
+        """ 将setting cards添加到分组 """
         for card in cards:
             self.addSettingCard(card)
 
