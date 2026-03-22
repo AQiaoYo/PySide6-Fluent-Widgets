@@ -67,7 +67,10 @@ class FluentIconEngine(QIconEngine):
 
         painter = QPainter(pixmap)
         rect = QRect(0, 0, size.width(), size.height())
-        self.paint(painter, rect, mode, state)
+        try:
+            self.paint(painter, rect, mode, state)
+        finally:
+            painter.end()
         return pixmap
 
 
@@ -91,7 +94,10 @@ class SvgIconEngine(QIconEngine):
 
         painter = QPainter(pixmap)
         rect = QRect(0, 0, size.width(), size.height())
-        self.paint(painter, rect, mode, state)
+        try:
+            self.paint(painter, rect, mode, state)
+        finally:
+            painter.end()
         return pixmap
 
 
@@ -130,7 +136,10 @@ class FontIconEngine(QIconEngine):
 
         painter = QPainter(pixmap)
         rect = QRect(0, 0, size.width(), size.height())
-        self.paint(painter, rect, mode, state)
+        try:
+            self.paint(painter, rect, mode, state)
+        finally:
+            painter.end()
         return pixmap
 
 
