@@ -1,6 +1,7 @@
 # coding: utf-8
 from typing import List
 from PySide6.QtGui import QFont
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QWidget
 
 from .config import qconfig
@@ -55,9 +56,22 @@ def getFont(fontSize=14, weight=QFont.Normal):
     """
     font = QFont()
     font.setFamilies(qconfig.get(qconfig.fontFamilies))
-    font.setPixelSize(fontSize)
+    font.setPointSizeF(fontSize * 72 / _logical_dpi())
     font.setWeight(weight)
     return font
+
+
+def fontPixelSize(font: QFont) -> int:
+    """返回字体当前等效的像素大小."""
+    pixel_size = font.pixelSize()
+    if pixel_size > 0:
+        return pixel_size
+
+    point_size = font.pointSizeF()
+    if point_size > 0:
+        return round(point_size * _logical_dpi() / 72)
+
+    return 14
 
 
 def fontStyleSheet(font: QFont):
@@ -66,5 +80,12 @@ def fontStyleSheet(font: QFont):
     for family in font.families():
         families.append(f"'{family}'")
 
-    qss = f"font: {font.pixelSize()}px {','.join(families)}"
+    qss = f"font: {fontPixelSize(font)}px {','.join(families)}"
     return qss
+
+
+def _logical_dpi() -> float:
+    app = QGuiApplication.instance()
+    screen = app.primaryScreen() if app is not None else None
+    dpi = screen.logicalDotsPerInchY() if screen is not None else 96.0
+    return dpi or 96.0
