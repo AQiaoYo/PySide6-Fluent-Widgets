@@ -7,7 +7,8 @@ from PySide6.QtWidgets import (QApplication, QFrame, QGraphicsDropShadowEffect,
                              QHBoxLayout, QLabel, QWidget, QAbstractItemView, QStyleOptionViewItem,
                              QTableView)
 
-from ...common import FluentStyleSheet
+from ...common.font import getFont
+from ...common.style_sheet import isDarkTheme
 from ...common.screen import getCurrentScreenGeometry
 
 
@@ -109,9 +110,57 @@ class ToolTip(QFrame):
         """ 设置样式表 """
         self.container.setObjectName("container")
         self.label.setObjectName("contentLabel")
-        FluentStyleSheet.TOOL_TIP.apply(self)
+        self.label.setFont(getFont(12))
+        self.setStyleSheet(self._toolTipQss())
         self.label.adjustSize()
         self.adjustSize()
+
+    def _toolTipQss(self) -> str:
+        if isDarkTheme():
+            return """
+                ToolTip {
+                    border-radius: 4px;
+                }
+
+                ToolTip > #container {
+                    background-color: rgb(43, 43, 43);
+                    border: 1px solid rgb(28, 28, 28);
+                    border-radius: 4px;
+                }
+
+                ToolTip>#container[transparent=true] {
+                    background-color: transparent;
+                    border: 1px solid rgba(0, 0, 0, 50);
+                }
+
+                QLabel#contentLabel {
+                    background-color: transparent;
+                    color: white;
+                    border: none;
+                }
+            """
+
+        return """
+            ToolTip {
+                border-radius: 4px;
+            }
+
+            ToolTip>#container {
+                border: 1px solid rgba(0, 0, 0, 0.06);
+                background-color: rgb(249, 249, 249);
+                border-radius: 4px;
+            }
+
+            ToolTip>#container[transparent=true] {
+                background-color: transparent;
+            }
+
+            QLabel#contentLabel {
+                background-color: transparent;
+                border: none;
+                color: black;
+            }
+        """
 
     def _createContainer(self):
         return QFrame(self)

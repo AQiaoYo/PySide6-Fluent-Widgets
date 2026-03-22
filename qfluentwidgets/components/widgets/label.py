@@ -5,11 +5,12 @@ from typing import List, Union
 from PySide6.QtCore import Qt, Property, QPoint, Signal, QSize, QRectF, QUrl
 from PySide6.QtGui import (QPainter, QPixmap, QPalette, QColor, QFont, QImage, QPainterPath,
                          QImageReader, QBrush, QMovie, QDesktopServices)
+from PySide6.QtGui import QGuiApplication
 from PySide6.QtWidgets import QLabel, QWidget, QPushButton, QApplication
 
 from ...common.exception_handler import exceptionHandler
 from ...common.overload import singledispatchmethod
-from ...common.font import setFont, getFont
+from ...common.font import setFont, getFont, fontPixelSize
 from ...common.style_sheet import FluentStyleSheet, setCustomStyleSheet, setCustomStyleSheet
 from ...common.config import qconfig, isDarkTheme
 from .menu import LabelContextMenu
@@ -108,12 +109,13 @@ class FluentLabelBase(QLabel):
 
     @Property(int)
     def pixelFontSize(self):
-        return self.font().pixelSize()
+        return fontPixelSize(self.font())
 
     @pixelFontSize.setter
     def pixelFontSize(self, size: int):
         font = self.font()
-        font.setPixelSize(size)
+        dpi = QGuiApplication.primaryScreen().logicalDotsPerInchY() if QGuiApplication.instance() else 96.0
+        font.setPointSizeF(size * 72 / (dpi or 96.0))
         self.setFont(font)
 
     @Property(bool)

@@ -6,7 +6,7 @@ from PySide6.QtCore import Qt, Signal, QRectF, Property, QPoint, QEvent
 from PySide6.QtGui import QPainter, QFont, QHoverEvent, QAction
 from PySide6.QtWidgets import QWidget, QApplication
 
-from ...common.font import setFont
+from ...common.font import setFont, fontPixelSize
 from ...common.icon import FluentIcon
 from ...common.style_sheet import isDarkTheme
 from ...components.widgets.menu import RoundMenu, MenuAnimationType
@@ -83,7 +83,7 @@ class BreadcrumbItem(BreadcrumbWidget):
         self.text = text
 
         rect = self.fontMetrics().boundingRect(text)
-        w = rect.width() + math.ceil(self.font().pixelSize() / 10)
+        w = rect.width() + math.ceil(fontPixelSize(self.font()) / 10)
         if not self.isRoot():
             w += self.spacing * 2
 
@@ -114,7 +114,7 @@ class BreadcrumbItem(BreadcrumbWidget):
         # 绘制seperator
         sw = self.spacing * 2
         if not self.isRoot():
-            iw = self.font().pixelSize() / 14 * 8
+            iw = fontPixelSize(self.font()) / 14 * 8
             rect = QRectF((sw - iw) / 2, (self.height() - iw) / 2 + 1, iw, iw)
 
             painter.setOpacity(0.61)
@@ -305,7 +305,7 @@ class BreadcrumbBar(QWidget):
     def setFont(self, font: QFont):
         super().setFont(font)
 
-        s = int(font.pixelSize() / 14 * 16)
+        s = int(fontPixelSize(font) / 14 * 16)
         self.elideButton.setFixedSize(s, s)
 
         for item in self.items:
