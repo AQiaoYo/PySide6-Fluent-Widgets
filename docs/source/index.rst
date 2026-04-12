@@ -16,7 +16,7 @@
    <hr/>
 
    <p align="center">
-      A fluent design widgets library based on PyQt5
+      A fluent design widgets library based on PySide6
    </p>
 
    <p align="center">
