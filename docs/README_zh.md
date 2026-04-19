@@ -52,7 +52,7 @@ pip install "PySide6-Fluent-Widgets-Qiao[full]" -i https://pypi.org/simple/
 克隆此仓库后，推荐使用 `uv` 创建环境并运行示例：
 ```shell
 uv sync
-uv run python examples/gallery/demo.py
+uv run python examples/apps/gallery/demo.py
 ```
 
 如果你需要可选依赖或文档构建环境：

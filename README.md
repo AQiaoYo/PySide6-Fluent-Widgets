@@ -54,7 +54,7 @@ The project repository is hosted at [AQiaoYo/PySide6-Fluent-Widgets](https://git
 After cloning this repository, use `uv` to create the environment and run examples:
 ```shell
 uv sync
-uv run python examples/gallery/demo.py
+uv run python examples/apps/gallery/demo.py
 ```
 
 If you need the optional dependencies or documentation environment:
