@@ -1,62 +1,80 @@
 # coding: utf-8
+"""
+MediaPlayer 演示
+
+展示内容：
+- SimpleMediaPlayBar 简洁播放条
+- StandardMediaPlayBar 标准播放条
+- VideoWidget 视频播放
+- 在线/本地媒体源切换
+"""
 import sys
 from pathlib import Path
 
 from PySide6.QtCore import QUrl, Qt
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
 
-from qfluentwidgets import setTheme, Theme
+from qfluentwidgets import setTheme, Theme, BodyLabel
 from qfluentwidgets.multimedia import SimpleMediaPlayBar, StandardMediaPlayBar, VideoWidget
 
 
 class Demo1(QWidget):
+    """音频播放演示"""
 
     def __init__(self):
         super().__init__()
-        setTheme(Theme.DARK)
-        self.vBoxLayout = QVBoxLayout(self)
-        self.resize(500, 300)
+        self.setWindowTitle('MediaPlayer - 音频')
+        self.resize(500, 200)
+        self.initLayout()
 
-        # self.player = QMediaPlayer(self)
-        # self.player.setMedia(QUrl.fromLocalFile(filename))
-        # self.player.setPosition()
-
+        # 简洁播放条
         self.simplePlayBar = SimpleMediaPlayBar(self)
+
+        # 标准播放条
         self.standardPlayBar = StandardMediaPlayBar(self)
 
-        self.vBoxLayout.addWidget(self.simplePlayBar)
-        self.vBoxLayout.addWidget(self.standardPlayBar)
+        self.layout.addWidget(self.simplePlayBar)
+        self.layout.addWidget(self.standardPlayBar)
 
-        # online music
-        url = QUrl("https://files.cnblogs.com/files/blogs/677826/beat.zip?t=1693900324")
-        self.simplePlayBar.player.setSource(url)
+        # 设置媒体源
+        try:
+            url = QUrl.fromLocalFile(str(Path('resource/aiko - シアワセ.mp3').absolute()))
+            self.standardPlayBar.player.setSource(url)
+        except Exception:
+            pass
 
-        # local music
-        url = QUrl.fromLocalFile(str(Path('resource/aiko - シアワセ.mp3').absolute()))
-        self.standardPlayBar.player.setSource(url)
-
-        # self.standardPlayBar.play()
+    def initLayout(self):
+        self.layout = QVBoxLayout(self)
+        self.layout.setSpacing(16)
+        self.layout.setContentsMargins(20, 20, 20, 20)
 
 
 class Demo2(QWidget):
+    """视频播放演示"""
 
     def __init__(self):
         super().__init__()
-        self.vBoxLayout = QVBoxLayout(self)
-        self.videoWidget = VideoWidget(self)
+        self.setWindowTitle('MediaPlayer - 视频')
+        self.resize(800, 450)
 
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.videoWidget = VideoWidget(self)
         self.videoWidget.setVideo(QUrl('https://media.w3.org/2010/05/sintel/trailer.mp4'))
         self.videoWidget.play()
 
-        self.vBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.vBoxLayout.addWidget(self.videoWidget)
-        self.resize(800, 450)
+        layout.addWidget(self.videoWidget)
 
 
 if __name__ == '__main__':
-    app = QApplication([])
+    setTheme(Theme.DARK)
+    app = QApplication(sys.argv)
+
     demo1 = Demo1()
     demo1.show()
+
     demo2 = Demo2()
     demo2.show()
+
     sys.exit(app.exec())

@@ -1,45 +1,50 @@
 # coding:utf-8
+"""
+FluentWidget 演示
+
+展示内容：
+- FluentWidget 基础用法（无标题栏窗口）
+- 主题切换（toggleTheme）
+- Mica 效果控制
+- 自定义背景色
+"""
 import sys
 
-from PySide6.QtCore import Qt, QUrl
-from PySide6.QtGui import QIcon, QDesktopServices
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon
+from PySide6.QtWidgets import QApplication, QVBoxLayout
 
-from qfluentwidgets import FluentWidget, toggleTheme, PushButton
+from qfluentwidgets import FluentWidget, toggleTheme, PushButton, BodyLabel
 from qfluentwidgets import FluentIcon as FIF
 
 
-
 class Window(FluentWidget):
+    """FluentWidget 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        self.button = PushButton(FIF.CONSTRACT, 'Toggle theme', self)
-        self.vBoxLayout = QVBoxLayout(self)
-
-        # disable mica effect in Win11
-        # self.setMicaEffectEnabled(False)
-
-        # customize background color
-        # self.setCustomBackgroundColor(Qt.red, Qt.blue)
-
-        # toggle theme when the button is clicked
-        self.button.clicked.connect(toggleTheme)
-
-        # leave some space for title bar
-        self.vBoxLayout.setContentsMargins(0, self.titleBar.height(), 0, 0)
-        self.vBoxLayout.addWidget(self.button, 0, Qt.AlignmentFlag.AlignCenter)
-
+        self.setWindowTitle('FluentWidget - 演示')
+        self.initWidgets()
+        self.initLayout()
         self.initWindow()
 
+    def initWidgets(self):
+        """初始化组件"""
+        self.label = BodyLabel('FluentWidget 是无标题栏窗口基类', self)
+        self.btnTheme = PushButton(FIF.CONSTRACT, '切换主题', self)
+        self.btnTheme.clicked.connect(toggleTheme)
+
+    def initLayout(self):
+        """初始化布局"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, self.titleBar.height(), 0, 0)
+        layout.addWidget(self.label, 0, Qt.AlignCenter)
+        layout.addWidget(self.btnTheme, 0, Qt.AlignCenter)
+
     def initWindow(self):
+        """初始化窗口"""
         self.resize(900, 700)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
-
-        desktop = QApplication.screens()[0].availableGeometry()
-        w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
 
 
 if __name__ == '__main__':
