@@ -1,15 +1,28 @@
 # coding:utf-8
+"""
+SplitFluentWindow 演示
+
+展示内容：
+- SplitFluentWindow 分割式导航窗口
+- 左侧导航 + 右侧内容区
+- 为标题栏留空布局
+- 树形导航结构
+"""
 import sys
 
 from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QDesktopServices
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout
-from qfluentwidgets import (NavigationItemPosition, MessageBox, setTheme, Theme, SplitFluentWindow,
-                            NavigationAvatarWidget, qrouter, SubtitleLabel, setFont)
+
+from qfluentwidgets import (
+    NavigationItemPosition, MessageBox, SplitFluentWindow,
+    NavigationAvatarWidget, SubtitleLabel, setFont,
+)
 from qfluentwidgets import FluentIcon as FIF
 
 
 class Widget(QWidget):
+    """子界面占位组件"""
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -21,16 +34,21 @@ class Widget(QWidget):
         self.hBoxLayout.addWidget(self.label, 1, Qt.AlignCenter)
         self.setObjectName(text.replace(' ', '-'))
 
-        # !IMPORTANT: leave some space for title bar
+        # 为标题栏留出空间
         self.hBoxLayout.setContentsMargins(0, 32, 0, 0)
 
 
 class Window(SplitFluentWindow):
+    """SplitFluentWindow 导航窗口"""
 
     def __init__(self):
         super().__init__()
+        self.initInterfaces()
+        self.initNavigation()
+        self.initWindow()
 
-        # create sub interface
+    def initInterfaces(self):
+        """初始化子界面"""
         self.homeInterface = Widget('Home Interface', self)
         self.musicInterface = Widget('Music Interface', self)
         self.videoInterface = Widget('Video Interface', self)
@@ -41,10 +59,8 @@ class Window(SplitFluentWindow):
         self.albumInterface2 = Widget('Album Interface 2', self)
         self.albumInterface1_1 = Widget('Album Interface 1-1', self)
 
-        self.initNavigation()
-        self.initWindow()
-
     def initNavigation(self):
+        """初始化导航"""
         self.addSubInterface(self.homeInterface, FIF.HOME, 'Home')
         self.addSubInterface(self.musicInterface, FIF.MUSIC, 'Music library')
         self.addSubInterface(self.videoInterface, FIF.VIDEO, 'Video library')
@@ -57,7 +73,7 @@ class Window(SplitFluentWindow):
         self.addSubInterface(self.albumInterface2, FIF.ALBUM, 'Album 2', parent=self.albumInterface)
         self.addSubInterface(self.folderInterface, FIF.FOLDER, 'Folder library', NavigationItemPosition.SCROLL)
 
-        # add custom widget to bottom
+        # 底部头像
         self.navigationInterface.addWidget(
             routeKey='avatar',
             widget=NavigationAvatarWidget('zhiyiYo', 'resource/shoko.png'),
@@ -67,34 +83,27 @@ class Window(SplitFluentWindow):
 
         self.addSubInterface(self.settingInterface, FIF.SETTING, 'Settings', NavigationItemPosition.BOTTOM)
 
-        # NOTE: enable acrylic effect
-        # self.navigationInterface.setAcrylicEnabled(True)
-
     def initWindow(self):
+        """初始化窗口"""
         self.resize(900, 700)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('SplitFluentWindow - 演示')
 
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
         self.move(w//2 - self.width()//2, h//2 - self.height()//2)
 
     def showMessageBox(self):
+        """显示信息对话框"""
         w = MessageBox(
-            '支持作者🥰',
-            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水🥤。您的支持就是作者开发和维护项目的动力🚀',
+            'SplitFluentWindow',
+            'SplitFluentWindow 将导航栏与内容区左右分割，标题栏位于内容区上方。',
             self
         )
-        w.yesButton.setText('来啦老弟')
-        w.cancelButton.setText('下次一定')
-
-        if w.exec():
-            QDesktopServices.openUrl(QUrl("https://afdian.net/a/zhiyiYo"))
+        w.exec()
 
 
 if __name__ == '__main__':
-    setTheme(Theme.DARK)
-
     app = QApplication(sys.argv)
     w = Window()
     w.show()

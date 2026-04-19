@@ -1,16 +1,24 @@
 # coding:utf-8
+"""
+TabWidget 演示
+
+展示内容：
+- TabWidget 标签页组件
+- 可拖拽标签页
+- 动态添加新标签页
+- 标签页关闭事件
+"""
 import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QVBoxLayout, QApplication, QWidget
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout
 
-from qfluentwidgets import TabWidget, SubtitleLabel, setFont, IconWidget
-
+from qfluentwidgets import TabWidget, SubtitleLabel, setFont, IconWidget, FluentIcon as FIF
 
 
 class TabInterface(QWidget):
-    """ Tab interface """
+    """标签页内容组件"""
 
     def __init__(self, text: str, icon, parent=None):
         super().__init__(parent=parent)
@@ -26,45 +34,56 @@ class TabInterface(QWidget):
         setFont(self.label, 24)
 
 
-
 class Window(QWidget):
+    """TabWidget 演示窗口"""
 
     def __init__(self):
         super().__init__()
+        self.setWindowTitle('TabWidget - 演示')
+        self.resize(900, 600)
         self.tabCount = 1
-        self.tabWidget = TabWidget(self)
-        self.hBoxLayout = QVBoxLayout(self)
+        self.initWidgets()
+        self.initLayout()
 
+    def initWidgets(self):
+        """初始化标签页组件"""
+        self.tabWidget = TabWidget(self)
         self.tabWidget.setMovable(True)
 
-        self.initNavigation()
-        self.initWindow()
+        # 添加初始标签页
+        self.tabWidget.addTab(
+            TabInterface('Heart', FIF.HEART),
+            'Tab 1',
+            icon=FIF.HEART,
+        )
 
-    def initNavigation(self):
-        self.hBoxLayout.addWidget(self.tabWidget)
-
-        # add tab
-        self.tabWidget.addTab(TabInterface('Heart', 'resource/Heart.png'), 'As long as you love me', icon='resource/Heart.png')
-
-        self.tabWidget.currentChanged.connect(lambda index: print("current index:", index))
+        # 信号连接
+        self.tabWidget.currentChanged.connect(self.onTabChanged)
         self.tabWidget.tabCloseRequested.connect(self.tabWidget.removeTab)
         self.tabWidget.tabAddRequested.connect(self.addNewPage)
 
-    def initWindow(self):
-        self.resize(1100, 750)
-        self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+    def initLayout(self):
+        """初始化布局"""
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.addWidget(self.tabWidget)
+
+    def onTabChanged(self, index):
+        """标签页切换时更新标题"""
+        self.setWindowTitle(f'TabWidget - 标签 {index + 1}')
 
     def addNewPage(self):
-        text = f'硝子酱一级棒卡哇伊×{self.tabCount}'
+        """添加新标签页"""
+        text = f'新标签页 #{self.tabCount}'
         self.tabWidget.addTab(
-            TabInterface(text, 'resource/Smiling_with_heart.png'), text, 'resource/Smiling_with_heart.png')
+            TabInterface(text, FIF.DOCUMENT),
+            text,
+            icon=FIF.DOCUMENT,
+        )
         self.tabCount += 1
 
 
 if __name__ == '__main__':
-    # setTheme(Theme.DARK)
-
     app = QApplication(sys.argv)
     w = Window()
     w.show()
