@@ -24,6 +24,9 @@ dependencies = [
 [project.optional-dependencies]
 full = ["colorthief", "pillow", "scipy"]
 
+[project.scripts]
+preview = "devtools.preview:main"
+
 [project.urls]
 Documentation = "https://github.com/AQiaoYo/PySide6-Fluent-Widgets#readme"
 Source = "https://github.com/AQiaoYo/PySide6-Fluent-Widgets"
@@ -47,7 +50,7 @@ docs = [
 license-files = ["LICENSE"]
 
 [tool.setuptools.packages.find]
-include = ["qfluentwidgets*"]
+include = ["qfluentwidgets*", "devtools*"]
 
 [tool.uv]
 package = true
