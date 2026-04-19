@@ -1,16 +1,30 @@
 # coding:utf-8
+"""
+NavigationInterface (Stack) 演示
+
+展示内容：
+- NavigationInterface 侧边导航栏
+- 树形层级菜单（子菜单展开/折叠记忆）
+- 自定义头像组件
+- 与 QStackedWidget 联动
+- 页面切换动画与路由
+"""
 import sys
+
 from PySide6.QtCore import Qt, QRect, QUrl
 from PySide6.QtGui import QIcon, QPainter, QImage, QBrush, QColor, QFont, QDesktopServices
 from PySide6.QtWidgets import QApplication, QFrame, QStackedWidget, QHBoxLayout, QLabel
 
-from qfluentwidgets import (NavigationInterface, NavigationItemPosition, NavigationWidget, MessageBox,
-                            isDarkTheme, setTheme, Theme, setThemeColor, qrouter, FluentWindow, NavigationAvatarWidget)
+from qfluentwidgets import (
+    NavigationInterface, NavigationItemPosition, NavigationWidget, MessageBox,
+    isDarkTheme, setTheme, Theme, qrouter,
+)
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow, StandardTitleBar
 
 
 class Widget(QFrame):
+    """子页面组件"""
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -21,43 +35,71 @@ class Widget(QFrame):
         self.setObjectName(text.replace(' ', '-'))
 
 
+class AvatarWidget(NavigationWidget):
+    """自定义头像导航组件"""
+
+    def __init__(self, parent=None):
+        super().__init__(isSelectable=False, parent=parent)
+        self.avatar = QImage('resource/shoko.png').scaled(
+            24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHints(
+            QPainter.SmoothPixmapTransform | QPainter.Antialiasing)
+        painter.setPen(Qt.NoPen)
+
+        if self.isPressed:
+            painter.setOpacity(0.7)
+
+        # 悬停背景
+        if self.isEnter:
+            c = 255 if isDarkTheme() else 0
+            painter.setBrush(QColor(c, c, c, 10))
+            painter.drawRoundedRect(self.rect(), 5, 5)
+
+        # 绘制头像
+        painter.setBrush(QBrush(self.avatar))
+        painter.translate(8, 6)
+        painter.drawEllipse(0, 0, 24, 24)
+        painter.translate(-8, -6)
+
+        if not self.isCompacted:
+            painter.setPen(Qt.white if isDarkTheme() else Qt.black)
+            font = QFont('Segoe UI')
+            font.setPixelSize(14)
+            painter.setFont(font)
+            painter.drawText(QRect(44, 0, 255, 36), Qt.AlignVCenter, 'zhiyiYo')
+
 
 class Window(FramelessWindow):
+    """NavigationInterface 演示主窗口"""
 
     def __init__(self):
         super().__init__()
         self.setTitleBar(StandardTitleBar(self))
 
-        # use dark theme mode
-        # setTheme(Theme.DARK)
-
-        # change the theme color
-        # setThemeColor('#0078d4')
-
         self.hBoxLayout = QHBoxLayout(self)
         self.navigationInterface = NavigationInterface(self, showMenuButton=True)
         self.stackWidget = QStackedWidget(self)
 
-        # create sub interface
-        self.searchInterface = Widget('Search Interface', self)
-        self.musicInterface = Widget('Music Interface', self)
-        self.videoInterface = Widget('Video Interface', self)
-        self.folderInterface = Widget('Folder Interface', self)
-        self.settingInterface = Widget('Setting Interface', self)
-        self.albumInterface = Widget('Album Interface', self)
-        self.albumInterface1 = Widget('Album Interface 1', self)
-        self.albumInterface2 = Widget('Album Interface 2', self)
-        self.albumInterface1_1 = Widget('Album Interface 1-1', self)
+        # 创建子页面
+        self.searchInterface = Widget('搜索页面', self)
+        self.musicInterface = Widget('音乐库', self)
+        self.videoInterface = Widget('视频库', self)
+        self.folderInterface = Widget('文件夹', self)
+        self.settingInterface = Widget('设置', self)
+        self.albumInterface = Widget('专辑', self)
+        self.albumInterface1 = Widget('专辑 1', self)
+        self.albumInterface2 = Widget('专辑 2', self)
+        self.albumInterface1_1 = Widget('专辑 1.1', self)
 
-        # initialize layout
         self.initLayout()
-
-        # add items to navigation interface
         self.initNavigation()
-
         self.initWindow()
 
     def initLayout(self):
+        """初始化布局"""
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, self.titleBar.height(), 0, 0)
         self.hBoxLayout.addWidget(self.navigationInterface)
@@ -65,75 +107,53 @@ class Window(FramelessWindow):
         self.hBoxLayout.setStretchFactor(self.stackWidget, 1)
 
     def initNavigation(self):
-        # enable acrylic effect
-        # self.navigationInterface.setAcrylicEnabled(True)
-
-        self.addSubInterface(self.searchInterface, FIF.SEARCH, 'Search')
-        self.addSubInterface(self.musicInterface, FIF.MUSIC, 'Music library')
-        self.addSubInterface(self.videoInterface, FIF.VIDEO, 'Video library')
+        """初始化导航栏"""
+        self.addSubInterface(self.searchInterface, FIF.SEARCH, '搜索')
+        self.addSubInterface(self.musicInterface, FIF.MUSIC, '音乐库')
+        self.addSubInterface(self.videoInterface, FIF.VIDEO, '视频库')
 
         self.navigationInterface.addSeparator()
 
-        self.addSubInterface(self.albumInterface, FIF.ALBUM, 'Albums', NavigationItemPosition.SCROLL)
-        self.addSubInterface(self.albumInterface1, FIF.ALBUM, 'Album 1', parent=self.albumInterface)
-        self.addSubInterface(self.albumInterface1_1, FIF.ALBUM, 'Album 1.1', parent=self.albumInterface1)
-        self.addSubInterface(self.albumInterface2, FIF.ALBUM, 'Album 2', parent=self.albumInterface)
+        # 树形菜单
+        self.addSubInterface(self.albumInterface, FIF.ALBUM, '专辑', NavigationItemPosition.SCROLL)
+        self.addSubInterface(self.albumInterface1, FIF.ALBUM, '专辑 1', parent=self.albumInterface)
+        self.addSubInterface(self.albumInterface1_1, FIF.ALBUM, '专辑 1.1', parent=self.albumInterface1)
+        self.addSubInterface(self.albumInterface2, FIF.ALBUM, '专辑 2', parent=self.albumInterface)
 
-        # enable expand state memory for tree menu
-        self.navigationInterface.widget('Album-Interface').setRememberExpandState(True)
-        self.navigationInterface.widget('Album-Interface-1').setRememberExpandState(True)
+        # 记忆展开状态
+        self.navigationInterface.widget('专辑').setRememberExpandState(True)
+        self.navigationInterface.widget('专辑-1').setRememberExpandState(True)
 
-        # add navigation items to scroll area
-        self.addSubInterface(self.folderInterface, FIF.FOLDER, 'Folder library', NavigationItemPosition.SCROLL)
-        # for i in range(1, 21):
-        #     self.navigationInterface.addItem(
-        #         f'folder{i}',
-        #         FIF.FOLDER,
-        #         f'Folder {i}',
-        #         lambda: print('Folder clicked'),
-        #         position=NavigationItemPosition.SCROLL
-        #     )
+        self.addSubInterface(self.folderInterface, FIF.FOLDER, '文件夹', NavigationItemPosition.SCROLL)
 
-        # add custom widget to bottom
+        # 底部自定义头像
         self.navigationInterface.addWidget(
             routeKey='avatar',
-            widget=NavigationAvatarWidget('zhiyiYo', 'resource/shoko.png'),
+            widget=AvatarWidget(),
             onClick=self.showMessageBox,
             position=NavigationItemPosition.BOTTOM,
         )
 
-        self.addSubInterface(self.settingInterface, FIF.SETTING, 'Settings', NavigationItemPosition.BOTTOM)
-
-        #!IMPORTANT: don't forget to set the default route key if you enable the return button
-        # qrouter.setDefaultRouteKey(self.stackWidget, self.musicInterface.objectName())
-
-        # set the maximum width
-        # self.navigationInterface.setExpandWidth(300)
+        self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)
 
         self.stackWidget.currentChanged.connect(self.onCurrentInterfaceChanged)
         self.stackWidget.setCurrentIndex(1)
 
-        # always expand
-        # self.navigationInterface.setCollapsible(False)
-
     def initWindow(self):
+        """初始化窗口"""
         self.resize(900, 700)
         self.setWindowIcon(QIcon('resource/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('NavigationInterface - 演示')
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
 
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
-
-        # NOTE: set the minimum window width that allows the navigation panel to be expanded
-        # self.navigationInterface.setMinimumExpandWidth(900)
-        # self.navigationInterface.expand(useAni=False)
+        self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.setQss()
 
     def addSubInterface(self, interface, icon, text: str, position=NavigationItemPosition.TOP, parent=None):
-        """ add sub interface """
+        """添加子页面"""
         self.stackWidget.addWidget(interface)
         self.navigationInterface.addItem(
             routeKey=interface.objectName(),
@@ -146,27 +166,28 @@ class Window(FramelessWindow):
         )
 
     def setQss(self):
+        """加载样式表"""
         color = 'dark' if isDarkTheme() else 'light'
         with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def switchTo(self, widget):
+        """切换页面"""
         self.stackWidget.setCurrentWidget(widget)
 
     def onCurrentInterfaceChanged(self, index):
+        """页面变化时同步导航栏选中状态"""
         widget = self.stackWidget.widget(index)
         self.navigationInterface.setCurrentItem(widget.objectName())
 
-        #!IMPORTANT: This line of code needs to be uncommented if the return button is enabled
-        # qrouter.push(self.stackWidget, widget.objectName())
-
     def showMessageBox(self):
+        """显示支持作者对话框"""
         w = MessageBox(
-            '支持作者🥰',
-            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水🥤。您的支持就是作者开发和维护项目的动力🚀',
+            '支持作者',
+            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水。',
             self
         )
-        w.yesButton.setText('来啦老弟')
+        w.yesButton.setText('支持一下')
         w.cancelButton.setText('下次一定')
 
         if w.exec():

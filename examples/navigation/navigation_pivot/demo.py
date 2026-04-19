@@ -1,16 +1,29 @@
 # coding:utf-8
+"""
+NavigationInterface (Pivot风格) 演示
+
+展示内容：
+- NavigationInterface 侧边导航栏（带返回按钮）
+- 自定义标题栏（带图标）
+- 与 QStackedWidget 联动
+- 路由记忆 (qrouter)
+"""
 import sys
-from PySide6.QtCore import Qt, QRect, QUrl
-from PySide6.QtGui import QIcon, QPainter, QImage, QBrush, QColor, QFont, QDesktopServices
+
+from PySide6.QtCore import Qt, QUrl
+from PySide6.QtGui import QIcon, QDesktopServices
 from PySide6.QtWidgets import QApplication, QFrame, QStackedWidget, QHBoxLayout, QLabel
 
-from qfluentwidgets import (NavigationInterface,NavigationItemPosition, NavigationWidget, MessageBox,
-                            isDarkTheme, setTheme, Theme, qrouter)
+from qfluentwidgets import (
+    NavigationInterface, NavigationItemPosition, MessageBox,
+    isDarkTheme, setTheme, Theme, qrouter,
+)
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow, TitleBar
 
 
 class Widget(QFrame):
+    """子页面组件"""
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -19,62 +32,20 @@ class Widget(QFrame):
         self.label.setAlignment(Qt.AlignCenter)
         self.hBoxLayout = QHBoxLayout(self)
         self.hBoxLayout.addWidget(self.label, 1, Qt.AlignCenter)
-
-        # leave some space for title bar
         self.hBoxLayout.setContentsMargins(0, 32, 0, 0)
 
 
-class AvatarWidget(NavigationWidget):
-    """ Avatar widget """
-
-    def __init__(self, parent=None):
-        super().__init__(isSelectable=False, parent=parent)
-        self.avatar = QImage('resource/shoko.png').scaled(
-            24, 24, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-
-    def paintEvent(self, e):
-        painter = QPainter(self)
-        painter.setRenderHints(
-            QPainter.SmoothPixmapTransform | QPainter.Antialiasing)
-
-        painter.setPen(Qt.NoPen)
-
-        if self.isPressed:
-            painter.setOpacity(0.7)
-
-        # draw background
-        if self.isEnter:
-            c = 255 if isDarkTheme() else 0
-            painter.setBrush(QColor(c, c, c, 10))
-            painter.drawRoundedRect(self.rect(), 5, 5)
-
-        # draw avatar
-        painter.setBrush(QBrush(self.avatar))
-        painter.translate(8, 6)
-        painter.drawEllipse(0, 0, 24, 24)
-        painter.translate(-8, -6)
-
-        if not self.isCompacted:
-            painter.setPen(Qt.white if isDarkTheme() else Qt.black)
-            font = QFont('Segoe UI')
-            font.setPixelSize(14)
-            painter.setFont(font)
-            painter.drawText(QRect(44, 0, 255, 36), Qt.AlignVCenter, 'zhiyiYo')
-
-
 class CustomTitleBar(TitleBar):
-    """ Title bar with icon and title """
+    """自定义标题栏（带图标和标题）"""
 
     def __init__(self, parent):
         super().__init__(parent)
-        # add window icon
         self.iconLabel = QLabel(self)
         self.iconLabel.setFixedSize(18, 18)
         self.hBoxLayout.insertSpacing(0, 10)
         self.hBoxLayout.insertWidget(1, self.iconLabel, 0, Qt.AlignLeft | Qt.AlignBottom)
         self.window().windowIconChanged.connect(self.setIcon)
 
-        # add title label
         self.titleLabel = QLabel(self)
         self.hBoxLayout.insertWidget(2, self.titleLabel, 0, Qt.AlignLeft | Qt.AlignBottom)
         self.titleLabel.setObjectName('titleLabel')
@@ -89,35 +60,30 @@ class CustomTitleBar(TitleBar):
 
 
 class Window(FramelessWindow):
+    """NavigationInterface 演示主窗口"""
 
     def __init__(self):
         super().__init__()
         self.setTitleBar(CustomTitleBar(self))
-
-        # use dark theme mode
-        # setTheme(Theme.DARK)
 
         self.hBoxLayout = QHBoxLayout(self)
         self.navigationInterface = NavigationInterface(
             self, showMenuButton=True, showReturnButton=True)
         self.stackWidget = QStackedWidget(self)
 
-        # create sub interface
-        self.searchInterface = Widget('Search Interface', self)
-        self.musicInterface = Widget('Music Interface', self)
-        self.videoInterface = Widget('Video Interface', self)
-        self.folderInterface = Widget('Folder Interface', self)
-        self.settingInterface = Widget('Setting Interface', self)
+        # 创建子页面
+        self.searchInterface = Widget('搜索页面', self)
+        self.musicInterface = Widget('音乐库', self)
+        self.videoInterface = Widget('视频库', self)
+        self.folderInterface = Widget('文件夹', self)
+        self.settingInterface = Widget('设置', self)
 
-        # initialize layout
         self.initLayout()
-
-        # add items to navigation interface
         self.initNavigation()
-
         self.initWindow()
 
     def initLayout(self):
+        """初始化布局"""
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.navigationInterface)
@@ -128,59 +94,43 @@ class Window(FramelessWindow):
         self.navigationInterface.displayModeChanged.connect(self.titleBar.raise_)
 
     def initNavigation(self):
-        # enable acrylic effect
-        # self.navigationInterface.setAcrylicEnabled(True)
-
-        self.addSubInterface(self.searchInterface, FIF.SEARCH, 'Search')
-        self.addSubInterface(self.musicInterface, FIF.MUSIC, 'Music library')
-        self.addSubInterface(self.videoInterface, FIF.VIDEO, 'Video library')
+        """初始化导航栏"""
+        self.addSubInterface(self.searchInterface, FIF.SEARCH, '搜索')
+        self.addSubInterface(self.musicInterface, FIF.MUSIC, '音乐库')
+        self.addSubInterface(self.videoInterface, FIF.VIDEO, '视频库')
 
         self.navigationInterface.addSeparator()
 
-        # add navigation items to scroll area
-        self.addSubInterface(self.folderInterface, FIF.FOLDER, 'Folder library', NavigationItemPosition.SCROLL)
-        # for i in range(1, 21):
-        #     self.navigationInterface.addItem(
-        #         f'folder{i}',
-        #         FIF.FOLDER,
-        #         f'Folder {i}',
-        #         lambda: print('Folder clicked'),
-        #         position=NavigationItemPosition.SCROLL
-        #     )
+        self.addSubInterface(self.folderInterface, FIF.FOLDER, '文件夹', NavigationItemPosition.SCROLL)
 
-        # add custom widget to bottom
         self.navigationInterface.addWidget(
             routeKey='avatar',
-            widget=AvatarWidget(),
+            widget=QLabel('zhiyiYo'),  # 简化为文本
             onClick=self.showMessageBox,
             position=NavigationItemPosition.BOTTOM
         )
 
-        self.addSubInterface(self.settingInterface, FIF.SETTING, 'Settings', NavigationItemPosition.BOTTOM)
+        self.addSubInterface(self.settingInterface, FIF.SETTING, '设置', NavigationItemPosition.BOTTOM)
 
-        #!IMPORTANT: don't forget to set the default route key
         qrouter.setDefaultRouteKey(self.stackWidget, self.musicInterface.objectName())
-
-        # set the maximum width
-        # self.navigationInterface.setExpandWidth(300)
-
         self.stackWidget.currentChanged.connect(self.onCurrentInterfaceChanged)
         self.stackWidget.setCurrentIndex(1)
 
     def initWindow(self):
+        """初始化窗口"""
         self.resize(900, 700)
         self.setWindowIcon(QIcon('resource/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('NavigationInterface - 演示')
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
 
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+        self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.setQss()
 
     def addSubInterface(self, interface, icon, text: str, position=NavigationItemPosition.TOP):
-        """ add sub interface """
+        """添加子页面"""
         self.stackWidget.addWidget(interface)
         self.navigationInterface.addItem(
             routeKey=interface.objectName(),
@@ -192,25 +142,29 @@ class Window(FramelessWindow):
         )
 
     def setQss(self):
+        """加载样式表"""
         color = 'dark' if isDarkTheme() else 'light'
         with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def switchTo(self, widget):
+        """切换页面"""
         self.stackWidget.setCurrentWidget(widget)
 
     def onCurrentInterfaceChanged(self, index):
+        """页面变化时同步导航栏"""
         widget = self.stackWidget.widget(index)
         self.navigationInterface.setCurrentItem(widget.objectName())
         qrouter.push(self.stackWidget, widget.objectName())
 
     def showMessageBox(self):
+        """显示支持作者对话框"""
         w = MessageBox(
-            '支持作者🥰',
-            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水🥤。您的支持就是作者开发和维护项目的动力🚀',
+            '支持作者',
+            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水。',
             self
         )
-        w.yesButton.setText('来啦老弟')
+        w.yesButton.setText('支持一下')
         w.cancelButton.setText('下次一定')
 
         if w.exec():
@@ -218,7 +172,7 @@ class Window(FramelessWindow):
 
     def resizeEvent(self, e):
         self.titleBar.move(46, 0)
-        self.titleBar.resize(self.width()-46, self.titleBar.height())
+        self.titleBar.resize(self.width() - 46, self.titleBar.height())
 
 
 if __name__ == '__main__':

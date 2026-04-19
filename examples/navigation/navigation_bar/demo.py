@@ -1,18 +1,30 @@
 # coding:utf-8
+"""
+NavigationBar (底部导航) 演示
+
+展示内容：
+- NavigationBar 底部导航栏
+- 自定义标题栏（带搜索框）
+- PopUpAniStackedWidget 弹出式页面切换动画
+- 选中图标自定义
+"""
 import sys
 
-from PySide6.QtCore import Qt, Signal, QEasingCurve, QUrl
+from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QIcon, QDesktopServices
 from PySide6.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QApplication, QFrame, QWidget
 
-from qfluentwidgets import (NavigationBar, NavigationItemPosition, NavigationWidget, MessageBox,
-                            isDarkTheme, setTheme, Theme, setThemeColor, SearchLineEdit,
-                            PopUpAniStackedWidget, getFont)
+from qfluentwidgets import (
+    NavigationBar, NavigationItemPosition, MessageBox,
+    isDarkTheme, setTheme, Theme, SearchLineEdit,
+    PopUpAniStackedWidget,
+)
 from qfluentwidgets import FluentIcon as FIF
 from qframelesswindow import FramelessWindow, TitleBar
 
 
 class Widget(QWidget):
+    """子页面组件"""
 
     def __init__(self, text: str, parent=None):
         super().__init__(parent=parent)
@@ -24,22 +36,16 @@ class Widget(QWidget):
 
 
 class StackedWidget(QFrame):
-    """ Stacked widget """
-
-    currentChanged = Signal(int)
+    """带动画的堆叠页面容器"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
         self.view = PopUpAniStackedWidget(self)
-
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
         self.hBoxLayout.addWidget(self.view)
 
-        self.view.currentChanged.connect(self.currentChanged)
-
     def addWidget(self, widget):
-        """ add widget to view """
         self.view.addWidget(widget)
 
     def widget(self, index: int):
@@ -49,15 +55,14 @@ class StackedWidget(QFrame):
         if not popOut:
             self.view.setCurrentWidget(widget, duration=300)
         else:
-            self.view.setCurrentWidget(
-                widget, True, False, 200, QEasingCurve.InQuad)
+            self.view.setCurrentWidget(widget, True, False, 200)
 
     def setCurrentIndex(self, index, popOut=False):
         self.setCurrentWidget(self.view.widget(index), popOut)
 
 
 class CustomTitleBar(TitleBar):
-    """ Title bar with icon and title """
+    """自定义标题栏（带图标、标题和搜索框）"""
 
     def __init__(self, parent):
         super().__init__(parent)
@@ -66,28 +71,25 @@ class CustomTitleBar(TitleBar):
         self.hBoxLayout.removeWidget(self.maxBtn)
         self.hBoxLayout.removeWidget(self.closeBtn)
 
-        # add window icon
+        # 图标
         self.iconLabel = QLabel(self)
         self.iconLabel.setFixedSize(18, 18)
         self.hBoxLayout.insertSpacing(0, 20)
-        self.hBoxLayout.insertWidget(
-            1, self.iconLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        self.hBoxLayout.insertWidget(1, self.iconLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.window().windowIconChanged.connect(self.setIcon)
 
-        # add title label
+        # 标题
         self.titleLabel = QLabel(self)
-        self.hBoxLayout.insertWidget(
-            2, self.titleLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
+        self.hBoxLayout.insertWidget(2, self.titleLabel, 0, Qt.AlignLeft | Qt.AlignVCenter)
         self.titleLabel.setObjectName('titleLabel')
         self.window().windowTitleChanged.connect(self.setTitle)
 
-        # add search line edit
+        # 搜索框
         self.searchLineEdit = SearchLineEdit(self)
         self.searchLineEdit.setPlaceholderText('搜索应用、游戏、电影、设备等')
         self.searchLineEdit.setFixedWidth(400)
         self.searchLineEdit.setClearButtonEnabled(True)
 
-        self.vBoxLayout = QVBoxLayout()
         self.buttonLayout = QHBoxLayout()
         self.buttonLayout.setSpacing(0)
         self.buttonLayout.setContentsMargins(0, 0, 0, 0)
@@ -95,6 +97,8 @@ class CustomTitleBar(TitleBar):
         self.buttonLayout.addWidget(self.minBtn)
         self.buttonLayout.addWidget(self.maxBtn)
         self.buttonLayout.addWidget(self.closeBtn)
+
+        self.vBoxLayout = QVBoxLayout()
         self.vBoxLayout.addLayout(self.buttonLayout)
         self.vBoxLayout.addStretch(1)
         self.hBoxLayout.addLayout(self.vBoxLayout, 0)
@@ -107,41 +111,32 @@ class CustomTitleBar(TitleBar):
         self.iconLabel.setPixmap(QIcon(icon).pixmap(18, 18))
 
     def resizeEvent(self, e):
-        self.searchLineEdit.move((self.width() - self.searchLineEdit.width()) //2, 8)
-
+        self.searchLineEdit.move((self.width() - self.searchLineEdit.width()) // 2, 8)
 
 
 class Window(FramelessWindow):
+    """NavigationBar 演示主窗口"""
 
     def __init__(self):
         super().__init__()
         self.setTitleBar(CustomTitleBar(self))
 
-        # use dark theme mode
-        # setTheme(Theme.DARK)
-
-        # change the theme color
-        # setThemeColor('#0078d4')
-
         self.hBoxLayout = QHBoxLayout(self)
         self.navigationBar = NavigationBar(self)
         self.stackWidget = StackedWidget(self)
 
-        # create sub interface
-        self.homeInterface = Widget('Home Interface', self)
-        self.appInterface = Widget('Application Interface', self)
-        self.videoInterface = Widget('Video Interface', self)
-        self.libraryInterface = Widget('library Interface', self)
+        # 创建子页面
+        self.homeInterface = Widget('主页', self)
+        self.appInterface = Widget('应用', self)
+        self.videoInterface = Widget('视频', self)
+        self.libraryInterface = Widget('库', self)
 
-        # initialize layout
         self.initLayout()
-
-        # add items to navigation interface
         self.initNavigation()
-
         self.initWindow()
 
     def initLayout(self):
+        """初始化布局"""
         self.hBoxLayout.setSpacing(0)
         self.hBoxLayout.setContentsMargins(0, 48, 0, 0)
         self.hBoxLayout.addWidget(self.navigationBar)
@@ -149,6 +144,7 @@ class Window(FramelessWindow):
         self.hBoxLayout.setStretchFactor(self.stackWidget, 1)
 
     def initNavigation(self):
+        """初始化导航栏"""
         self.addSubInterface(self.homeInterface, FIF.HOME, '主页', selectedIcon=FIF.HOME_FILL)
         self.addSubInterface(self.appInterface, FIF.APPLICATION, '应用')
         self.addSubInterface(self.videoInterface, FIF.VIDEO, '视频')
@@ -163,29 +159,24 @@ class Window(FramelessWindow):
             position=NavigationItemPosition.BOTTOM,
         )
 
-        self.stackWidget.currentChanged.connect(self.onCurrentInterfaceChanged)
+        self.stackWidget.view.currentChanged.connect(self.onCurrentInterfaceChanged)
         self.navigationBar.setCurrentItem(self.homeInterface.objectName())
 
-        # hide the text of button when selected
-        # self.navigationBar.setSelectedTextVisible(False)
-
-        # adjust the font size of button
-        # self.navigationBar.setFont(getFont(12))
-
     def initWindow(self):
+        """初始化窗口"""
         self.resize(900, 700)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('NavigationBar - 演示')
         self.titleBar.setAttribute(Qt.WA_StyledBackground)
 
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()
-        self.move(w//2 - self.width()//2, h//2 - self.height()//2)
+        self.move(w // 2 - self.width() // 2, h // 2 - self.height() // 2)
 
         self.setQss()
 
     def addSubInterface(self, interface, icon, text: str, position=NavigationItemPosition.TOP, selectedIcon=None):
-        """ add sub interface """
+        """添加子页面"""
         self.stackWidget.addWidget(interface)
         self.navigationBar.addItem(
             routeKey=interface.objectName(),
@@ -197,24 +188,28 @@ class Window(FramelessWindow):
         )
 
     def setQss(self):
+        """加载样式表"""
         color = 'dark' if isDarkTheme() else 'light'
         with open(f'resource/{color}/demo.qss', encoding='utf-8') as f:
             self.setStyleSheet(f.read())
 
     def switchTo(self, widget):
+        """切换页面"""
         self.stackWidget.setCurrentWidget(widget)
 
     def onCurrentInterfaceChanged(self, index):
+        """页面变化时同步导航栏"""
         widget = self.stackWidget.widget(index)
         self.navigationBar.setCurrentItem(widget.objectName())
 
     def showMessageBox(self):
+        """显示支持作者对话框"""
         w = MessageBox(
-            '支持作者🥰',
-            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水🥤。您的支持就是作者开发和维护项目的动力🚀',
+            '支持作者',
+            '个人开发不易，如果这个项目帮助到了您，可以考虑请作者喝一瓶快乐水。',
             self
         )
-        w.yesButton.setText('来啦老弟')
+        w.yesButton.setText('支持一下')
         w.cancelButton.setText('下次一定')
 
         if w.exec():

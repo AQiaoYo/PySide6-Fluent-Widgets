@@ -1,68 +1,85 @@
 # coding:utf-8
+"""
+BreadcrumbBar 演示
+
+展示内容：
+- BreadcrumbBar 面包屑导航栏
+- 与 QStackedWidget 联动切换页面
+- 动态添加页面
+- 字体与间距自定义
+"""
 import sys
-
 from uuid import uuid1
+
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout, QStackedWidget, QVBoxLayout
+from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QStackedWidget
 
-from qfluentwidgets import (BreadcrumbBar, setFont, setTheme, Theme, LineEdit, PrimaryToolButton,
-                            SubtitleLabel, FluentIcon)
-
+from qfluentwidgets import BreadcrumbBar, setFont, LineEdit, PrimaryToolButton, SubtitleLabel, FluentIcon
 
 
 class Demo(QWidget):
+    """BreadcrumbBar 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        setTheme(Theme.DARK)
-        self.setStyleSheet('Demo{background:rgb(32,32,32)}')
+        self.setWindowTitle('BreadcrumbBar - 演示')
+        self.resize(500, 500)
+        self.initWidgets()
+        self.initLayout()
 
+    def initWidgets(self):
+        """初始化组件"""
         self.breadcrumbBar = BreadcrumbBar(self)
         self.stackedWidget = QStackedWidget(self)
         self.lineEdit = LineEdit(self)
         self.addButton = PrimaryToolButton(FluentIcon.SEND, self)
 
-        self.vBoxLayout = QVBoxLayout(self)
-        self.lineEditLayout = QHBoxLayout()
-
+        self.lineEdit.setPlaceholderText('输入页面名称后按回车或点击按钮')
         self.addButton.clicked.connect(lambda: self.addInterface(self.lineEdit.text()))
         self.lineEdit.returnPressed.connect(lambda: self.addInterface(self.lineEdit.text()))
-        self.lineEdit.setPlaceholderText('Enter the name of interface')
 
-        # NOTE: adjust the size of breadcrumb item
-        setFont(self.breadcrumbBar, 26)
+        # 设置面包屑样式
+        setFont(self.breadcrumbBar, 20)
         self.breadcrumbBar.setSpacing(20)
         self.breadcrumbBar.currentItemChanged.connect(self.switchInterface)
 
-        self.addInterface('Home')
-        self.addInterface('Documents')
+        # 添加初始页面
+        self.addInterface('主页')
+        self.addInterface('文档')
 
-        self.vBoxLayout.setContentsMargins(20, 20, 20, 20)
-        self.vBoxLayout.addWidget(self.breadcrumbBar)
-        self.vBoxLayout.addWidget(self.stackedWidget)
-        self.vBoxLayout.addLayout(self.lineEditLayout)
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QVBoxLayout(self)
+        mainLayout.setSpacing(16)
+        mainLayout.setContentsMargins(20, 20, 20, 20)
 
-        self.lineEditLayout.addWidget(self.lineEdit, 1)
-        self.lineEditLayout.addWidget(self.addButton)
-        self.resize(500, 500)
+        mainLayout.addWidget(self.breadcrumbBar)
+        mainLayout.addWidget(self.stackedWidget, 1)
+
+        inputLayout = QHBoxLayout()
+        inputLayout.addWidget(self.lineEdit, 1)
+        inputLayout.addWidget(self.addButton)
+        mainLayout.addLayout(inputLayout)
 
     def addInterface(self, text: str):
+        """添加新页面"""
         if not text:
             return
 
-        w = SubtitleLabel(text)
-        w.setObjectName(uuid1().hex)
-        w.setAlignment(Qt.AlignCenter)
+        widget = SubtitleLabel(text)
+        widget.setObjectName(uuid1().hex)
+        widget.setAlignment(Qt.AlignCenter)
 
         self.lineEdit.clear()
-        self.stackedWidget.addWidget(w)
-        self.stackedWidget.setCurrentWidget(w)
+        self.stackedWidget.addWidget(widget)
+        self.stackedWidget.setCurrentWidget(widget)
+        self.breadcrumbBar.addItem(widget.objectName(), text)
 
-        # !IMPORTANT: add breadcrumb item
-        self.breadcrumbBar.addItem(w.objectName(), text)
-
-    def switchInterface(self, objectName):
-        self.stackedWidget.setCurrentWidget(self.findChild(SubtitleLabel, objectName))
+    def switchInterface(self, objectName: str):
+        """切换页面"""
+        widget = self.findChild(SubtitleLabel, objectName)
+        if widget:
+            self.stackedWidget.setCurrentWidget(widget)
 
 
 if __name__ == '__main__':
