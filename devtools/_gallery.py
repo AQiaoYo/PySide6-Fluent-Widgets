@@ -1,11 +1,11 @@
 # coding: utf-8
 """FluentWindow 全组件浏览器"""
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QApplication, QFrame
 
 from qfluentwidgets import (
     FluentWindow, FluentIcon as FIF, ScrollArea, NavigationItemPosition,
-    CaptionLabel, SimpleCardWidget, toggleTheme, isDarkTheme,
+    CaptionLabel, toggleTheme, isDarkTheme,
 )
 
 from ._factories import (
@@ -59,7 +59,11 @@ class CategoryPage(ScrollArea):
                         self._add_card(w, name)
 
     def _add_card(self, widget, description):
-        card = SimpleCardWidget(self.view)
+        # 使用 QFrame + QSS 替代 SimpleCardWidget，避免 paintEvent 与子组件
+        # 的 QGraphicsEffect 冲突（如 ElevatedCardWidget、InfoBar 等）
+        card = QFrame(self.view)
+        card.setObjectName('card')
+        card.setStyleSheet(self._card_style_sheet())
 
         lo = QVBoxLayout(card)
         lo.setContentsMargins(16, 16, 16, 16)
@@ -71,8 +75,27 @@ class CategoryPage(ScrollArea):
 
         widget.setParent(card)
         lo.addWidget(widget)
+        widget.show()
 
         self.vBoxLayout.addWidget(card)
+
+    @staticmethod
+    def _card_style_sheet():
+        if isDarkTheme():
+            return """
+                QFrame#card {
+                    border: 1px solid rgb(36, 36, 36);
+                    border-radius: 10px;
+                    background-color: rgba(0, 0, 0, 0.1795);
+                }
+            """
+        return """
+            QFrame#card {
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                border-radius: 10px;
+                background-color: rgba(0, 0, 0, 0.024);
+            }
+        """
 
 
 class GalleryWindow(FluentWindow):
