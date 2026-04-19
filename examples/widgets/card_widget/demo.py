@@ -1,4 +1,18 @@
 # coding:utf-8
+"""
+CardWidget 演示
+
+展示内容：
+- CardWidget 卡片控件
+- ElevatedCardWidget 浮起卡片
+- SimpleCardWidget 简单卡片
+- HeaderCardWidget 标题卡片
+- GroupHeaderCardWidget 分组标题卡片
+- AppCard 应用卡片示例
+- GalleryCard 画廊卡片示例
+- LightBox 灯箱效果
+- MicaWindow 云母效果窗口
+"""
 import sys
 from pathlib import Path
 
@@ -495,7 +509,7 @@ class Demo3(MSFluentWindow):
             "settingInterface", FluentIcon.SETTING, "设置", position=NavigationItemPosition.BOTTOM, selectable=False)
 
         self.resize(880, 760)
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('CardWidget - 演示')
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
 
         self.titleBar.raise_()

@@ -1,15 +1,28 @@
 # coding: utf-8
+"""
+TableWidget / TableView 演示
+
+展示内容：
+- TableWidget 表格控件
+- 自定义 TableItemDelegate
+- 边框与圆角设置
+- 数据填充与选中信号
+- 主题切换
+"""
 import sys
 
 from PySide6.QtCore import QModelIndex, Qt
 from PySide6.QtGui import QPalette
-from PySide6.QtWidgets import QApplication, QStyleOptionViewItem, QTableWidget, QTableWidgetItem, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QStyleOptionViewItem, QTableWidgetItem, QWidget, QVBoxLayout
 
-from qfluentwidgets import TableWidget, isDarkTheme, setTheme, Theme, TableView, TableItemDelegate, setCustomStyleSheet
+from qfluentwidgets import (
+    TableWidget, TableItemDelegate, BodyLabel, isDarkTheme, setTheme, Theme, PushButton,
+)
+from qfluentwidgets import FluentIcon as FIF
 
 
 class CustomTableItemDelegate(TableItemDelegate):
-    """ Custom table item delegate """
+    """自定义表格项委托 — 高亮艺术家列"""
 
     def initStyleOption(self, option: QStyleOptionViewItem, index: QModelIndex):
         super().initStyleOption(option, index)
@@ -25,27 +38,27 @@ class CustomTableItemDelegate(TableItemDelegate):
 
 
 class Demo(QWidget):
+    """TableWidget 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
+        self.setWindowTitle('TableWidget - 演示')
+        self.resize(800, 600)
+        self.initWidgets()
+        self.initLayout()
 
-        self.hBoxLayout = QHBoxLayout(self)
-        self.tableView = TableWidget(self)
+    def initWidgets(self):
+        """初始化表格组件"""
+        self.statusLabel = BodyLabel('请选择一个单元格', self)
+        self.statusLabel.setAlignment(Qt.AlignCenter)
 
-        # NOTE: use custom item delegate
-        # self.tableView.setItemDelegate(CustomTableItemDelegate(self.tableView))
+        self.tableWidget = TableWidget(self)
+        self.tableWidget.setBorderVisible(True)
+        self.tableWidget.setBorderRadius(8)
+        self.tableWidget.setWordWrap(False)
+        self.tableWidget.setRowCount(30)
+        self.tableWidget.setColumnCount(5)
 
-        # select row on right-click
-        # self.tableView.setSelectRightClickedRow(True)
-
-        # enable border
-        self.tableView.setBorderVisible(True)
-        self.tableView.setBorderRadius(8)
-
-        self.tableView.setWordWrap(False)
-        self.tableView.setRowCount(60)
-        self.tableView.setColumnCount(5)
         songInfos = [
             ['かばん', 'aiko', 'かばん', '2004', '5:04'],
             ['爱你', '王心凌', '爱你', '2004', '3:39'],
@@ -62,37 +75,46 @@ class Demo(QWidget):
             ['もっと', 'aiko', 'もっと', '2016', '4:50'],
             ['問題集', 'aiko', 'もっと', '2016', '4:18'],
             ['半袖', 'aiko', 'もっと', '2016', '5:50'],
-            ['ひねくれ', '鎖那', 'Hush a by little girl', '2017', '3:54'],
-            ['シュテルン', '鎖那', 'Hush a by little girl', '2017', '3:16'],
-            ['愛は勝手', 'aiko', '湿った夏の始まり', '2018', '5:31'],
-            ['ドライブモード', 'aiko', '湿った夏の始まり', '2018', '3:37'],
-            ['うん。', 'aiko', '湿った夏の始まり', '2018', '5:48'],
-            ['キラキラ', 'aikoの詩。', '2019', '5:08', 'aiko'],
-            ['恋のスーパーボール', 'aiko', 'aikoの詩。', '2019', '4:31'],
-            ['磁石', 'aiko', 'どうしたって伝えられないから', '2021', '4:24'],
-            ['食べた愛', 'aiko', '食べた愛/あたしたち', '2021', '5:17'],
-            ['列車', 'aiko', '食べた愛/あたしたち', '2021', '4:18'],
-            ['花の塔', 'さユり', '花の塔', '2022', '4:35'],
-            ['夏恋のライフ', 'aiko', '夏恋のライフ', '2022', '5:03'],
-            ['あかときリロード', 'aiko', 'あかときリロード', '2023', '4:04'],
-            ['荒れた唇は恋を失くす', 'aiko', '今の二人をお互いが見てる', '2023', '4:07'],
-            ['ワンツースリー', 'aiko', '今の二人をお互いが見てる', '2023', '4:47'],
         ]
-        songInfos += songInfos
+        songInfos += songInfos  # 复制一份填满 30 行
+
         for i, songInfo in enumerate(songInfos):
             for j in range(5):
-                self.tableView.setItem(i, j, QTableWidgetItem(songInfo[j]))
+                self.tableWidget.setItem(i, j, QTableWidgetItem(songInfo[j]))
 
-        self.tableView.verticalHeader().hide()
-        self.tableView.setHorizontalHeaderLabels(['Title', 'Artist', 'Album', 'Year', 'Duration'])
-        self.tableView.resizeColumnsToContents()
-        # self.tableView.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        # self.tableView.setSortingEnabled(True)
+        self.tableWidget.verticalHeader().hide()
+        self.tableWidget.setHorizontalHeaderLabels(['标题', '艺术家', '专辑', '年份', '时长'])
+        self.tableWidget.resizeColumnsToContents()
 
-        self.setStyleSheet("Demo{background: rgb(255, 255, 255)} ")
-        self.hBoxLayout.setContentsMargins(50, 30, 50, 30)
-        self.hBoxLayout.addWidget(self.tableView)
-        self.resize(735, 760)
+        # 信号连接
+        self.tableWidget.cellClicked.connect(self.onCellClicked)
+        self.tableWidget.currentItemChanged.connect(self.onItemChanged)
+
+        # 主题切换
+        self.themeBtn = PushButton(FIF.CONSTRACT, '切换主题', self)
+        self.themeBtn.clicked.connect(setTheme)
+
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QVBoxLayout(self)
+        mainLayout.setSpacing(16)
+        mainLayout.setContentsMargins(30, 20, 30, 20)
+
+        mainLayout.addWidget(self.statusLabel)
+        mainLayout.addWidget(self.tableWidget, 1)
+        mainLayout.addWidget(self.themeBtn, 0, Qt.AlignCenter)
+
+    def onCellClicked(self, row: int, column: int):
+        """单元格点击"""
+        item = self.tableWidget.item(row, column)
+        if item:
+            self.statusLabel.setText(f'点击: 第 {row + 1} 行, 第 {column + 1} 列 — {item.text()}')
+
+    def onItemChanged(self, current: QTableWidgetItem, previous: QTableWidgetItem):
+        """当前项变化"""
+        if current:
+            self.statusLabel.setText(
+                f'选中: 第 {current.row() + 1} 行, 第 {current.column() + 1} 列 — {current.text()}')
 
 
 if __name__ == "__main__":

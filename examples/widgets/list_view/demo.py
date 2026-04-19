@@ -1,48 +1,85 @@
 # coding: utf-8
+"""
+ListWidget / ListView 演示
+
+展示内容：
+- ListWidget 列表控件
+- ListView 列表视图
+- 数据填充与选中信号
+- 主题切换
+"""
 import sys
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon
-from PySide6.QtWidgets import QApplication, QListWidgetItem, QListWidget, QWidget, QHBoxLayout
+from PySide6.QtWidgets import QApplication, QListWidgetItem, QWidget, QHBoxLayout, QVBoxLayout
 
-from qfluentwidgets import ListView, setTheme, Theme, ListWidget
-
+from qfluentwidgets import ListWidget, ListView, BodyLabel, setTheme, Theme, PushButton
+from qfluentwidgets import FluentIcon as FIF
 
 
 class Demo(QWidget):
+    """ListWidget 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
+        self.setWindowTitle('ListWidget - 演示')
+        self.resize(500, 500)
+        self.initWidgets()
+        self.initLayout()
 
-        self.hBoxLayout = QHBoxLayout(self)
+    def initWidgets(self):
+        """初始化列表组件"""
+        self.statusLabel = BodyLabel('请选择一个项目', self)
+        self.statusLabel.setAlignment(Qt.AlignCenter)
+
+        # ListWidget
         self.listWidget = ListWidget(self)
-
-        # self.listWidget.setAlternatingRowColors(True)
-
-        # self.listWidget.setSelectRightClickedRow(True)
-
-        stands = [
-            '白金之星', '绿色法皇', "天堂制造", "绯红之王",
-            '银色战车', '疯狂钻石', "壮烈成仁", "败者食尘",
-            "黑蚊子多", '杀手皇后', "金属制品", "石之自由",
-            "砸瓦鲁多", '钢链手指', "臭氧宝宝", "华丽挚爱",
-            "隐者之紫", "黄金体验", "虚无之王", "纸月之王",
-            "骇人恶兽", "男子领域", "20世纪男孩", "牙 Act 4",
-            "铁球破坏者", "性感手枪", 'D4C • 爱之列车', "天生完美",
-            "软又湿", "佩斯利公园", "奇迹于你", "行走的心",
-            "护霜旅行者", "十一月雨", "调情圣手", "片刻静候"
+        items = [
+            'Python', 'JavaScript', 'TypeScript', 'Go', 'Rust',
+            'C++', 'Java', 'C#', 'Swift', 'Kotlin',
+            'Ruby', 'PHP', 'Lua', 'Dart', 'Scala',
+            'Haskell', 'Erlang', 'Clojure', 'F#', 'R',
         ]
-        for stand in stands:
-            item = QListWidgetItem(stand)
-            # item.setIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-            # item.setCheckState(Qt.Unchecked)
+        for item_text in items:
+            item = QListWidgetItem(item_text)
             self.listWidget.addItem(item)
 
-        self.setStyleSheet("Demo{background: rgb(249, 249, 249)} ")
-        self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
-        self.hBoxLayout.addWidget(self.listWidget)
-        self.resize(300, 400)
+        self.listWidget.currentItemChanged.connect(self.onItemChanged)
+        self.listWidget.itemClicked.connect(self.onItemClicked)
+
+        # ListView（空数据展示结构）
+        self.listView = ListView(self)
+        for item_text in items[:10]:
+            self.listView.addItem(item_text)
+
+        # 主题切换
+        self.themeBtn = PushButton(FIF.CONSTRACT, '切换主题', self)
+        self.themeBtn.clicked.connect(setTheme)
+
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QVBoxLayout(self)
+        mainLayout.setSpacing(16)
+        mainLayout.setContentsMargins(20, 20, 20, 20)
+
+        mainLayout.addWidget(self.statusLabel)
+
+        listLayout = QHBoxLayout()
+        listLayout.setSpacing(16)
+        listLayout.addWidget(self.listWidget, 1)
+        listLayout.addWidget(self.listView, 1)
+        mainLayout.addLayout(listLayout, 1)
+
+        mainLayout.addWidget(self.themeBtn, 0, Qt.AlignCenter)
+
+    def onItemChanged(self, current: QListWidgetItem, previous: QListWidgetItem):
+        """当前项变化"""
+        if current:
+            self.statusLabel.setText(f'当前选中: {current.text()}')
+
+    def onItemClicked(self, item: QListWidgetItem):
+        """项被点击"""
+        self.statusLabel.setText(f'点击了: {item.text()}')
 
 
 if __name__ == "__main__":
