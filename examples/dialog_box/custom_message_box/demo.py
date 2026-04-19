@@ -1,4 +1,13 @@
 # coding:utf-8
+"""
+CustomMessageBox 演示
+
+展示内容：
+- MessageBoxBase 自定义消息框基类
+- 自定义输入验证 (validate)
+- 错误提示与输入框高亮
+- 按钮文本自定义
+"""
 import sys
 
 from PySide6.QtCore import Qt, QUrl
@@ -9,7 +18,7 @@ from qfluentwidgets import MessageBoxBase, SubtitleLabel, LineEdit, PushButton, 
 
 
 class CustomMessageBox(MessageBoxBase):
-    """ Custom message box """
+    """自定义 URL 打开对话框"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -19,25 +28,23 @@ class CustomMessageBox(MessageBoxBase):
         self.urlLineEdit.setPlaceholderText('输入文件、流或者播放列表的 URL')
         self.urlLineEdit.setClearButtonEnabled(True)
 
-        self.warningLabel = CaptionLabel("The url is invalid")
+        self.warningLabel = CaptionLabel("URL 格式无效")
         self.warningLabel.setTextColor("#cf1010", QColor(255, 28, 32))
 
-        # add widget to view layout
+        # 添加控件到视图布局
         self.viewLayout.addWidget(self.titleLabel)
         self.viewLayout.addWidget(self.urlLineEdit)
         self.viewLayout.addWidget(self.warningLabel)
         self.warningLabel.hide()
 
-        # change the text of button
+        # 修改按钮文本
         self.yesButton.setText('打开')
         self.cancelButton.setText('取消')
 
         self.widget.setMinimumWidth(350)
 
-        # self.hideYesButton()
-
     def validate(self):
-        """ Rewrite the virtual method """
+        """重写验证方法"""
         isValid = self.urlLineEdit.text().lower().startswith("http://")
         self.warningLabel.setHidden(isValid)
         self.urlLineEdit.setError(not isValid)
@@ -45,20 +52,27 @@ class CustomMessageBox(MessageBoxBase):
 
 
 class Demo(QWidget):
+    """CustomMessageBox 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
-        # self.setStyleSheet('Demo{background:rgb(32,32,32)}')
+        self.setWindowTitle('CustomMessageBox - 演示')
+        self.resize(600, 400)
+        self.initWidgets()
+        self.initLayout()
 
-        self.hBxoLayout = QHBoxLayout(self)
+    def initWidgets(self):
+        """初始化组件"""
         self.button = PushButton('打开 URL', self)
-
-        self.resize(600, 600)
-        self.hBxoLayout.addWidget(self.button, 0, Qt.AlignCenter)
         self.button.clicked.connect(self.showDialog)
 
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QHBoxLayout(self)
+        mainLayout.addWidget(self.button, 0, Qt.AlignCenter)
+
     def showDialog(self):
+        """显示自定义对话框"""
         w = CustomMessageBox(self)
         if w.exec():
             print(w.urlLineEdit.text())
