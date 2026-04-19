@@ -43,12 +43,11 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
         qconfig.themeChangedFinished.connect(self._onThemeChangedFinished)
 
     def setCustomBackgroundColor(self, light, dark):
-        """设置自定义背景色.
-
-        参数
-        ----------
-        light, dark: QColor | Qt.GlobalColor | str
-            亮色/暗色主题下使用的背景色.
+        """设置自定义背景色
+        
+        Args:
+            light (QColor | Qt.GlobalColor | str): 亮色主题下使用的背景色
+            dark (QColor | Qt.GlobalColor | str): 暗色主题下使用的背景色
         """
         self._lightBackgroundColor = QColor(light)
         self._darkBackgroundColor = QColor(dark)
@@ -78,7 +77,11 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
             self.windowEffect.setMicaEffect(self.winId(), isDarkTheme())
 
     def setMicaEffectEnabled(self, isEnabled: bool):
-        """设置是否启用 Mica 效果,仅在 Win11 上可用."""
+        """设置是否启用 Mica 效果，仅在 Win11 上可用
+        
+        Args:
+            isEnabled (bool): 是否启用 Mica 效果
+        """
         if sys.platform != 'win32' or sys.getwindowsversion().build < 22000:
             return
 
@@ -95,12 +98,13 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
         return self._isMicaEnabled
 
     def systemTitleBarRect(self, size: QSize) -> QRect:
-        """返回系统标题栏区域,仅适用于 macOS.
-
-        参数
-        ----------
-        size: QSize
-            原始系统标题栏区域.
+        """返回系统标题栏区域，仅适用于 macOS
+        
+        Args:
+            size (QSize): 原始系统标题栏区域
+        
+        Returns:
+            系统标题栏区域
         """
         return QRect(0, 0 if self.isFullScreen() else 2, 75, size.height())
 
@@ -131,19 +135,22 @@ class FluentWindowBase(FluentWidget):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         position=None):
-        """添加子界面."""
+        """添加子界面
+        
+        Args:
+            interface (QWidget): 要添加的子界面
+            icon (Union[FluentIconBase, QIcon, str]): 导航项图标
+            text (str): 导航项文本
+            position: 导航项位置
+        """
         raise NotImplementedError
 
     def removeInterface(self, interface: QWidget, isDelete=False):
-        """移除子界面.
-
-        参数
-        ----------
-        interface: QWidget
-            要移除的子界面.
-
-        isDelete: bool
-            是否一并删除该子界面.
+        """移除子界面
+        
+        Args:
+            interface (QWidget): 要移除的子界面
+            isDelete (bool): 是否一并删除该子界面
         """
         raise NotImplementedError
 
@@ -166,12 +173,13 @@ class FluentWindowBase(FluentWidget):
         self.stackedWidget.setStyle(QApplication.style())
 
     def systemTitleBarRect(self, size: QSize) -> QRect:
-        """返回系统标题栏区域,仅适用于 macOS.
-
-        参数
-        ----------
-        size: QSize
-            原始系统标题栏区域.
+        """返回系统标题栏区域，仅适用于 macOS
+        
+        Args:
+            size (QSize): 原始系统标题栏区域
+        
+        Returns:
+            系统标题栏区域
         """
         return QRect(size.width() - 75, 0 if self.isFullScreen() else 8, 75, size.height())
 
@@ -280,30 +288,17 @@ class FluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         position=None, parent=None, isTransparent=False) -> 'NavigationTreeWidget':
-        """添加子界面.
-
-        调用此方法前, 必须先为 `interface` 设置 `objectName`.
-
-        参数
-        ----------
-        interface: QWidget
-            要添加的子界面,调用前必须已设置 `objectName`.
-
-        icon: FluentIconBase | QIcon | str
-            导航项图标.
-
-        text: str
-            导航项文本.
-
-        position: NavigationItemPosition
-            导航项位置.
-
-        parent: QWidget | str
-            * QWidget: 使用父部件的 `objectName` 作为父级导航项.
-            * str: 直接使用父级路由键.
-
-        isTransparent: bool
-            是否使用透明背景.
+        """添加子界面
+        
+        调用此方法前，必须先为 interface 设置 objectName
+        
+        Args:
+            interface (QWidget): 要添加的子界面，调用前必须已设置 objectName
+            icon (Union[FluentIconBase, QIcon, str]): 导航项图标
+            text (str): 导航项文本
+            position (NavigationItemPosition): 导航项位置
+            parent (QWidget | str): 父级导航项，QWidget 表示使用父部件的 objectName 作为父级导航项，str 表示直接使用父级路由键
+            isTransparent (bool): 是否使用透明背景
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
@@ -401,26 +396,17 @@ class MSFluentWindow(FluentWindowBase):
 
     def addSubInterface(self, interface: QWidget, icon: Union[FluentIconBase, QIcon, str], text: str,
                         selectedIcon=None, position=None, isTransparent=False) -> 'NavigationBarPushButton':
-        """添加子界面.
-
-        调用此方法前, 必须先为 `interface` 设置 `objectName`.
-
-        参数
-        ----------
-        interface: QWidget
-            要添加的子界面,调用前必须已设置 `objectName`.
-
-        icon: FluentIconBase | QIcon | str
-            导航项图标.
-
-        text: str
-            导航项文本.
-
-        selectedIcon: str | QIcon | FluentIconBase
-            导航项选中状态下的图标.
-
-        position: NavigationItemPosition
-            导航项位置.
+        """添加子界面
+        
+        调用此方法前，必须先为 interface 设置 objectName
+        
+        Args:
+            interface (QWidget): 要添加的子界面，调用前必须已设置 objectName
+            icon (Union[FluentIconBase, QIcon, str]): 导航项图标
+            text (str): 导航项文本
+            selectedIcon (str | QIcon | FluentIconBase): 导航项选中状态下的图标
+            position (NavigationItemPosition): 导航项位置
+            isTransparent: 是否使用透明背景
         """
         if not interface.objectName():
             raise ValueError("The object name of `interface` can't be empty string.")
@@ -487,7 +473,7 @@ class SplitTitleBar(TitleBar):
 
 
 class SplitFluentWindow(FluentWindow):
-    """分栏风格的 Fluent 窗口."""
+    """分栏风格的 Fluent 窗口"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -503,6 +489,6 @@ class SplitFluentWindow(FluentWindow):
 
 
 class FluentBackgroundTheme:
-    """Fluent 背景主题."""
+    """Fluent 背景主题"""
     DEFAULT = (QColor(243, 243, 243), QColor(32, 32, 32))   # 亮色, 暗色
     DEFAULT_BLUE = (QColor(240, 244, 249), QColor(25, 33, 42))

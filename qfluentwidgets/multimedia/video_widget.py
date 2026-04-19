@@ -1,4 +1,6 @@
 # coding: utf-8
+"""视频播放组件"""
+
 from PySide6.QtCore import Qt, Signal, QUrl, QSizeF, QTimer
 from PySide6.QtGui import QPainter
 from PySide6.QtMultimediaWidgets import QGraphicsVideoItem
@@ -9,7 +11,7 @@ from .media_play_bar import StandardMediaPlayBar
 
 
 class GraphicsVideoItem(QGraphicsVideoItem):
-    """ 图形视频项 """
+    """图形视频项"""
 
     def paint(self, painter: QPainter, option, widget):
         painter.setCompositionMode(QPainter.CompositionMode_Difference)
@@ -17,7 +19,7 @@ class GraphicsVideoItem(QGraphicsVideoItem):
 
 
 class VideoWidget(QGraphicsView):
-    """ 视频部件 """
+    """视频部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -42,7 +44,11 @@ class VideoWidget(QGraphicsView):
         self.timer.timeout.connect(self._onHideTimeOut)
 
     def setVideo(self, url: QUrl):
-        """ 设置 视频 到 play """
+        """设置视频源
+
+        Args:
+            url: 视频文件的 QUrl 地址
+        """
         self.player.setSource(url)
         self.fitInView(self.videoItem, Qt.KeepAspectRatio)
 
@@ -75,7 +81,7 @@ class VideoWidget(QGraphicsView):
         self.playBar.stop()
 
     def togglePlayState(self):
-        """ 切换play state """
+        """切换播放状态"""
         if self.player.isPlaying():
             self.pause()
         else:

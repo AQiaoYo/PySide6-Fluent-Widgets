@@ -1,4 +1,6 @@
 # coding: utf-8
+"""媒体播放栏组件"""
+
 from PySide6.QtCore import Qt, Signal, QSize, QPropertyAnimation, QPoint
 from PySide6.QtGui import QPixmap, QPainter, QColor
 from PySide6.QtWidgets import QWidget, QGraphicsOpacityEffect, QHBoxLayout, QVBoxLayout
@@ -14,7 +16,7 @@ from .media_player import MediaPlayer, MediaPlayerBase
 
 
 class MediaPlayBarButton(TransparentToolButton):
-    """ 媒体播放栏按钮 """
+    """媒体播放栏按钮"""
 
     def _postInit(self):
         super()._postInit()
@@ -24,7 +26,7 @@ class MediaPlayBarButton(TransparentToolButton):
 
 
 class PlayButton(MediaPlayBarButton):
-    """ 播放按钮 """
+    """播放按钮"""
 
     def _postInit(self):
         super()._postInit()
@@ -41,7 +43,7 @@ class PlayButton(MediaPlayBarButton):
 
 
 class VolumeView(FlyoutViewBase):
-    """ 音量视图 """
+    """音量视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -89,7 +91,7 @@ class VolumeView(FlyoutViewBase):
 
 
 class VolumeButton(MediaPlayBarButton):
-    """ 音量按钮 """
+    """音量按钮"""
 
     volumeChanged = Signal(int)
     mutedChanged = Signal(bool)
@@ -127,7 +129,7 @@ class VolumeButton(MediaPlayBarButton):
 
 
 class MediaPlayBarBase(QWidget):
-    """ 播放栏基类 """
+    """播放栏基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -148,7 +150,11 @@ class MediaPlayBarBase(QWidget):
         self.playButton.clicked.connect(self.togglePlayState)
 
     def setMediaPlayer(self, player: MediaPlayerBase):
-        """ 设置 媒体播放器 """
+        """设置媒体播放器
+        
+        Args:
+            player: 媒体播放器基类实例
+        """
         self.player = player
 
         self.player.durationChanged.connect(self.progressSlider.setMaximum)
@@ -185,11 +191,19 @@ class MediaPlayBarBase(QWidget):
         self.player.stop()
 
     def setVolume(self, volume: int):
-        """ 设置 音量 的 播放器 """
+        """设置播放器音量
+        
+        Args:
+            volume: 音量大小，范围 0-100
+        """
         self.player.setVolume(volume)
 
     def setPosition(self, position: int):
-        """ 设置 位置 的 media 中的 ms """
+        """设置媒体播放位置
+        
+        Args:
+            position: 播放位置，单位为毫秒
+        """
         self.player.setPosition(position)
 
     def _onPositionChanged(self, position: int):
@@ -199,7 +213,7 @@ class MediaPlayBarBase(QWidget):
         self.playButton.setPlay(self.player.isPlaying())
 
     def togglePlayState(self):
-        """切换媒体播放器的播放状态."""
+        """切换媒体播放器的播放状态"""
         if self.player.isPlaying():
             self.player.pause()
         else:
@@ -223,7 +237,7 @@ class MediaPlayBarBase(QWidget):
 
 
 class SimpleMediaPlayBar(MediaPlayBarBase):
-    """ 简易媒体播放栏 """
+    """简易媒体播放栏"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -239,12 +253,16 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
         self.setMediaPlayer(MediaPlayer(self))
 
     def addButton(self, button: MediaPlayBarButton):
-        """将按钮添加到播放栏右侧."""
+        """将按钮添加到播放栏右侧
+        
+        Args:
+            button: 播放栏按钮
+        """
         self.hBoxLayout.addWidget(button, 0)
 
 
 class StandardMediaPlayBar(MediaPlayBarBase):
-    """ 标准媒体播放栏 """
+    """标准媒体播放栏"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -299,11 +317,19 @@ class StandardMediaPlayBar(MediaPlayBarBase):
         self.skipForwardButton.clicked.connect(lambda: self.skipForward(30000))
 
     def skipBack(self, ms: int):
-        """ Back up 用于 specified milliseconds """
+        """向后跳过指定毫秒数
+        
+        Args:
+            ms: 跳过的毫秒数
+        """
         self.player.setPosition(self.player.position()-ms)
 
     def skipForward(self, ms: int):
-        """ Fast forward specified milliseconds """
+        """向前跳过指定毫秒数
+        
+        Args:
+            ms: 跳过的毫秒数
+        """
         self.player.setPosition(self.player.position()+ms)
 
     def _onPositionChanged(self, position: int):
