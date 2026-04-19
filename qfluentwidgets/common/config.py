@@ -1,4 +1,6 @@
 # coding: utf-8
+"""配置管理模块"""
+
 import json
 from copy import deepcopy
 from enum import Enum
@@ -32,7 +34,7 @@ def _resolve_system_theme():
     return Theme(detected_theme) if detected_theme else Theme.LIGHT
 
 class Theme(Enum):
-    """ 主题枚举 """
+    """主题枚举"""
 
     LIGHT = "Light"
     DARK = "Dark"
@@ -40,19 +42,37 @@ class Theme(Enum):
 
 
 class ConfigValidator:
-    """ 配置校验器 """
+    """配置校验器"""
 
     def validate(self, value):
-        """校验值是否合法."""
+        """校验值是否合法
+
+        Args:
+            value: 待校验的值
+
+        Returns:
+            如果值合法则为 True，否则为 False
+        """
         return True
 
     def correct(self, value):
-        """修正非法值."""
+        """修正非法值
+
+        Args:
+            value: 待修正的值
+
+        Returns:
+            修正后的值
+        """
         return value
 
 
 class RangeValidator(ConfigValidator):
-    """ 范围校验器 """
+    """范围校验器
+
+    构造函数重载:
+        __init__(self, min, max)
+    """
 
     def __init__(self, min, max):
         self.min = min
@@ -67,7 +87,11 @@ class RangeValidator(ConfigValidator):
 
 
 class OptionsValidator(ConfigValidator):
-    """ 选项校验器 """
+    """选项校验器
+
+    构造函数重载:
+        __init__(self, options)
+    """
 
     def __init__(self, options):
         if not options:
@@ -86,14 +110,18 @@ class OptionsValidator(ConfigValidator):
 
 
 class BoolValidator(OptionsValidator):
-    """ 布尔值校验器 """
+    """布尔值校验器
+
+    构造函数重载:
+        __init__(self)
+    """
 
     def __init__(self):
         super().__init__([True, False])
 
 
 class FolderValidator(ConfigValidator):
-    """ 文件夹校验器 """
+    """文件夹校验器"""
 
     def validate(self, value):
         return Path(value).exists()
@@ -105,7 +133,7 @@ class FolderValidator(ConfigValidator):
 
 
 class FolderListValidator(ConfigValidator):
-    """ 文件夹列表校验器 """
+    """文件夹列表校验器"""
 
     def validate(self, value):
         return all(Path(i).exists() for i in value)
@@ -121,7 +149,11 @@ class FolderListValidator(ConfigValidator):
 
 
 class ColorValidator(ConfigValidator):
-    """ RGB 颜色校验器 """
+    """RGB 颜色校验器
+
+    构造函数重载:
+        __init__(self, default)
+    """
 
     def __init__(self, default):
         self.default = QColor(default)
@@ -137,19 +169,37 @@ class ColorValidator(ConfigValidator):
 
 
 class ConfigSerializer:
-    """ 配置序列化器 """
+    """配置序列化器"""
 
     def serialize(self, value):
-        """序列化配置值."""
+        """序列化配置值
+
+        Args:
+            value: 待序列化的值
+
+        Returns:
+            序列化后的值
+        """
         return value
 
     def deserialize(self, value):
-        """从配置文件中的值反序列化配置."""
+        """反序列化配置值
+
+        Args:
+            value: 配置文件中的值
+
+        Returns:
+            反序列化后的值
+        """
         return value
 
 
 class EnumSerializer(ConfigSerializer):
-    """ 枚举类序列化器 """
+    """枚举类序列化器
+
+    构造函数重载:
+        __init__(self, enumClass)
+    """
 
     def __init__(self, enumClass):
         self.enumClass = enumClass
@@ -162,7 +212,7 @@ class EnumSerializer(ConfigSerializer):
 
 
 class ColorSerializer(ConfigSerializer):
-    """ QColor 序列化器 """
+    """QColor 序列化器"""
 
     def serialize(self, value: QColor):
         return value.name(QColor.HexArgb)
@@ -175,28 +225,24 @@ class ColorSerializer(ConfigSerializer):
 
 
 class ConfigItem(QObject):
-    """ 配置项 """
+    """配置项
+
+    构造函数重载:
+        __init__(self, group, name, default, validator=None, serializer=None, restart=False)
+    """
 
     valueChanged = Signal(object)
 
     def __init__(self, group, name, default, validator=None, serializer=None, restart=False):
-        """
-        参数
-        ----------
-        group: str
-            配置分组名称.
+        """初始化配置项
 
-        name: str
-            配置项名称,可以为空.
-
-        default:
-            默认值.
-
-        serializer: ConfigSerializer
-            配置序列化器.
-
-        restart: bool
-            更新值后是否需要重启应用.
+        Args:
+            group (str): 配置分组名称
+            name (str): 配置项名称，可以为空
+            default: 默认值
+            validator (ConfigValidator, optional): 配置校验器，默认为 ConfigValidator
+            serializer (ConfigSerializer, optional): 配置序列化器，默认为 ConfigSerializer
+            restart (bool, optional): 更新值后是否需要重启应用
         """
         super().__init__()
         self.group = group
@@ -210,7 +256,7 @@ class ConfigItem(QObject):
 
     @property
     def value(self):
-        """获取配置项的值."""
+        """获取配置项的值"""
         return self.__value
 
     @value.setter
@@ -223,7 +269,7 @@ class ConfigItem(QObject):
 
     @property
     def key(self):
-        """获取以 `.` 分隔的配置键."""
+        """获取以 `.` 分隔的配置键"""
         return self.group+"."+self.name if self.name else self.group
 
     def __str__(self):
@@ -237,11 +283,11 @@ class ConfigItem(QObject):
 
 
 class RangeConfigItem(ConfigItem):
-    """带范围约束的配置项."""
+    """带范围约束的配置项"""
 
     @property
     def range(self):
-        """获取配置项允许的取值范围."""
+        """获取配置项允许的取值范围"""
         return self.validator.range
 
     def __str__(self):
@@ -249,7 +295,7 @@ class RangeConfigItem(ConfigItem):
 
 
 class OptionsConfigItem(ConfigItem):
-    """带选项列表的配置项."""
+    """带选项列表的配置项"""
 
     @property
     def options(self):
@@ -260,7 +306,11 @@ class OptionsConfigItem(ConfigItem):
 
 
 class ColorConfigItem(ConfigItem):
-    """ 颜色配置项 """
+    """颜色配置项
+
+    构造函数重载:
+        __init__(self, group, name, default, restart=False)
+    """
 
     def __init__(self, group, name, default, restart=False):
         super().__init__(group, name, QColor(default), ColorValidator(default),
@@ -271,7 +321,11 @@ class ColorConfigItem(ConfigItem):
 
 
 class QConfig(QObject):
-    """应用级配置对象."""
+    """应用级配置对象
+
+    构造函数重载:
+        __init__(self)
+    """
 
     appRestartSig = Signal()
     themeChanged = Signal(Theme)
@@ -290,30 +344,28 @@ class QConfig(QObject):
         self._cfg = self
 
     def get(self, item):
-        """获取配置项的值."""
+        """获取配置项的值
+
+        Args:
+            item (ConfigItem): 配置项
+
+        Returns:
+            配置项的当前值
+        """
         return item.value
 
     def set(self, item, value, save=True, copy=True):
-        """设置配置项的值.
+        """设置配置项的值
 
-        参数
-        ----------
-        item: ConfigItem
-            配置项.
-
-        value:
-            要写入的新值.
-
-        save: bool
-            是否立即保存到配置文件.
-
-        copy: bool
-            是否对新值执行深拷贝.
+        Args:
+            item (ConfigItem): 配置项
+            value: 要写入的新值
+            save (bool, optional): 是否立即保存到配置文件，默认为 True
+            copy (bool, optional): 是否对新值执行深拷贝，默认为 True
         """
         if item.value == value:
             return
 
-        # 复杂对象默认做深拷贝,避免外部引用继续修改配置值.
         try:
             item.value = deepcopy(value) if copy else value
         except:
@@ -333,7 +385,14 @@ class QConfig(QObject):
             self._cfg.themeColorChanged.emit(value)
 
     def toDict(self, serialize=True):
-        """将配置项转换为 `dict`."""
+        """将配置项转换为 dict
+
+        Args:
+            serialize (bool, optional): 是否对值进行序列化，默认为 True
+
+        Returns:
+            包含所有配置项的字典
+        """
         items = {}
         for name in dir(self._cfg.__class__):
             item = getattr(self._cfg.__class__, name)
@@ -353,22 +412,18 @@ class QConfig(QObject):
         return items
 
     def save(self):
-        """保存配置."""
+        """保存配置"""
         self._cfg.file.parent.mkdir(parents=True, exist_ok=True)
         with open(self._cfg.file, "w", encoding="utf-8") as f:
             json.dump(self._cfg.toDict(), f, ensure_ascii=False, indent=4)
 
     @exceptionHandler()
     def load(self, file=None, config=None):
-        """加载配置.
+        """加载配置
 
-        参数
-        ----------
-        file: str 或 Path
-            JSON 配置文件路径.
-
-        config: 配置
-            要初始化的配置对象.
+        Args:
+            file (str or Path, optional): JSON 配置文件路径
+            config (QConfig, optional): 要初始化的配置对象
         """
         if isinstance(config, QConfig):
             self._cfg = config
@@ -383,14 +438,12 @@ class QConfig(QObject):
         except:
             cfg = {}
 
-        # 将配置键映射到对应的配置项,便于后续回填.
         items = {}
         for name in dir(self._cfg.__class__):
             item = getattr(self._cfg.__class__, name)
             if isinstance(item, ConfigItem):
                 items[item.key] = item
 
-        # 根据配置文件中的值更新配置项.
         for k, v in cfg.items():
             if not isinstance(v, dict) and items.get(k) is not None:
                 items[k].deserializeFrom(v)
@@ -404,12 +457,12 @@ class QConfig(QObject):
 
     @property
     def theme(self):
-        """获取当前主题模式."""
+        """获取当前主题模式"""
         return self._cfg._theme
 
     @theme.setter
     def theme(self, t):
-        """切换主题,但不修改配置文件."""
+        """切换主题，但不修改配置文件"""
         if t == Theme.AUTO:
             t = _resolve_system_theme()
 
@@ -421,13 +474,20 @@ qconfig = QConfig()
 
 
 def isDarkTheme():
-    """返回当前主题是否为暗色模式."""
+    """返回当前主题是否为暗色模式"""
     return qconfig.theme == Theme.DARK
 
 def theme():
-    """获取当前主题."""
+    """获取当前主题"""
     return qconfig.theme
 
 def isDarkThemeMode(theme=Theme.AUTO):
-    """判断给定主题模式是否为暗色模式."""
+    """判断给定主题模式是否为暗色模式
+
+    Args:
+        theme (Theme, optional): 要判断的主题模式，默认为 Theme.AUTO
+
+    Returns:
+        如果主题为暗色模式则返回 True，否则返回 False
+    """
     return theme == Theme.DARK if theme != Theme.AUTO else isDarkTheme()

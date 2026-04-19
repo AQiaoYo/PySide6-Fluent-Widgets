@@ -1,3 +1,5 @@
+"""QFluentWidgets 通用组件与工具模块，提供样式表、图标、字体、主题及辅助类"""
+
 from .config import *
 from .font import setFont, getFont, setFontFamilies, fontFamilies, fontStyleSheet
 from .auto_wrap import TextWrap

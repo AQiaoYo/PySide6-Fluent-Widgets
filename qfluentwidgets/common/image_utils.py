@@ -1,4 +1,5 @@
 # coding: utf-8
+"""图像处理工具模块"""
 from math import floor
 from io import BytesIO
 from typing import Union
@@ -15,6 +16,17 @@ from .exception_handler import exceptionHandler
 
 
 def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
+    """对图像进行高斯模糊处理
+
+    Args:
+        image: 图像路径字符串或 QPixmap 对象
+        blurRadius: 高斯模糊半径，默认 18
+        brightFactor: 亮度调整因子，默认 1
+        blurPicSize: 模糊处理的图像尺寸限制，用于降低计算量
+
+    Returns:
+        模糊后的 QPixmap 对象
+    """
     if isinstance(image, str) and not image.startswith(':'):
         image = Image.open(image)
     else:
@@ -52,8 +64,13 @@ def gaussianBlur(image, blurRadius=18, brightFactor=1, blurPicSize= None):
 
 # https://github.com/python-pillow/Pillow/blob/main/src/PIL/ImageQt.py
 def fromqpixmap(im: Union[QImage, QPixmap]):
-    """
-    :param im: QImage 或 PIL ImageQt 对象
+    """将 QPixmap/QImage 转换为 PIL Image 对象
+
+    Args:
+        im: QImage 或 QPixmap 对象
+
+    Returns:
+        PIL Image 对象
     """
     buffer = QBuffer()
     buffer.open(QIODevice.OpenModeFlag.ReadWrite)
@@ -74,22 +91,18 @@ def fromqpixmap(im: Union[QImage, QPixmap]):
 
 
 class DominantColor:
-    """主色提取工具类."""
+    """主色提取工具类"""
 
     @classmethod
     @exceptionHandler((24, 24, 24))
     def getDominantColor(cls, imagePath):
-        """从图像中提取主色.
+        """从图像中提取主色
 
-        参数
-        ----------
-        imagePath: str
-            图像路径.
+        Args:
+            imagePath: 图像路径
 
-        返回
-        -------
-        r, g, b: int
-            各颜色通道的 RGB 值.
+        Returns:
+            主色的 RGB 元组，格式为 (r, g, b)
         """
         if imagePath.startswith(':'):
             return (24, 24, 24)
@@ -118,7 +131,14 @@ class DominantColor:
 
     @classmethod
     def __adjustPaletteValue(cls, palette):
-        """调整调色板亮度."""
+        """调整调色板亮度
+
+        Args:
+            palette: 原始调色板
+
+        Returns:
+            调整亮度后的新调色板
+        """
         newPalette = []
         for rgb in palette:
             h, s, v = cls.rgb2hsv(rgb)
@@ -137,7 +157,14 @@ class DominantColor:
 
     @staticmethod
     def rgb2hsv(rgb):
-        """ 将rgb转换为hsv """
+        """将 RGB 转换为 HSV
+
+        Args:
+            rgb: RGB 颜色元组
+
+        Returns:
+            HSV 颜色元组
+        """
         r, g, b = [i / 255 for i in rgb]
         mx = max(r, g, b)
         mn = min(r, g, b)
@@ -156,7 +183,16 @@ class DominantColor:
 
     @staticmethod
     def hsv2rgb(h, s, v):
-        """ 将hsv转换为rgb """
+        """将 HSV 转换为 RGB
+
+        Args:
+            h: 色相
+            s: 饱和度
+            v: 明度
+
+        Returns:
+            RGB 颜色元组
+        """
         h60 = h / 60.0
         h60f = floor(h60)
         hi = int(h60f) % 6
@@ -182,6 +218,16 @@ class DominantColor:
 
     @staticmethod
     def colorfulness(r: int, g: int, b: int):
+        """计算色彩度
+
+        Args:
+            r: 红色通道值
+            g: 绿色通道值
+            b: 蓝色通道值
+
+        Returns:
+            色彩度数值
+        """
         rg = np.absolute(r - g)
         yb = np.absolute(0.5 * (r + g) - b)
 
@@ -194,4 +240,3 @@ class DominantColor:
         mean_root = np.sqrt((rg_mean ** 2) + (yb_mean ** 2))
 
         return std_root + (0.3 * mean_root)
-

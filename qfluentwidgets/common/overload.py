@@ -1,12 +1,13 @@
 # coding: utf-8
+"""基于单分派的泛型方法装饰器"""
+
 from functools import singledispatch, update_wrapper
 
 
 class singledispatchmethod:
-    """Single-dispatch generic method descriptor.
+    """单分派泛型方法描述符
 
-    Supports wrapping existing descriptors 和 handles non-descriptor
-    callables as instance methods.
+    支持包装现有描述符，并将非描述符可调用对象作为实例方法处理
     """
 
     def __init__(self, func):
@@ -17,9 +18,14 @@ class singledispatchmethod:
         self.func = func
 
     def register(self, cls, method=None):
-        """generic_method.注册(cls, func) -> func
+        """注册给定类型的新实现
 
-        Registers new implementation 用于 given *cls* 上的 *generic_method*.
+        Args:
+            cls: 要注册的类型
+            method: 要注册的方法，默认为 None
+
+        Returns:
+            注册的方法
         """
         return self.dispatcher.register(cls, func=method)
 

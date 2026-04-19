@@ -1,3 +1,5 @@
+"""自动换行相关工具模块"""
+
 from enum import Enum, auto
 from functools import lru_cache
 from re import sub
@@ -6,13 +8,15 @@ from unicodedata import east_asian_width
 
 
 class CharType(Enum):
+    """字符类型枚举"""
+
     SPACE = auto()
     ASIAN = auto()
     LATIN = auto()
 
 
 class TextWrap:
-    """文本 wrap"""
+    """文本自动换行工具类"""
 
     EAST_ASAIN_WIDTH_TABLE = {
         "F": 2,
@@ -26,19 +30,40 @@ class TextWrap:
     @classmethod
     @lru_cache(maxsize=128)
     def get_width(cls, char: str) -> int:
-        """返回 宽度 的 char"""
+        """获取字符的显示宽度
+
+        Args:
+            char: 待计算的字符
+
+        Returns:
+            字符的显示宽度
+        """
         return cls.EAST_ASAIN_WIDTH_TABLE.get(east_asian_width(char), 1)
 
     @classmethod
     @lru_cache(maxsize=32)
     def get_text_width(cls, text: str) -> int:
-        """返回 宽度 的 文本"""
+        """获取文本的显示宽度
+
+        Args:
+            text: 待计算的文本
+
+        Returns:
+            文本的显示宽度
+        """
         return sum(cls.get_width(char) for char in text)
 
     @classmethod
     @lru_cache(maxsize=128)
     def get_char_type(cls, char: str) -> CharType:
-        """返回 type 的 char"""
+        """获取字符的类型
+
+        Args:
+            char: 待判断的字符
+
+        Returns:
+            字符类型
+        """
 
         if char.isspace():
             return CharType.SPACE
@@ -50,18 +75,44 @@ class TextWrap:
 
     @classmethod
     def process_text_whitespace(cls, text: str) -> str:
-        """Process whitespace 和 leading 和 trailing spaces 中的 strings"""
+        """处理文本中的空白字符
+
+        将连续空白字符替换为单个空格，并去除首尾空格
+
+        Args:
+            text: 待处理的文本
+
+        Returns:
+            处理后的文本
+        """
         return sub(pattern=r"\s+", repl=" ", string=text).strip()
 
     @classmethod
     @lru_cache(maxsize=32)
     def split_long_token(cls, token: str, width: int) -> List[str]:
-        """Split long token into smaller chunks."""
+        """将长 token 按指定宽度分割
+
+        Args:
+            token: 待分割的字符串
+            width: 每个片段的最大宽度
+
+        Returns:
+            分割后的字符串片段列表
+        """
         return [token[i : i + width] for i in range(0, len(token), width)]
 
     @classmethod
     def tokenizer(cls, text: str):
-        """tokenize line"""
+        """对文本进行分词
+
+        根据字符类型将文本切分为 token
+
+        Args:
+            text: 待分词的文本
+
+        Yields:
+            分词后的 token
+        """
 
         buffer = ""
         last_char_type: Optional[CharType] = None
@@ -80,26 +131,15 @@ class TextWrap:
 
     @classmethod
     def wrap(cls, text: str, width: int, once: bool = True) -> Tuple[str, bool]:
-        """Wrap 根据 string length
+        """根据宽度对文本进行自动换行
 
-        参数
-        ----------
-        text: str
-            文本 到 be wrapped
+        Args:
+            text: 待换行的文本
+            width: 单行允许的最大宽度，中文字符按 2 个字符计算
+            once: 是否只执行一次换行
 
-        width: int
-            单行允许的最大长度, 中文字符按 2 个字符计算.
-
-        once: bool
-            是否只执行一次换行.
-
-        返回
-        -------
-        wrap_text: str
-            文本 after auto word wrap process
-
-        is_wrapped: bool
-            是否 line break occurs 中的 文本
+        Returns:
+            包含换行后的文本和是否发生换行的元组
         """
 
         width = int(width)
@@ -125,6 +165,16 @@ class TextWrap:
 
     @classmethod
     def _wrap_line(cls, text: str, width: int, once: bool = True) -> Tuple[str, bool]:
+        """对单行文本进行自动换行
+
+        Args:
+            text: 待换行的单行文本
+            width: 单行允许的最大宽度
+            once: 是否只执行一次换行
+
+        Returns:
+            包含换行后的文本和是否发生换行的元组
+        """
         line_buffer = ""
         wrapped_lines = []
         current_width = 0

@@ -1,4 +1,6 @@
 # coding: utf-8
+"""动画模块"""
+
 from enum import Enum
 from PySide6.QtCore import QEasingCurve, QEvent, QObject, QPropertyAnimation, Property, Signal, QPoint, QPointF, QRect, QRectF, QParallelAnimationGroup, QSequentialAnimationGroup, Qt
 from PySide6.QtGui import QMouseEvent, QEnterEvent, QColor
@@ -8,7 +10,7 @@ from .config import qconfig
 
 
 class AnimationBase(QObject):
-    """ 动画基类 """
+    """动画基类"""
 
     def __init__(self, parent: QWidget):
         super().__init__(parent=parent)
@@ -41,7 +43,7 @@ class AnimationBase(QObject):
 
 
 class TranslateYAnimation(AnimationBase):
-    """Y 轴位移动画."""
+    """Y 轴位移动画"""
 
     valueChanged = Signal(float)
 
@@ -60,14 +62,14 @@ class TranslateYAnimation(AnimationBase):
         self.valueChanged.emit(y)
 
     def _onPress(self, e):
-        """ 向下位移 """
+        """向下位移"""
         self.ani.setEndValue(self.maxOffset)
         self.ani.setEasingCurve(QEasingCurve.OutQuad)
         self.ani.setDuration(150)
         self.ani.start()
 
     def _onRelease(self, e):
-        """回到初始位置."""
+        """回到初始位置"""
         self.ani.setEndValue(0)
         self.ani.setDuration(500)
         self.ani.setEasingCurve(QEasingCurve.OutElastic)
@@ -78,7 +80,7 @@ class TranslateYAnimation(AnimationBase):
 
 
 class BackgroundAnimationWidget:
-    """ 带背景动画的部件 """
+    """带背景动画的部件"""
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -167,7 +169,7 @@ class BackgroundAnimationWidget:
 
 
 class BackgroundColorObject(QObject):
-    """ 背景色对象 """
+    """背景色对象"""
 
     def __init__(self, parent: BackgroundAnimationWidget):
         super().__init__(parent)
@@ -183,7 +185,7 @@ class BackgroundColorObject(QObject):
         self.parent().update()
 
 class DropShadowAnimation(QPropertyAnimation):
-    """ 阴影动画 """
+    """阴影动画"""
 
     def __init__(self, parent: QWidget, normalColor=QColor(0, 0, 0, 0), hoverColor=QColor(0, 0, 0, 75)):
         super().__init__(parent=parent)
@@ -252,14 +254,14 @@ class DropShadowAnimation(QPropertyAnimation):
 
 
 class FluentAnimationSpeed(Enum):
-    """Fluent 动画速度."""
+    """Fluent 动画速度"""
     FAST = 0
     MEDIUM = 1
     SLOW = 2
 
 
 class FluentAnimationType(Enum):
-    """Fluent 动画类型."""
+    """Fluent 动画类型"""
     FAST_INVOKE = 0
     STRONG_INVOKE = 1
     FAST_DISMISS = 2
@@ -269,7 +271,7 @@ class FluentAnimationType(Enum):
 
 
 class FluentAnimationProperty(Enum):
-    """Fluent 动画属性."""
+    """Fluent 动画属性"""
     POSITION = "position"
     SCALE = "scale"
     ANGLE = "angle"
@@ -278,7 +280,7 @@ class FluentAnimationProperty(Enum):
 
 
 class FluentAnimationProperObject(QObject):
-    """Fluent 动画属性对象."""
+    """Fluent 动画属性对象"""
 
     objects = {}
 
@@ -293,12 +295,10 @@ class FluentAnimationProperObject(QObject):
 
     @classmethod
     def register(cls, name):
-        """注册动画属性对象.
+        """注册动画属性对象
 
-        参数
-        ----------
-        name: Any
-            属性对象名称,必须唯一.
+        Args:
+            name: 属性对象名称，必须唯一
         """
         def wrapper(Manager):
             if name not in cls.objects:
@@ -318,7 +318,7 @@ class FluentAnimationProperObject(QObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.POSITION)
 class PositionObject(FluentAnimationProperObject):
-    """ 位置 对象 """
+    """位置对象"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -336,7 +336,7 @@ class PositionObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.SCALE)
 class ScaleObject(FluentAnimationProperObject):
-    """缩放对象."""
+    """缩放对象"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -354,7 +354,7 @@ class ScaleObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.ANGLE)
 class AngleObject(FluentAnimationProperObject):
-    """角度对象."""
+    """角度对象"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -372,7 +372,7 @@ class AngleObject(FluentAnimationProperObject):
 
 @FluentAnimationProperObject.register(FluentAnimationProperty.OPACITY)
 class OpacityObject(FluentAnimationProperObject):
-    """透明度对象."""
+    """透明度对象"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -389,7 +389,7 @@ class OpacityObject(FluentAnimationProperObject):
 
 
 class FluentAnimation(QPropertyAnimation):
-    """Fluent 动画基类."""
+    """Fluent 动画基类"""
 
     animations = {}
 
@@ -409,7 +409,11 @@ class FluentAnimation(QPropertyAnimation):
         return cls.createBezierCurve(0, 0, 1, 1)
 
     def setSpeed(self, speed: FluentAnimationSpeed):
-        """设置动画速度."""
+        """设置动画速度
+
+        Args:
+            speed: 动画速度
+        """
         self.setDuration(self.speedToDuration(speed))
 
     def speedToDuration(self, speed: FluentAnimationSpeed):
@@ -434,12 +438,10 @@ class FluentAnimation(QPropertyAnimation):
 
     @classmethod
     def register(cls, name):
-        """注册动画管理器.
+        """注册动画管理器
 
-        参数
-        ----------
-        name: Any
-            动画类型名称,必须唯一.
+        Args:
+            name: 动画类型名称，必须唯一
         """
         def wrapper(Manager):
             if name not in cls.animations:
@@ -470,7 +472,7 @@ class FluentAnimation(QPropertyAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FAST_INVOKE)
 class FastInvokeAnimation(FluentAnimation):
-    """快速调用动画."""
+    """快速调用动画"""
 
     @classmethod
     def curve(cls):
@@ -487,7 +489,7 @@ class FastInvokeAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.STRONG_INVOKE)
 class StrongInvokeAnimation(FluentAnimation):
-    """强调用动画."""
+    """强调用动画"""
 
     @classmethod
     def curve(cls):
@@ -499,12 +501,12 @@ class StrongInvokeAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FAST_DISMISS)
 class FastDismissAnimation(FastInvokeAnimation):
-    """快速消失动画."""
+    """快速消失动画"""
 
 
 @FluentAnimation.register(FluentAnimationType.SOFT_DISMISS)
 class SoftDismissAnimation(FluentAnimation):
-    """柔和消失动画."""
+    """柔和消失动画"""
 
     @classmethod
     def curve(cls):
@@ -516,7 +518,7 @@ class SoftDismissAnimation(FluentAnimation):
 
 @FluentAnimation.register(FluentAnimationType.POINT_TO_POINT)
 class PointToPointAnimation(FastDismissAnimation):
-    """点到点动画."""
+    """点到点动画"""
 
     @classmethod
     def curve(cls):
@@ -525,7 +527,7 @@ class PointToPointAnimation(FastDismissAnimation):
 
 @FluentAnimation.register(FluentAnimationType.FADE_IN_OUT)
 class FadeInOutAnimation(FluentAnimation):
-    """淡入淡出动画."""
+    """淡入淡出动画"""
 
     def speedToDuration(self, speed: FluentAnimationSpeed):
         return 83
@@ -533,7 +535,7 @@ class FadeInOutAnimation(FluentAnimation):
 
 
 class ScaleSlideAnimation(QObject):
-    """缩放与滑移动画."""
+    """缩放与滑移动画"""
 
     valueChanged = Signal(QRectF)
     finished = Signal()
@@ -597,7 +599,7 @@ class ScaleSlideAnimation(QObject):
         self.crossAniGroup.stop()
 
     def _startSlideAnimation(self, startRect, endRect, from_, to, dimension):
-        """使用 WinUI 3 的拉伸逻辑为指示器执行滑移动画."""
+        """使用 WinUI 3 的拉伸逻辑为指示器执行滑移动画"""
         self.currentAni = self.slideAniGroup
         self.slidePosAni1.setDuration(200)
         self.slidePosAni2.setDuration(400)

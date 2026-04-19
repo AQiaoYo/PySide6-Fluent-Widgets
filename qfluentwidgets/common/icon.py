@@ -1,4 +1,6 @@
 # coding: utf-8
+"""图标相关工具模块"""
+
 from enum import Enum
 from typing import Union
 import json
@@ -14,17 +16,14 @@ from .overload import singledispatchmethod
 
 
 class FluentIconEngine(QIconEngine):
-    """ Fluent 图标 engine """
+    """Fluent 图标 engine"""
 
     def __init__(self, icon, reverse=False):
-        """
-        参数
-        ----------
-        icon: QICon | 图标 | FluentIconBase
-            要绘制的图标.
+        """初始化 Fluent 图标 engine
 
-        reverse: bool
-            是否反转图标主题.
+        Args:
+            icon: 要绘制的图标，类型为 QIcon、Icon 或 FluentIconBase
+            reverse: 是否反转图标主题
         """
         super().__init__()
         self.icon = icon
@@ -75,7 +74,7 @@ class FluentIconEngine(QIconEngine):
 
 
 class SvgIconEngine(QIconEngine):
-    """ Svg 图标 engine """
+    """Svg 图标 engine"""
 
     def __init__(self, svg: str):
         super().__init__()
@@ -102,7 +101,7 @@ class SvgIconEngine(QIconEngine):
 
 
 class FontIconEngine(QIconEngine):
-    """ Font 图标 engine """
+    """Font 图标 engine"""
 
     def __init__(self, fontFamily: str, char: str, color, isBold):
         super().__init__()
@@ -144,7 +143,15 @@ class FontIconEngine(QIconEngine):
 
 
 def getIconColor(theme=Theme.AUTO, reverse=False):
-    """根据主题获取图标颜色."""
+    """根据主题获取图标颜色
+
+    Args:
+        theme: 图标主题
+        reverse: 是否反转颜色
+
+    Returns:
+        图标颜色字符串
+    """
     if not reverse:
         lc, dc = "black", "white"
     else:
@@ -159,41 +166,27 @@ def getIconColor(theme=Theme.AUTO, reverse=False):
 
 
 def drawSvgIcon(icon, painter, rect):
-    """绘制 SVG 图标.
+    """绘制 SVG 图标
 
-    参数
-    ----------
-    icon: str | bytes | QByteArray
-        SVG 图标路径或源码.
-
-    painter: QPainter
-        画笔对象.
-
-    rect: QRect | QRectF
-        图标绘制区域.
+    Args:
+        icon: SVG 图标路径或源码
+        painter: 画笔对象
+        rect: 图标绘制区域
     """
     renderer = QSvgRenderer(icon)
     renderer.render(painter, QRectF(rect))
 
 
 def writeSvg(iconPath: str, indexes=None, **attributes):
-    """使用指定属性重写 SVG.
+    """使用指定属性重写 SVG
 
-    参数
-    ----------
-    iconPath: str
-        SVG 图标路径.
+    Args:
+        iconPath: SVG 图标路径
+        indexes: 需要填充属性的路径索引
+        **attributes: 要写入路径的属性
 
-    indexes: 列表[int]
-        需要填充属性的路径索引.
-
-    **attributes:
-        要写入路径的属性.
-
-    返回
-    -------
-    svg: str
-        SVG 代码.
+    Returns:
+        SVG 代码
     """
     if not iconPath.lower().endswith('.svg'):
         return ""
@@ -219,21 +212,14 @@ def writeSvg(iconPath: str, indexes=None, **attributes):
 
 
 def drawIcon(icon, painter, rect, state=QIcon.Off, **attributes):
-    """绘制图标.
+    """绘制图标
 
-    参数
-    ----------
-    icon: str | QIcon | FluentIconBaseBase
-        要绘制的图标.
-
-    painter: QPainter
-        画笔对象.
-
-    rect: QRect | QRectF
-        图标绘制区域.
-
-    **attribute:
-        SVG 图标附加属性.
+    Args:
+        icon: 要绘制的图标
+        painter: 画笔对象
+        rect: 图标绘制区域
+        state: 图标状态
+        **attributes: SVG 图标附加属性
     """
     if isinstance(icon, FluentIconBase):
         icon.render(painter, rect, **attributes)
@@ -245,34 +231,34 @@ def drawIcon(icon, painter, rect, state=QIcon.Off, **attributes):
 
 
 class FluentIconBase:
-    """ Fluent 图标 基类 """
+    """Fluent 图标基类"""
 
     def path(self, theme=Theme.AUTO) -> str:
-        """获取图标路径.
+        """获取图标路径
 
-        参数
-        ----------
-        theme: 主题
-            图标所属主题.
-            * `Theme.LIGHT`: 黑色图标.
-            * `Theme.DARK`: 白色图标.
-            * `Theme.AUTO`: 图标颜色取决于 `qconfig.theme`.
+        Args:
+            theme: 图标所属主题
+                * Theme.LIGHT: 黑色图标
+                * Theme.DARK: 白色图标
+                * Theme.AUTO: 图标颜色取决于 qconfig.theme
+
+        Returns:
+            图标路径
         """
         raise NotImplementedError
 
     def icon(self, theme=Theme.AUTO, color: QColor = None) -> QIcon:
-        """创建 Fluent 图标.
+        """创建 Fluent 图标
 
-        参数
-        ----------
-        theme: 主题
-            图标所属主题.
-            * `Theme.LIGHT`: 黑色图标.
-            * `Theme.DARK`: 白色图标.
-            * `Theme.AUTO`: 图标颜色取决于 `qconfig.theme`.
+        Args:
+            theme: 图标所属主题
+                * Theme.LIGHT: 黑色图标
+                * Theme.DARK: 白色图标
+                * Theme.AUTO: 图标颜色取决于 qconfig.theme
+            color: 图标颜色，仅适用于 SVG 图标
 
-        color: QColor | Qt.GlobalColor | str
-            图标颜色, 仅适用于 SVG 图标.
+        Returns:
+            QIcon 对象
         """
         path = self.path(theme)
 
@@ -283,50 +269,40 @@ class FluentIconBase:
         return QIcon(SvgIconEngine(writeSvg(path, fill=color)))
 
     def colored(self, lightColor: QColor, darkColor: QColor) -> "ColoredFluentIcon":
-        """创建带主题色的 Fluent 图标.
+        """创建带主题色的 Fluent 图标
 
-        参数
-        ----------
-        lightColor: str | QColor | Qt.GlobalColor
-            亮色模式下的图标颜色.
+        Args:
+            lightColor: 亮色模式下的图标颜色
+            darkColor: 暗色模式下的图标颜色
 
-        darkColor: str | QColor | Qt.GlobalColor
-            暗色模式下的图标颜色.
+        Returns:
+            ColoredFluentIcon 对象
         """
         return ColoredFluentIcon(self, lightColor, darkColor)
 
     def qicon(self, reverse=False) -> QIcon:
-        """转换为 QIcon, 并随应用主题同步更新图标.
+        """转换为 QIcon，并随应用主题同步更新图标
 
-        参数
-        ----------
-        reverse: bool
-            是否反转图标主题.
+        Args:
+            reverse: 是否反转图标主题
+
+        Returns:
+            QIcon 对象
         """
         return QIcon(FluentIconEngine(self, reverse))
 
     def render(self, painter, rect, theme=Theme.AUTO, indexes=None, **attributes):
-        """绘制 SVG 图标.
+        """绘制 SVG 图标
 
-        参数
-        ----------
-        painter: QPainter
-            画笔对象.
-
-        rect: QRect | QRectF
-            图标绘制区域.
-
-        theme: 主题
-            图标所属主题.
-            * `Theme.LIGHT`: 黑色图标.
-            * `Theme.DARK`: 白色图标.
-            * `Theme.AUTO`: 图标颜色取决于 `qconfig.theme`.
-
-        indexes: 列表[int]
-            需要修改属性的 SVG 路径索引.
-
-        **attributes:
-            要更新到路径上的属性.
+        Args:
+            painter: 画笔对象
+            rect: 图标绘制区域
+            theme: 图标所属主题
+                * Theme.LIGHT: 黑色图标
+                * Theme.DARK: 白色图标
+                * Theme.AUTO: 图标颜色取决于 qconfig.theme
+            indexes: 需要修改属性的 SVG 路径索引
+            **attributes: 要更新到路径上的属性
         """
         icon = self.path(theme)
 
@@ -342,7 +318,7 @@ class FluentIconBase:
 
 
 class FluentFontIconBase(FluentIconBase):
-    """ Fluent font 图标 基类 """
+    """Fluent font 图标基类"""
 
     _isFontLoaded = False
     fontId = None
@@ -400,7 +376,7 @@ class FluentFontIconBase(FluentIconBase):
         return None
 
     def loadFont(self):
-        """ Load 图标 font """
+        """加载图标字体"""
         cls = self.__class__
         if cls._isFontLoaded or not QApplication.instance():
             return
@@ -419,7 +395,7 @@ class FluentFontIconBase(FluentIconBase):
             self.loadIconNames()
 
     def loadIconNames(self):
-        """ Load 图标 name map """
+        """加载图标名称映射"""
         cls = self.__class__
         cls._iconNames.clear()
 
@@ -440,20 +416,15 @@ class FluentFontIconBase(FluentIconBase):
 
 
 class ColoredFluentIcon(FluentIconBase):
-    """ Colored fluent 图标 """
+    """带主题色的 Fluent 图标"""
 
     def __init__(self, icon: FluentIconBase, lightColor, darkColor):
-        """
-        参数
-        ----------
-        icon: FluentIconBase
-            图标 到 be colored
+        """初始化带主题色的 Fluent 图标
 
-        lightColor: str | QColor | Qt.GlobalColor
-            图标 颜色 中的 亮色 模式
-
-        darkColor: str | QColor | Qt.GlobalColor
-            图标 颜色 中的 暗色 模式
+        Args:
+            icon: 要着色的图标
+            lightColor: 亮色模式下的图标颜色
+            darkColor: 暗色模式下的图标颜色
         """
         super().__init__()
         self.fluentIcon = icon
@@ -481,7 +452,7 @@ class ColoredFluentIcon(FluentIconBase):
 
 
 class FluentIcon(FluentIconBase, Enum):
-    """ Fluent 图标 """
+    """Fluent 图标"""
 
     UP = "Up"
     ADD = "Add"
@@ -671,7 +642,14 @@ class Icon(QIcon):
 
 
 def toQIcon(icon: Union[QIcon, FluentIconBase, str]) -> QIcon:
-    """ convet `图标` 到 `QIcon` """
+    """将图标转换为 QIcon
+
+    Args:
+        icon: 要转换的图标
+
+    Returns:
+        QIcon 对象
+    """
     if isinstance(icon, str):
         return QIcon(icon)
 
@@ -682,13 +660,12 @@ def toQIcon(icon: Union[QIcon, FluentIconBase, str]) -> QIcon:
 
 
 class Action(QAction):
-    """ Fluent action
+    """Fluent Action
 
-    构造函数
-    ------------
-    * Action(`父部件`: QWidget = None, `**kwargs`)
-    * Action(`文本`: str, `父部件`: QWidget = None, `**kwargs`)
-    * Action(`图标`: QIcon | FluentIconBase, `父部件`: QWidget = None, `**kwargs`)
+    构造函数重载:
+        * Action(parent: QObject = None, **kwargs)
+        * Action(text: str, parent: QObject = None, **kwargs)
+        * Action(icon: QIcon | FluentIconBase, text: str, parent: QObject = None, **kwargs)
     """
 
     @singledispatchmethod

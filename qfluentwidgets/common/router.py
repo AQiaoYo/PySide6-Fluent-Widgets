@@ -1,4 +1,6 @@
 # coding: utf-8
+"""路由管理模块，提供基于 QStackedWidget 的路由导航功能"""
+
 from typing import Dict, List
 from itertools import groupby
 
@@ -7,7 +9,7 @@ from PySide6.QtWidgets import QWidget, QStackedWidget
 
 
 class RouteItem:
-    """ Route 项 """
+    """路由项，用于标识堆叠部件中的子界面"""
 
     def __init__(self, stacked: QStackedWidget, routeKey: str):
         self.stacked = stacked
@@ -21,7 +23,7 @@ class RouteItem:
 
 
 class StackedHistory:
-    """ Stacked history """
+    """堆叠部件路由历史记录，管理单个 QStackedWidget 的页面切换历史"""
 
     def __init__(self, stacked: QStackedWidget):
         self.stacked = stacked
@@ -70,7 +72,7 @@ class StackedHistory:
 
 
 class Router(QObject):
-    """ Router """
+    """路由管理器，维护全局路由栈和各堆叠部件的历史记录"""
 
     emptyChanged = Signal(bool)
 
@@ -80,22 +82,23 @@ class Router(QObject):
         self.stackHistories = {}  # type: Dict[QStackedWidget, StackedHistory]
 
     def setDefaultRouteKey(self, stacked: QStackedWidget, routeKey: str):
-        """ 设置stacked 部件的default 路由键 """
+        """设置堆叠部件的默认路由键
+
+        Args:
+            stacked: 堆叠部件
+            routeKey: 默认路由键
+        """
         if stacked not in self.stackHistories:
             self.stackHistories[stacked] = StackedHistory(stacked)
 
         self.stackHistories[stacked].setDefaultRouteKey(routeKey)
 
     def push(self, stacked: QStackedWidget, routeKey: str):
-        """ push history
+        """压入路由历史记录
 
-        参数
-        ----------
-        stacked: QStackedWidget
-            stacked 部件
-
-        routeKey: str
-            子界面的路由键, 应与该子界面的 `objectName` 一致.
+        Args:
+            stacked: 堆叠部件
+            routeKey: 子界面的路由键，应与该子界面的 objectName 一致
         """
         item = RouteItem(stacked, routeKey)
 
@@ -110,7 +113,7 @@ class Router(QObject):
         self.emptyChanged.emit(not bool(self.history))
 
     def pop(self):
-        """ pop history """
+        """弹出当前路由历史记录并回退到上一个页面"""
         if not self.history:
             return
 
@@ -119,7 +122,11 @@ class Router(QObject):
         self.stackHistories[item.stacked].pop()
 
     def remove(self, routeKey: str):
-        """ 移除 history """
+        """移除指定路由键对应的历史记录
+
+        Args:
+            routeKey: 要移除的路由键
+        """
         self.history = [i for i in self.history if i.routeKey != routeKey]
         self.history = [list(g)[0] for k, g in groupby(self.history, lambda i: i.routeKey)]
         self.emptyChanged.emit(not bool(self.history))

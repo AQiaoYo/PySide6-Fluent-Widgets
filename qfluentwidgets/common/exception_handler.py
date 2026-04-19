@@ -1,15 +1,17 @@
 # coding: utf-8
+"""异常处理装饰器"""
 from copy import deepcopy
 
 
 
 def exceptionHandler(*default):
-    """ decorator 用于 exception handling
+    """用于异常处理的装饰器
 
-    参数
-    ----------
-    *default:
-        default 值 returned 当 exception occurs
+    Args:
+        *default: 发生异常时返回的默认值，未提供则返回 None
+
+    Returns:
+        用于包装目标函数的装饰器，可捕获异常并返回默认值
     """
 
     def outer(func):

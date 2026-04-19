@@ -1,4 +1,6 @@
 # coding: utf-8
+"""Fluent 主题颜色与系统颜色工具模块"""
+
 from enum import Enum
 
 from PySide6.QtGui import QColor
@@ -8,9 +10,9 @@ from .config import isDarkThemeMode
 
 
 class FluentThemeColor(Enum):
-    """ Fluent 主题 颜色
+    """Fluent 主题颜色
 
-    Refer to: https://www.figma.com/file/iM7EPX8Jn37zjeSezb43cF
+    参考: https://www.figma.com/file/iM7EPX8Jn37zjeSezb43cF
     """
     YELLOW_GOLD = "#FFB900"
     GOLD = "#FF8C00"
@@ -62,11 +64,20 @@ class FluentThemeColor(Enum):
     CAMOUFLAGE = "#7E735F"
 
     def color(self):
+        """获取颜色
+
+        Returns:
+            QColor: 对应的颜色对象
+        """
         return QColor(self.value)
 
 
 
 class FluentSystemColor(Enum):
+    """Fluent 系统颜色
+
+    根据当前主题返回对应的颜色值
+    """
 
     SUCCESS_FOREGROUND = ("#0f7b0f", "#6ccb5f")
     CAUTION_FOREGROUND = ("#9d5d00", "#fce100")
@@ -77,19 +88,55 @@ class FluentSystemColor(Enum):
     CRITICAL_BACKGROUND = ("#fde7e9", "#442726")
 
     def color(self, theme=Theme.AUTO) -> QColor:
+        """获取当前主题下的颜色
+
+        Args:
+            theme: 主题模式，默认为 Theme.AUTO
+
+        Returns:
+            QColor: 对应的颜色对象
+        """
         color = self.value[1] if isDarkThemeMode(theme) else self.value[0]
         return QColor(color)
 
 
 
 def validColor(color: QColor, default: QColor) -> QColor:
+    """验证颜色有效性，无效则返回默认值
+
+    Args:
+        color: 待验证的颜色
+        default: 默认颜色
+
+    Returns:
+        QColor: 有效则返回 color，否则返回 default
+    """
     return color if color.isValid() else default
 
 
 def fallbackThemeColor(color: QColor):
+    """获取回退主题色
+
+    当 color 无效时返回当前主题色
+
+    Args:
+        color: 待验证的颜色
+
+    Returns:
+        QColor: 有效则返回 color，否则返回 themeColor()
+    """
     return color if color.isValid() else themeColor()
 
 
 def autoFallbackThemeColor(light: QColor, dark: QColor):
+    """根据当前主题自动选择颜色并回退到主题色
+
+    Args:
+        light: 浅色模式下的颜色
+        dark: 深色模式下的颜色
+
+    Returns:
+        QColor: 根据当前主题选择的颜色，无效时回退到主题色
+    """
     color = dark if isDarkTheme() else light
     return fallbackThemeColor(color)

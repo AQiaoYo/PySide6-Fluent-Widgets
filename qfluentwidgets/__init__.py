@@ -1,16 +1,15 @@
-"""
-PySide6-Fluent-Widgets-Qiao
-===========================
-一个基于 PySide6 的 Fluent Design 风格组件库.
+"""PySide6-Fluent-Widgets-Qiao
 
-文档可通过代码中的 docstring 获取,也可以在线查看:
+一个基于 PySide6 的 Fluent Design 风格组件库
+
+文档可通过代码中的 docstring 获取，也可以在线查看
 https://github.com/AQiaoYo/PySide6-Fluent-Widgets#readme
 
-示例位于:
+示例位于
 https://github.com/AQiaoYo/PySide6-Fluent-Widgets/tree/main/examples
 
-:copyright: (c) 2021 by zhiyiYo,AQiaoYo 维护此分支.
-:license: 非商业项目使用 GPLv3,详见 README.
+版权所有 (c) 2021 by zhiyiYo，AQiaoYo 维护此分支
+非商业项目使用 GPLv3，详见 README
 """
 
 from ._version import __version__

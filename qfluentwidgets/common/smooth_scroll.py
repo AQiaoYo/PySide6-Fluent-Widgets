@@ -1,4 +1,6 @@
 # coding: utf-8
+"""平滑滚动模块"""
+
 from collections import deque
 from enum import Enum
 from math import cos, pi, ceil
@@ -9,20 +11,15 @@ from PySide6.QtWidgets import QApplication, QScrollArea, QAbstractScrollArea
 
 
 class SmoothScroll:
-    """平滑滚动控制器."""
+    """平滑滚动控制器"""
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical, dynamicEngineEnabled=True):
-        """
-        参数
-        ----------
-        widget: QScrollArea
-            需要平滑滚动的滚动区域.
+        """初始化平滑滚动控制器
 
-        orient: Orientation
-            滚动方向.
-
-        dynamicEngineEnabled: bool
-            是否根据屏幕 DPI 动态选择滚动引擎.
+        Args:
+            widget: 需要平滑滚动的滚动区域
+            orient: 滚动方向
+            dynamicEngineEnabled: 是否根据屏幕 DPI 动态选择滚动引擎
         """
         self.widget = widget
         self.orient = orient
@@ -35,11 +32,19 @@ class SmoothScroll:
         self.adaptiveScrollEngine = AdaptiveSmoothScrollEngine(widget, orient)
 
     def setDynamicEngineEnabled(self, isEnabled: bool):
-        """设置是否使用动态滚动引擎."""
+        """设置是否使用动态滚动引擎
+
+        Args:
+            isEnabled: 是否启用动态滚动引擎
+        """
         self.dynamicEngineEnabled = isEnabled
 
     def setSmoothMode(self, smoothMode):
-        """ 设置 平滑模式 """
+        """设置平滑模式
+
+        Args:
+            smoothMode: 平滑模式
+        """
         self.smoothMode = smoothMode
         self.fixedStepScrollEngine.setSmoothMode(smoothMode)
         self.adaptiveScrollEngine.setSmoothMode(smoothMode)
@@ -55,7 +60,11 @@ class SmoothScroll:
         engine.wheelEvent(e, delta)
 
     def _chooseScrollEngine(self) -> "SmoothScrollEngineBase":
-        """ choose 滚动 engine """
+        """选择滚动引擎
+
+        Returns:
+            选中的滚动引擎
+        """
         # ellapse 时间 driven adaptive 滚动 engine 用于 HiDPI 屏幕
         if self.dynamicEngineEnabled and self.widget.width()*self.widget.devicePixelRatioF() > self.widthThreshold:
             return self.adaptiveScrollEngine
@@ -64,7 +73,7 @@ class SmoothScroll:
 
 
 class SmoothMode(Enum):
-    """ 平滑模式 """
+    """平滑模式"""
     NO_SMOOTH = 0
     CONSTANT = 1
     LINEAR = 2
@@ -73,6 +82,7 @@ class SmoothMode(Enum):
 
 
 class SmoothScrollEngineBase(QObject):
+    """平滑滚动引擎基类"""
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
         super().__init__(widget)
@@ -93,7 +103,11 @@ class SmoothScrollEngineBase(QObject):
         self.smoothMoveTimer.timeout.connect(self._smoothMove)
 
     def setSmoothMode(self, smoothMode):
-        """ 设置 平滑模式 """
+        """设置平滑模式
+
+        Args:
+            smoothMode: 平滑模式
+        """
         self.smoothMode = smoothMode
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
@@ -139,7 +153,7 @@ class SmoothScrollEngineBase(QObject):
 
 
 class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
-    """固定步长平滑滚动引擎."""
+    """固定步长平滑滚动引擎"""
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
         # 将当前时间压入队列.
@@ -168,7 +182,11 @@ class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
         self.smoothMoveTimer.start(int(1000 / self.fps))
 
     def _getTotalDelta(self):
-        """在定时器触发时计算总滚动距离."""
+        """在定时器触发时计算总滚动距离
+
+        Returns:
+            总滚动距离
+        """
         totalDelta = 0
 
         # 计算所有未处理事件的滚动距离.
@@ -184,7 +202,15 @@ class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
         return totalDelta
 
     def _subDelta(self, delta, stepsLeft):
-        """ 获取 interpolation 用于 each step """
+        """计算单步插值
+
+        Args:
+            delta: 滚动距离
+            stepsLeft: 剩余步数
+
+        Returns:
+            当前步的插值结果
+        """
         m = self.stepsTotal / 2
         x = abs(self.stepsTotal - stepsLeft - m)
 
@@ -204,9 +230,9 @@ class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
 
 
 class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
-    """自适应平滑滚动引擎.
+    """自适应平滑滚动引擎
 
-    基于时间计算, 支持自适应调整, 并兼顾 HiDPI 场景.
+    基于时间计算，支持自适应调整，并兼顾 HiDPI 场景
     """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
@@ -216,7 +242,11 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         self.minDuration = 120
 
     def setSmoothMode(self, smoothMode):
-        """ 设置 平滑模式 """
+        """设置平滑模式
+
+        Args:
+            smoothMode: 平滑模式
+        """
         self.smoothMode = smoothMode
 
     def wheelEvent(self, e, delta: int):
@@ -283,7 +313,15 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
         return totalDelta
 
     def _subDelta(self, delta, ratio):
-        """ 计算interpolated delta 用于 当前 frame """
+        """计算当前帧的插值 delta
+
+        Args:
+            delta: 滚动距离
+            ratio: 时间比例
+
+        Returns:
+            当前帧的插值结果
+        """
         if self.smoothMode == SmoothMode.CONSTANT:
             return delta * ratio
         if self.smoothMode == SmoothMode.LINEAR:
