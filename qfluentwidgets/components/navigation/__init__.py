@@ -1,3 +1,5 @@
+"""导航组件包，提供 NavigationWidget、NavigationPanel、NavigationInterface、NavigationBar、Pivot、SegmentedWidget 和 BreadcrumbBar 等导航相关控件"""
+
 from .navigation_widget import (NavigationWidget, NavigationPushButton, NavigationSeparator, NavigationToolButton,
                                 NavigationTreeWidget, NavigationTreeWidgetBase, NavigationAvatarWidget)
 from .navigation_panel import NavigationPanel

@@ -1,4 +1,6 @@
 # coding: utf-8
+"""文件夹列表设置卡片"""
+
 from typing import List
 from pathlib import Path
 
@@ -17,7 +19,7 @@ from .expand_setting_card import ExpandSettingCard
 
 
 class FolderItem(QWidget):
-    """ 文件夹 项 """
+    """文件夹项"""
 
     removed = Signal(QWidget)
 
@@ -48,28 +50,27 @@ class FolderItem(QWidget):
 
 
 class FolderListSettingCard(ExpandSettingCard):
-    """文件夹列表设置卡片."""
+    """文件夹列表设置卡片
+
+    构造函数重载:
+        - __init__(configItem, title, content, directory, parent)
+        - __init__(configItem, title, content, directory)
+        - __init__(configItem, title, content)
+        - __init__(configItem, title)
+    """
 
     folderChanged = Signal(list)
 
     def __init__(self, configItem: ConfigItem, title: str, content: str = None, directory="./", parent=None):
         """
-        参数
-        ----------
-        configItem: RangeConfigItem
-            由卡片操作的配置项.
+        初始化文件夹列表设置卡片
 
-        title: str
-            卡片标题.
-
-        content: str
-            卡片内容.
-
-        directory: str
-            文件对话框的工作目录.
-
-        parent: QWidget
-            父部件.
+        Args:
+            configItem (ConfigItem): 由卡片操作的配置项
+            title (str): 卡片标题
+            content (str): 卡片内容
+            directory (str): 文件对话框的工作目录
+            parent (QWidget): 父部件
         """
         super().__init__(FIF.FOLDER, title, content, parent)
         self.configItem = configItem
@@ -92,7 +93,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self.addFolderButton.clicked.connect(self.__showFolderDialog)
 
     def __showFolderDialog(self):
-        """ 显示文件夹 对话框 """
+        """显示文件夹对话框"""
         folder = QFileDialog.getExistingDirectory(
             self, self.tr("Choose folder"), self._dialogDirectory)
 
@@ -105,7 +106,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self.folderChanged.emit(self.folders)
 
     def __addFolderItem(self, folder: str):
-        """ 添加 文件夹 项 """
+        """添加文件夹项"""
         item = FolderItem(folder, self.view)
         item.removed.connect(self.__showConfirmDialog)
         self.viewLayout.addWidget(item)
@@ -113,7 +114,7 @@ class FolderListSettingCard(ExpandSettingCard):
         self._adjustViewSize()
 
     def __showConfirmDialog(self, item: FolderItem):
-        """ 显示confirm 对话框 """
+        """显示确认对话框"""
         name = Path(item.folder).name
         title = self.tr('Are you sure you want to delete the folder?')
         content = self.tr("If you delete the ") + f'"{name}"' + \
@@ -124,7 +125,7 @@ class FolderListSettingCard(ExpandSettingCard):
         w.exec_()
 
     def __removeFolder(self, item: FolderItem):
-        """ 移除 文件夹 """
+        """移除文件夹"""
         if item.folder not in self.folders:
             return
 

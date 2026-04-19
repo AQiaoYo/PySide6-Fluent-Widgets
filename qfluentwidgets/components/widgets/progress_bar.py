@@ -1,4 +1,6 @@
 # coding: utf-8
+"""进度条组件"""
+
 from math import floor
 
 from PySide6.QtCore import (QEasingCurve, Qt, QPropertyAnimation, Property,
@@ -11,8 +13,15 @@ from ...common.style_sheet import themeColor, isDarkTheme
 
 
 class ProgressBar(QProgressBar):
+    """进度条"""
 
     def __init__(self, parent=None, useAni=True):
+        """初始化进度条
+
+        Args:
+            parent: 父窗口，默认为 None
+            useAni: 是否使用动画效果，默认为 True
+        """
         super().__init__(parent)
         self._val = 0
         self.setFixedHeight(4)
@@ -30,19 +39,44 @@ class ProgressBar(QProgressBar):
         self.setValue(0)
 
     def getVal(self):
+        """获取当前值
+
+        Returns:
+            当前进度值
+        """
         return self._val
 
     def setVal(self, v: float):
+        """设置当前值
+
+        Args:
+            v: 进度值
+        """
         self._val = v
         self.update()
 
     def isUseAni(self):
+        """是否使用动画效果
+
+        Returns:
+            是否使用动画
+        """
         return self._useAni
 
     def setUseAni(self, isUSe: bool):
+        """设置是否使用动画效果
+
+        Args:
+            isUSe: 是否使用动画
+        """
         self._useAni = isUSe
 
     def _onValueChanged(self, value):
+        """数值变化时的回调
+
+        Args:
+            value: 新的进度值
+        """
         if not self.useAni:
             self._val = value
             return
@@ -54,56 +88,82 @@ class ProgressBar(QProgressBar):
         super().setValue(value)
 
     def lightBarColor(self):
+        """获取亮色主题下的条形颜色
+
+        Returns:
+            亮色主题条形颜色
+        """
         return self._lightBarColor if self._lightBarColor.isValid() else themeColor()
 
     def darkBarColor(self):
+        """获取暗色主题下的条形颜色
+
+        Returns:
+            暗色主题条形颜色
+        """
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ 设置 自定义 条颜色
+        """设置自定义条形颜色
 
-        参数
-        ----------
-        亮色, dark: str | Qt.GlobalColor | QColor
-            条颜色 中的 亮色/暗色主题模式
+        Args:
+            light: 亮色主题下的条形颜色，可为 str、Qt.GlobalColor 或 QColor
+            dark: 暗色主题下的条形颜色，可为 str、Qt.GlobalColor 或 QColor
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
         self.update()
 
     def setCustomBackgroundColor(self, light, dark):
-        """ 设置 自定义 背景色
+        """设置自定义背景颜色
 
-        参数
-        ----------
-        亮色, dark: str | Qt.GlobalColor | QColor
-            背景色 中的 亮色/暗色主题模式
+        Args:
+            light: 亮色主题下的背景颜色，可为 str、Qt.GlobalColor 或 QColor
+            dark: 暗色主题下的背景颜色，可为 str、Qt.GlobalColor 或 QColor
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
         self.update()
 
     def resume(self):
+        """恢复进度条"""
         self._isPaused = False
         self._isError = False
         self.update()
 
     def pause(self):
+        """暂停进度条"""
         self._isPaused = True
         self.update()
 
     def setPaused(self, isPaused: bool):
+        """设置暂停状态
+
+        Args:
+            isPaused: 是否暂停
+        """
         self._isPaused = isPaused
         self.update()
 
     def isPaused(self):
+        """是否处于暂停状态
+
+        Returns:
+            是否暂停
+        """
         return self._isPaused
 
     def error(self):
+        """设置为错误状态"""
         self._isError = True
         self.update()
 
     def setError(self, isError: bool):
+        """设置错误状态
+
+        Args:
+            isError: 是否为错误状态
+        """
         self._isError = isError
         if isError:
             self.error()
@@ -111,9 +171,19 @@ class ProgressBar(QProgressBar):
             self.resume()
 
     def isError(self):
+        """是否处于错误状态
+
+        Returns:
+            是否错误
+        """
         return self._isError
 
     def barColor(self):
+        """获取当前条形颜色
+
+        Returns:
+            当前主题下的条形颜色
+        """
         if self.isPaused():
             return QColor(252, 225, 0) if isDarkTheme() else QColor(157, 93, 0)
 
@@ -123,6 +193,11 @@ class ProgressBar(QProgressBar):
         return self.darkBarColor() if isDarkTheme() else self.lightBarColor()
 
     def valText(self):
+        """获取当前值的文本表示
+
+        Returns:
+            格式化的进度文本
+        """
         if self.maximum() <= self.minimum():
             return ""
 
@@ -141,6 +216,11 @@ class ProgressBar(QProgressBar):
         return result.replace("%p", locale.toString(progress))
 
     def paintEvent(self, e):
+        """绘制进度条
+
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -165,9 +245,15 @@ class ProgressBar(QProgressBar):
 
 
 class IndeterminateProgressBar(QProgressBar):
-    """ Indeterminate 进度条 """
+    """不确定进度条"""
 
     def __init__(self, parent=None, start=True):
+        """初始化不确定进度条
+
+        Args:
+            parent: 父窗口，默认为 None
+            start: 是否自动开始动画，默认为 True
+        """
         super().__init__(parent=parent)
         self._shortPos = 0
         self._longPos = 0
@@ -202,18 +288,27 @@ class IndeterminateProgressBar(QProgressBar):
             self.start()
 
     def lightBarColor(self):
+        """获取亮色主题下的条形颜色
+
+        Returns:
+            亮色主题条形颜色
+        """
         return self._lightBarColor if self._lightBarColor.isValid() else themeColor()
 
     def darkBarColor(self):
+        """获取暗色主题下的条形颜色
+
+        Returns:
+            暗色主题条形颜色
+        """
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ 设置 自定义 条颜色
+        """设置自定义条形颜色
 
-        参数
-        ----------
-        亮色, dark: str | Qt.GlobalColor | QColor
-            条颜色 中的 亮色/暗色主题模式
+        Args:
+            light: 亮色主题下的条形颜色，可为 str、Qt.GlobalColor 或 QColor
+            dark: 暗色主题下的条形颜色，可为 str、Qt.GlobalColor 或 QColor
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
@@ -221,58 +316,103 @@ class IndeterminateProgressBar(QProgressBar):
 
     @Property(float)
     def shortPos(self):
+        """获取短条位置
+
+        Returns:
+            短条当前位置
+        """
         return self._shortPos
 
     @shortPos.setter
     def shortPos(self, p):
+        """设置短条位置
+
+        Args:
+            p: 位置值
+        """
         self._shortPos = p
         self.update()
 
     @Property(float)
     def longPos(self):
+        """获取长条位置
+
+        Returns:
+            长条当前位置
+        """
         return self._longPos
 
     @longPos.setter
     def longPos(self, p):
+        """设置长条位置
+
+        Args:
+            p: 位置值
+        """
         self._longPos = p
         self.update()
 
     def start(self):
+        """开始动画"""
         self.shortPos = 0
         self.longPos = 0
         self.aniGroup.start()
         self.update()
 
     def stop(self):
+        """停止动画"""
         self.aniGroup.stop()
         self.shortPos = 0
         self.longPos = 0
         self.update()
 
     def isStarted(self):
+        """动画是否已开始
+
+        Returns:
+            动画是否处于运行状态
+        """
         return self.aniGroup.state() == QParallelAnimationGroup.Running
 
     def pause(self):
+        """暂停动画"""
         self.aniGroup.pause()
         self.update()
 
     def resume(self):
+        """恢复动画"""
         self.aniGroup.resume()
         self.update()
 
     def setPaused(self, isPaused: bool):
+        """设置动画暂停状态
+
+        Args:
+            isPaused: 是否暂停
+        """
         self.aniGroup.setPaused(isPaused)
         self.update()
 
     def isPaused(self):
+        """动画是否已暂停
+
+        Returns:
+            是否处于暂停状态
+        """
         return self.aniGroup.state() == QParallelAnimationGroup.Paused
 
     def error(self):
+        """设置为错误状态并停止动画"""
         self._isError = True
         self.aniGroup.stop()
         self.update()
 
     def setError(self, isError: bool):
+        """设置错误状态
+
+        Args:
+            isError: 是否为错误状态
+        """
         self._isError = isError
         if isError:
             self.error()
@@ -280,9 +420,19 @@ class IndeterminateProgressBar(QProgressBar):
             self.start()
 
     def isError(self):
+        """是否处于错误状态
+
+        Returns:
+            是否错误
+        """
         return self._isError
 
     def barColor(self):
+        """获取当前条形颜色
+
+        Returns:
+            当前主题下的条形颜色
+        """
         if self.isError():
             return QColor(255, 153, 164) if isDarkTheme() else QColor(196, 43, 28)
 
@@ -292,6 +442,11 @@ class IndeterminateProgressBar(QProgressBar):
         return self.darkBarColor() if isDarkTheme() else self.lightBarColor()
 
     def paintEvent(self, e):
+        """绘制不确定进度条
+
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 

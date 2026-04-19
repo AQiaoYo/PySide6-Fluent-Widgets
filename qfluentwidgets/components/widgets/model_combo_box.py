@@ -1,4 +1,6 @@
 # coding: utf-8
+"""模型组合框组件"""
+
 import sys
 from typing import Union, List, Iterable
 
@@ -17,7 +19,7 @@ from ...common.style_sheet import FluentStyleSheet
 
 
 class ModelComboBoxBase:
-    """组合框的抽象数据模型."""
+    """组合框的抽象数据模型"""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -88,7 +90,17 @@ class ModelComboBoxBase:
         return super().eventFilter(obj, e)
 
     def insertItem(self, index: int, text: str, userData=None, icon: QIcon = None):
-        """在给定索引处插入项."""
+        """在给定索引处插入项
+
+        Args:
+            index: 项索引
+            text: 项文本
+            userData: 用户自定义数据，默认为 None
+            icon: 项图标，默认为 None
+
+        Returns:
+            插入项的模型索引
+        """
         values = {}
         values[Qt.ItemDataRole.EditRole] = text
 
@@ -106,7 +118,12 @@ class ModelComboBoxBase:
         return modelIndex
 
     def insertItems(self, index: int, texts: Iterable[str]):
-        """从给定索引开始批量插入项."""
+        """从给定索引开始批量插入项
+
+        Args:
+            index: 起始项索引
+            texts: 项文本可迭代对象
+        """
         self.blockSignals(True)
 
         row = index
@@ -143,34 +160,33 @@ class ModelComboBoxBase:
         return ret
 
     def addItem(self, text: str, userData=None, icon: QIcon = None):
-        """添加项.
+        """添加项
 
-        参数
-        ----------
-        text: str
-            项文本.
-
-        icon: str | QIcon | FluentIconBase
+        Args:
+            text: 项文本
+            userData: 用户自定义数据，默认为 None
+            icon: 项图标，支持 QIcon 和 FluentIconBase，默认为 None
         """
         self.insertItem(self.model().rowCount(), text, icon, userData)
         if self.count() == 1:
             self.setCurrentIndex(0)
 
     def addItems(self, texts: Iterable[str]):
-        """添加多个项.
+        """添加多个项
 
-        参数
-        ----------
-        text: Iterable[str]
-            项文本列表.
+        Args:
+            texts: 项文本可迭代对象
         """
         for text in texts:
             self.addItem(text)
 
     def removeItem(self, index: int):
-        """移除给定索引处的项.
+        """移除给定索引处的项
 
-        如果移除了当前项, 会同步更新当前索引.
+        如果移除了当前项，会同步更新当前索引
+
+        Args:
+            index: 项索引
         """
         if not self._isValidIndex(index):
             return
@@ -196,12 +212,10 @@ class ModelComboBoxBase:
         return self._currentIndex
 
     def setCurrentIndex(self, index: int):
-        """ 设置当前索引
+        """设置当前索引
 
-        参数
-        ----------
-        index: int
-            当前索引
+        Args:
+            index: 当前索引
         """
         if not self._isValidIndex(index) or index == self.currentIndex():
             return
@@ -227,14 +241,12 @@ class ModelComboBoxBase:
         return self.itemData(self.currentIndex())
 
     def setCurrentText(self, text):
-        """设置组合框当前显示的文本.
+        """设置组合框当前显示的文本
 
-        文本应存在于项列表中.
+        文本应存在于项列表中
 
-        参数
-        ----------
-        text: str
-            组合框中显示的文本.
+        Args:
+            text: 组合框中显示的文本
         """
         if text == self.currentText():
             return
@@ -244,15 +256,11 @@ class ModelComboBoxBase:
             self.setCurrentIndex(index)
 
     def setItemText(self, index: int, text: str):
-        """ 设置项的文本
+        """设置项的文本
 
-        参数
-        ----------
-        index: int
-            项索引.
-
-        text: str
-            新项文本.
+        Args:
+            index: 项索引
+            text: 新项文本
         """
         if not self._isValidIndex(index):
             return
@@ -265,15 +273,36 @@ class ModelComboBoxBase:
                 self.currentTextChanged.emit(text)
 
     def itemData(self, index: int):
-        """返回给定索引处的数据."""
+        """返回给定索引处的用户数据
+
+        Args:
+            index: 项索引
+
+        Returns:
+            给定索引处的用户数据
+        """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.UserRole)
 
     def itemText(self, index: int):
-        """返回给定索引处的文本."""
+        """返回给定索引处的文本
+
+        Args:
+            index: 项索引
+
+        Returns:
+            给定索引处的文本
+        """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.EditRole) or ""
 
     def itemIcon(self, index: int):
-        """返回给定索引处的图标."""
+        """返回给定索引处的图标
+
+        Args:
+            index: 项索引
+
+        Returns:
+            给定索引处的图标
+        """
         return self.model().data(self.model().index(index, 0), Qt.ItemDataRole.DecorationRole) or QIcon()
 
     def setItemData(self, index: int, value, role=Qt.ItemDataRole.UserRole):
@@ -281,14 +310,28 @@ class ModelComboBoxBase:
             self.model().setData(self.model().index(index, 0), value, role)
 
     def setItemIcon(self, index: int, icon: Union[str, QIcon, FluentIconBase]):
-        """设置给定索引处项的图标."""
+        """设置给定索引处项的图标
+
+        Args:
+            index: 项索引
+            icon: 项图标，支持字符串路径、QIcon 或 FluentIconBase
+        """
         self.setItemData(index, icon, Qt.ItemDataRole.DecorationRole)
 
     def _isValidIndex(self, index: int):
         return 0 <= index < self.count()
 
     def findData(self, data, role=Qt.ItemDataRole.UserRole, flags=Qt.MatchFlag.MatchExactly) -> int:
-        """返回包含给定数据的项索引, 不存在则返回 -1."""
+        """返回包含给定数据的项索引
+
+        Args:
+            data: 要查找的数据
+            role: 数据角色，默认为 UserRole
+            flags: 匹配标志，默认为 MatchExactly
+
+        Returns:
+            包含给定数据的项索引，不存在则返回 -1
+        """
         mi = self.model().index(0, 0)
         result = self.model().match(mi, role, data, -1, flags | Qt.MatchFlag.MatchRecursive)
         for i in result:
@@ -297,11 +340,19 @@ class ModelComboBoxBase:
         return -1
 
     def findText(self, text: str, flags=Qt.MatchFlag.MatchExactly):
-        """返回包含给定文本的项索引, 不存在则返回 -1."""
+        """返回包含给定文本的项索引
+
+        Args:
+            text: 要查找的文本
+            flags: 匹配标志，默认为 MatchExactly
+
+        Returns:
+            包含给定文本的项索引，不存在则返回 -1
+        """
         return self.findData(text, Qt.ItemDataRole.EditRole, flags)
 
     def clear(self):
-        """清空组合框中的所有项."""
+        """清空组合框中的所有项"""
         if self.currentIndex() >= 0:
             self.setText('')
 
@@ -311,15 +362,27 @@ class ModelComboBoxBase:
         self.model().blockSignals(False)
 
     def count(self):
-        """返回组合框中的项数."""
+        """返回组合框中的项数
+
+        Returns:
+            组合框中的项数
+        """
         return self.model().rowCount()
 
     def setMaxVisibleItems(self, num: int):
-        """设置测量组合框项宽度时允许使用的最大屏幕宽度."""
+        """设置下拉菜单中可见项的最大数量
+
+        Args:
+            num: 可见项的最大数量
+        """
         self._maxVisibleItems = num
 
     def maxVisibleItems(self):
-        """返回测量组合框项宽度时允许使用的最大屏幕宽度."""
+        """返回下拉菜单中可见项的最大数量
+
+        Returns:
+            可见项的最大数量
+        """
         return self._maxVisibleItems
 
     def _closeComboMenu(self):
@@ -398,7 +461,7 @@ class ModelComboBoxBase:
 
 
 class ModelComboBox(QPushButton, ModelComboBoxBase):
-    """组合框数据模型."""
+    """组合框数据模型"""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -490,7 +553,7 @@ class ModelComboBox(QPushButton, ModelComboBoxBase):
 
 
 class EditableModelComboBox(LineEdit, ModelComboBoxBase):
-    """可编辑组合框数据模型."""
+    """可编辑组合框数据模型"""
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)

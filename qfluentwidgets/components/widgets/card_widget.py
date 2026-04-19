@@ -1,4 +1,6 @@
 # coding: utf-8
+"""卡片部件"""
+
 from typing import List, Union
 from PySide6.QtCore import Qt, Signal, QRectF, Property, QPropertyAnimation, QPoint, QSize
 from PySide6.QtGui import QPixmap, QPainter, QColor, QPainterPath, QFont, QIcon
@@ -14,7 +16,10 @@ from .icon_widget import IconWidget
 
 
 class CardWidget(BackgroundAnimationWidget, QFrame):
-    """ Card 部件 """
+    """卡片部件
+
+    支持点击信号、圆角边框和背景动画效果
+    """
 
     clicked = Signal()
 
@@ -107,7 +112,10 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
 
 
 class SimpleCardWidget(CardWidget):
-    """ 简易 card 部件 """
+    """简易卡片部件
+
+    背景色在悬停和按压时保持不变
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -137,7 +145,10 @@ class SimpleCardWidget(CardWidget):
 
 
 class ElevatedCardWidget(SimpleCardWidget):
-    """ Card 部件 使用 shadow effect """
+    """带阴影效果的卡片部件
+
+    悬停时具有抬升动画和阴影效果
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -181,7 +192,10 @@ class ElevatedCardWidget(SimpleCardWidget):
 
 
 class CardSeparator(QWidget):
-    """ Card 分隔符 """
+    """卡片分隔符
+
+    用于在卡片内部绘制水平分隔线
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -200,7 +214,12 @@ class CardSeparator(QWidget):
 
 
 class HeaderCardWidget(SimpleCardWidget):
-    """ Header card 部件 """
+    """带头部的卡片部件
+
+    构造函数重载：
+        - __init__(parent=None): 创建空头部卡片
+        - __init__(title: str, parent=None): 创建指定标题的头部卡片
+    """
 
     @singledispatchmethod
     def __init__(self, parent=None):
@@ -253,6 +272,10 @@ class HeaderCardWidget(SimpleCardWidget):
 
 
 class CardGroupWidget(QWidget):
+    """卡片分组部件
+
+    用于展示图标、标题、内容和附属部件
+    """
 
     def __init__(self, icon: Union[str, FluentIconBase, QIcon], title: str, content: str, parent=None):
         super().__init__(parent=parent)
@@ -323,7 +346,10 @@ class CardGroupWidget(QWidget):
 
 
 class GroupHeaderCardWidget(HeaderCardWidget):
-    """分组头卡片部件."""
+    """分组头卡片部件
+
+    支持添加和管理多个卡片分组
+    """
 
     def _postInit(self):
         super()._postInit()
@@ -336,24 +362,17 @@ class GroupHeaderCardWidget(HeaderCardWidget):
         self.viewLayout.addLayout(self.groupLayout)
 
     def addGroup(self, icon: Union[str, FluentIconBase, QIcon], title: str, content: str, widget: QWidget, stretch=0) -> CardGroupWidget:
-        """向卡片中添加一个新分组.
+        """向卡片中添加一个新分组
 
-        参数
-        ----------
-        icon: str | QIcon | FluentIconBase
-            要绘制的图标.
+        Args:
+            icon: 要绘制的图标
+            title: 分组标题
+            content: 分组内容
+            widget: 要添加的部件
+            stretch: 部件在布局中的拉伸系数
 
-        title: str
-            分组标题.
-
-        content: str
-            分组内容.
-
-        widget: QWidget
-            要添加的部件.
-
-        stretch: int
-            部件在布局中的拉伸系数.
+        Returns:
+            创建的分组部件
         """
         group = CardGroupWidget(icon, title, content, self)
         group.addWidget(widget, stretch=stretch)

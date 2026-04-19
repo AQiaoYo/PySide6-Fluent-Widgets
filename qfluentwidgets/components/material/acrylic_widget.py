@@ -6,7 +6,7 @@ from ...common.style_sheet import isDarkTheme
 
 
 class AcrylicWidget:
-    """ 亚克力 部件 """
+    """亚克力效果部件"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

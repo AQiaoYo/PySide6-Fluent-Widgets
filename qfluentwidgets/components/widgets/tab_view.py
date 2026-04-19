@@ -17,19 +17,17 @@ from .tool_tip import ToolTipFilter
 
 
 class TabCloseButtonDisplayMode(Enum):
-    """ Tab 关闭 按钮 display 模式 """
+    """Tab 关闭按钮的显示模式"""
     ALWAYS = 0
     ON_HOVER = 1
     NEVER = 2
 
 
 def checkIndex(*default):
-    """ decorator 用于 索引 checking
-
-    参数
-    ----------
-    *default:
-        default 值 returned 当 索引 溢出
+    """用于索引检查的装饰器
+    
+    Args:
+        *default: 索引越界时返回的默认值
     """
 
     def outer(func):
@@ -52,7 +50,7 @@ def checkIndex(*default):
 
 
 class TabToolButton(TransparentToolButton):
-    """ Tab 工具按钮 """
+    """Tab 工具按钮"""
 
     def _postInit(self):
         self.setFixedSize(32, 24)
@@ -65,7 +63,7 @@ class TabToolButton(TransparentToolButton):
 
 
 class TabItem(PushButton):
-    """ Tab 项 """
+    """Tab 项"""
 
     closed = Signal()
     doubleClicked = Signal()
@@ -114,7 +112,11 @@ class TabItem(PushButton):
         self.slideAni.start()
 
     def setShadowEnabled(self, isEnabled: bool):
-        """ 设置 是否 shadow is 已启用 """
+        """设置阴影是否启用
+        
+        Args:
+            isEnabled: 是否启用阴影
+        """
         if isEnabled == self.isShadowEnabled:
             return
 
@@ -147,7 +149,11 @@ class TabItem(PushButton):
             self.closeButton.setVisible(isSelected)
 
     def setCloseButtonDisplayMode(self, mode: TabCloseButtonDisplayMode):
-        """ 设置 关闭 按钮 display 模式 """
+        """设置关闭按钮的显示模式
+        
+        Args:
+            mode: 关闭按钮显示模式
+        """
         if mode == self.closeButtonDisplayMode:
             return
 
@@ -165,7 +171,12 @@ class TabItem(PushButton):
         self.update()
 
     def setSelectedBackgroundColor(self, light: QColor, dark: QColor):
-        """ 设置 背景色 中的 selected state """
+        """设置选中状态的背景色
+        
+        Args:
+            light: 浅色模式下的背景色
+            dark: 深色模式下的背景色
+        """
         self.lightSelectedBackgroundColor = QColor(light)
         self.darkSelectedBackgroundColor = QColor(dark)
         self.update()
@@ -326,7 +337,7 @@ class TabItem(PushButton):
 
 
 class TabBar(SingleDirectionScrollArea):
-    """ Tab 栏 """
+    """Tab 栏"""
 
     currentChanged = Signal(int)
     tabBarClicked = Signal(int)
@@ -407,44 +418,26 @@ class TabBar(SingleDirectionScrollArea):
         self.addButton.setVisible(isVisible)
 
     def addTab(self, routeKey: str, text: str, icon: Union[QIcon, str, FluentIconBase] = None, onClick=None):
-        """添加标签页.
-
-        参数
-        ----------
-        routeKey: str
-            标签页的唯一标识.
-
-        text: str
-            标签页文本.
-
-        icon: str | QIcon | FluentIconBase
-            标签页图标.
-
-        onClick: callable
-            连接到点击信号的槽函数.
+        """添加标签页
+        
+        Args:
+            routeKey: 标签页的唯一标识
+            text: 标签页文本
+            icon: 标签页图标
+            onClick: 点击信号的槽函数
         """
         return self.insertTab(-1, routeKey, text, icon, onClick)
 
     def insertTab(self, index: int, routeKey: str, text: str, icon: Union[QIcon, str, FluentIconBase] = None,
                   onClick=None):
-        """插入标签页.
-
-        参数
-        ----------
-        index: int
-            标签页插入位置.
-
-        routeKey: str
-            标签页的唯一标识.
-
-        text: str
-            标签页文本.
-
-        icon: str | QIcon | FluentIconBase
-            标签页图标.
-
-        onClick: callable
-            连接到点击信号的槽函数.
+        """插入标签页
+        
+        Args:
+            index: 标签页插入位置
+            routeKey: 标签页的唯一标识
+            text: 标签页文本
+            icon: 标签页图标
+            onClick: 点击信号的槽函数
         """
         if routeKey in self.itemMap:
             raise ValueError(f"The route key `{routeKey}` is duplicated.")
@@ -519,7 +512,11 @@ class TabBar(SingleDirectionScrollArea):
         self.removeTab(self.items.index(self.tab(routeKey)))
 
     def setCurrentIndex(self, index: int):
-        """ 设置当前索引 """
+        """设置当前索引
+        
+        Args:
+            index: 当前索引
+        """
         if index == self._currentIndex:
             return
 
@@ -553,7 +550,11 @@ class TabBar(SingleDirectionScrollArea):
             self.currentChanged.emit(index)
 
     def setCloseButtonDisplayMode(self, mode: TabCloseButtonDisplayMode):
-        """ 设置 关闭 按钮 display 模式 """
+        """设置关闭按钮的显示模式
+        
+        Args:
+            mode: 关闭按钮显示模式
+        """
         if mode == self.closeButtonDisplayMode:
             return
 
@@ -569,12 +570,16 @@ class TabBar(SingleDirectionScrollArea):
         return self.itemMap.get(routeKey, None)
 
     def tabRegion(self) -> QRect:
-        """返回所有标签页的边界区域."""
+        """返回所有标签页的边界区域"""
         return self.itemLayout.geometry()
 
     @checkIndex()
     def tabRect(self, index: int):
-        """返回指定索引标签页的可视区域."""
+        """返回指定索引标签页的可视区域
+        
+        Args:
+            index: 标签页索引
+        """
         x = 0
         for i in range(index):
             x += self.tabItem(i).width()
@@ -612,7 +617,11 @@ class TabBar(SingleDirectionScrollArea):
         self.tabItem(index).setEnabled(isEnabled)
 
     def setTabsClosable(self, isClosable: bool):
-        """ 设置 是否 tab is closable """
+        """设置标签页是否可关闭
+        
+        Args:
+            isClosable: 是否可关闭
+        """
         if isClosable:
             self.setCloseButtonDisplayMode(TabCloseButtonDisplayMode.ALWAYS)
         else:
@@ -623,12 +632,22 @@ class TabBar(SingleDirectionScrollArea):
 
     @checkIndex()
     def setTabIcon(self, index: int, icon: Union[QIcon, FluentIconBase, str]):
-        """ 设置 tab 图标 """
+        """设置标签页图标
+        
+        Args:
+            index: 标签页索引
+            icon: 图标
+        """
         self.tabItem(index).setIcon(icon)
 
     @checkIndex()
     def setTabText(self, index: int, text: str):
-        """ 设置 tab 文本 """
+        """设置标签页文本
+        
+        Args:
+            index: 标签页索引
+            text: 文本
+        """
         self.tabItem(index).setText(text)
 
     @checkIndex(False)
@@ -637,7 +656,12 @@ class TabBar(SingleDirectionScrollArea):
 
     @checkIndex()
     def setTabVisible(self, index: int, isVisible: bool):
-        """ 设置tab的可见性 """
+        """设置标签页的可见性
+        
+        Args:
+            index: 标签页索引
+            isVisible: 是否可见
+        """
         self.tabItem(index).setVisible(isVisible)
 
         if isVisible and self.currentIndex() < 0:
@@ -655,16 +679,31 @@ class TabBar(SingleDirectionScrollArea):
 
     @checkIndex()
     def setTabTextColor(self, index: int, color: QColor):
-        """设置标签页文本颜色."""
+        """设置标签页文本颜色
+        
+        Args:
+            index: 标签页索引
+            color: 文本颜色
+        """
         self.tabItem(index).setTextColor(color)
 
     @checkIndex()
     def setTabToolTip(self, index: int, toolTip: str):
-        """设置标签页工具提示."""
+        """设置标签页工具提示
+        
+        Args:
+            index: 标签页索引
+            toolTip: 工具提示文本
+        """
         self.tabItem(index).setToolTip(toolTip)
 
     def setTabSelectedBackgroundColor(self, light: QColor, dark: QColor):
-        """ 设置 背景 中的 selected state """
+        """设置标签页选中状态的背景色
+        
+        Args:
+            light: 浅色模式下的背景色
+            dark: 深色模式下的背景色
+        """
         self.lightSelectedBackgroundColor = QColor(light)
         self.darkSelectedBackgroundColor = QColor(dark)
 
@@ -672,7 +711,11 @@ class TabBar(SingleDirectionScrollArea):
             item.setSelectedBackgroundColor(light, dark)
 
     def setTabShadowEnabled(self, isEnabled: bool):
-        """ 设置 是否 shadow 的 tab is 已启用 """
+        """设置标签页阴影是否启用
+        
+        Args:
+            isEnabled: 是否启用阴影
+        """
         if isEnabled == self.isTabShadowEnabled():
             return
 
@@ -720,7 +763,11 @@ class TabBar(SingleDirectionScrollArea):
             item.setMinimumWidth(w)
 
     def setTabMaximumWidth(self, width: int):
-        """ 设置tab的maximum 宽度 """
+        """设置标签页的最大宽度
+        
+        Args:
+            width: 最大宽度
+        """
         if width == self._tabMaxWidth:
             return
 
@@ -729,7 +776,11 @@ class TabBar(SingleDirectionScrollArea):
             item.setMaximumWidth(width)
 
     def setTabMinimumWidth(self, width: int):
-        """ 设置tab的minimum 宽度 """
+        """设置标签页的最小宽度
+        
+        Args:
+            width: 最小宽度
+        """
         if width == self._tabMinWidth:
             return
 
@@ -749,11 +800,11 @@ class TabBar(SingleDirectionScrollArea):
         return self._isScrollable
 
     def count(self):
-        """ 返回tabs的number """
+        """返回标签页数量"""
         return len(self.items)
 
     def clear(self):
-        """ 移除 all tabs """
+        """移除所有标签页"""
         while self.count() > 0:
             self.removeTab(self.count() - 1)
 
@@ -868,77 +919,45 @@ class TabWidget(QWidget):
         self._connectTabBarSignalToSlot()
 
     def addPage(self, widget: QWidget, label: str, icon: Union[QIcon, str, FluentIconBase] = None, routeKey=None) -> int:
-        """ Adds tab 使用 given 页面, 图标, 和 标签 到 标签部件, 和 返回 索引 的 tab 中的 tab 栏.
-
-        参数
-        ----------
-        widget: QWidget
-            新标签页对应的部件.
-
-        label: str
-            标签页标题.
-
-        icon: str | QIcon | FluentIconBase
-            标签页图标.
-
-        routeKey: str
-            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
-
-        返回
-        -------
-        index: int
-            标签页索引.
+        """添加页面到标签部件并返回标签页索引
+        
+        Args:
+            widget: 新标签页对应的部件
+            label: 标签页标题
+            icon: 标签页图标
+            routeKey: 新标签页的路由键，如果未提供将自动生成唯一 UUID
+        
+        Returns:
+            标签页索引
         """
         return self.insertTab(-1, widget, label, icon, routeKey)
 
     def addTab(self, widget: QWidget, label: str, icon: Union[QIcon, str, FluentIconBase] = None, routeKey=None) -> int:
-        """添加标签页并返回其索引.
-
-        参数
-        ----------
-        widget: QWidget
-            新标签页对应的部件.
-
-        label: str
-            标签页标题.
-
-        icon: str | QIcon | FluentIconBase
-            标签页图标.
-
-        routeKey: str
-            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
-
-        返回
-        -------
-        index: int
-            标签页索引.
+        """添加标签页并返回其索引
+        
+        Args:
+            widget: 新标签页对应的部件
+            label: 标签页标题
+            icon: 标签页图标
+            routeKey: 新标签页的路由键，如果未提供将自动生成唯一 UUID
+        
+        Returns:
+            标签页索引
         """
         return self.insertTab(-1, widget, label, icon, routeKey)
 
     def insertTab(self, index: int, widget: QWidget, label: str, icon: Union[QIcon, str, FluentIconBase] = None, routeKey=None) -> int:
-        """在指定位置插入标签页并返回其索引.
-
-        参数
-        ----------
-        index: int
-            新标签页的插入索引.
-
-        widget: QWidget
-            新标签页对应的部件.
-
-        label: str
-            标签页标题.
-
-        icon: str | QIcon | FluentIconBase
-            标签页图标.
-
-        routeKey: str
-            新标签页的路由键. 如果未提供, 将自动生成唯一 UUID.
-
-        返回
-        -------
-        index: int
-            索引 的 tab
+        """在指定位置插入标签页并返回其索引
+        
+        Args:
+            index: 插入位置
+            widget: 新标签页对应的部件
+            label: 标签页标题
+            icon: 标签页图标
+            routeKey: 新标签页的路由键，如果未提供将自动生成唯一 UUID
+        
+        Returns:
+            标签页索引
         """
         if self.stackedWidget.indexOf(widget) >= 0:
             return -1
@@ -954,12 +973,10 @@ class TabWidget(QWidget):
         return self.stackedWidget.indexOf(widget)
 
     def removeTab(self, index: int):
-        """ Removes tab at 位置 索引 从 this stack 的 部件. 页面 部件 itself is not deleted.
-
-        参数
-        ----------
-        index: int
-            索引 的 removed 部件
+        """从堆叠部件中移除指定索引的标签页，页面部件本身不会被删除
+        
+        Args:
+            index: 要移除的部件索引
         """
         if not 0 <= index < self.stackedWidget.count():
             return
@@ -968,26 +985,34 @@ class TabWidget(QWidget):
         self.tabBar.removeTab(index)
 
     def clear(self):
-        """ Removes all pages, but does not delete them. """
+        """移除所有页面，但不会删除它们"""
         while self.stackedWidget.count():
             self.stackedWidget.removeWidget(self.stackedWidget.widget(0))
 
         self.tabBar.clear()
 
     def widget(self, index: int):
-        """返回指定索引的标签页, 如果索引越界则返回 `None`."""
+        """返回指定索引的标签页，如果索引越界则返回 None
+        
+        Args:
+            index: 标签页索引
+        """
         return self.stackedWidget.widget(index)
 
     def currentWidget(self) -> QWidget:
-        """返回当前显示的页面."""
+        """返回当前显示的页面"""
         return self.stackedWidget.currentWidget()
 
     def currentIndex(self):
-        """返回当前标签页索引. 如果没有当前部件, 则返回 -1."""
+        """返回当前标签页索引，如果没有当前部件则返回 -1"""
         return self.stackedWidget.currentIndex()
 
     def setTabBar(self, tabBar):
-        """ Replaces original tab 栏 使用 new one. 注意 that this must be called before any tabs have been added, 或 behavior is undefined. """
+        """使用新的标签栏替换原始标签栏，注意必须在添加任何标签页之前调用，否则行为未定义
+        
+        Args:
+            tabBar: 新的标签栏
+        """
         if tabBar == self.tabBar:
             return
 
@@ -1001,7 +1026,7 @@ class TabWidget(QWidget):
         self._connectTabBarSignalToSlot()
 
     def isMovable(self):
-        """ 返回 是否 user can move tabs within tabbar area. """
+        """返回用户是否可以在标签栏区域内移动标签页"""
         return self.tabBar.isMovable()
 
     def setMovable(self, movable: bool):
@@ -1077,16 +1102,24 @@ class TabWidget(QWidget):
         self.tabBar.setTabData(index, data)
 
     def count(self) -> int:
-        """ 返回 number 的 tabs 中的 tab 栏. """
+        """返回标签栏中的标签页数量"""
         return self.stackedWidget.count()
 
     def setCurrentIndex(self, index: int):
-        """ 索引 的 tab 栏's 可见 tab """
+        """设置当前索引
+        
+        Args:
+            index: 当前索引
+        """
         self.tabBar.setCurrentIndex(index)
         self.stackedWidget.setCurrentIndex(index)
 
     def setCurrentWidget(self, widget: QWidget):
-        """将当前标签页切换到包含该部件的标签."""
+        """将当前标签页切换到包含该部件的标签
+        
+        Args:
+            widget: 目标部件
+        """
         index = self.stackedWidget.indexOf(widget)
         if index != -1:
             self.setCurrentIndex(index)

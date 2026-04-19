@@ -1,4 +1,6 @@
 # coding: utf-8
+"""Pips 分页导航组件"""
+
 from enum import Enum
 from PySide6.QtCore import Qt, Signal, QModelIndex, QPoint, Property, QSize, QRectF
 from PySide6.QtGui import QPixmap, QPainter, QColor
@@ -14,14 +16,14 @@ from .scroll_bar import SmoothScrollBar
 
 
 class PipsScrollButtonDisplayMode(Enum):
-    """ Pips pager 滚动按钮 display 模式 """
+    """PipsPager 滚动按钮的显示模式"""
     ALWAYS = 0
     ON_HOVER = 1
     NEVER = 2
 
 
 class ScrollButton(ToolButton):
-    """ 滚动按钮 """
+    """PipsPager 的滚动按钮"""
 
     def _postInit(self):
         self.setFixedSize(12, 12)
@@ -47,7 +49,7 @@ class ScrollButton(ToolButton):
 
 
 class PipsDelegate(QStyledItemDelegate):
-    """ Pips 委托 """
+    """PipsPager 的列表项委托"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -97,12 +99,11 @@ class PipsDelegate(QStyledItemDelegate):
 
 
 class PipsPager(QListWidget):
-    """ Pips pager
+    """Pips 分页导航控件
 
-    构造函数
-    ------------
-    * PipsPager(`父部件`: QWidget = None)
-    * PipsPager(`orient`: Qt.Orientation, `父部件`: QWidget = None)
+    构造函数重载:
+        * PipsPager(parent: QWidget = None)
+        * PipsPager(orientation: Qt.Orientation, parent: QWidget = None)
     """
 
     currentIndexChanged = Signal(int)
@@ -179,7 +180,11 @@ class PipsPager(QListWidget):
         self.delegate.setHoveredRow(self.row(item))
 
     def setPageNumber(self, n: int):
-        """ 设置页面的number """
+        """设置页面数量
+
+        Args:
+            n: 页面数量
+        """
         self.clear()
         self.addItems(['15555'] * n)
 
@@ -192,11 +197,19 @@ class PipsPager(QListWidget):
         self.adjustSize()
 
     def getPageNumber(self):
-        """ 获取页面的number """
+        """获取页面数量
+
+        Returns:
+            页面数量
+        """
         return self.count()
 
     def getVisibleNumber(self):
-        """ 获取可见 pips的number """
+        """获取可见 pip 的数量
+
+        Returns:
+            可见 pip 的数量
+        """
         return self._visibleNumber
 
     def setVisibleNumber(self, n: int):
@@ -204,15 +217,20 @@ class PipsPager(QListWidget):
         self.adjustSize()
 
     def scrollNext(self):
-        """ 滚动 down 项 """
+        """向后滚动一项"""
         self.setCurrentIndex(self.currentIndex() + 1)
 
     def scrollPrevious(self):
-        """ 滚动 up 项 """
+        """向前滚动一项"""
         self.setCurrentIndex(self.currentIndex() - 1)
 
     def scrollToItem(self, item: QListWidgetItem, hint=QListWidget.PositionAtCenter):
-        """ 滚动 到 项 """
+        """滚动到指定项
+
+        Args:
+            item: 目标列表项
+            hint: 滚动位置提示
+        """
         # 滚动 到 center 位置
         index = self.row(item)
         size = item.sizeHint()
@@ -239,7 +257,11 @@ class PipsPager(QListWidget):
         return self.orientation == Qt.Horizontal
 
     def setCurrentIndex(self, index: int):
-        """ 设置当前索引 """
+        """设置当前索引
+
+        Args:
+            index: 目标索引
+        """
         if not 0 <= index < self.count():
             return
 
@@ -271,12 +293,20 @@ class PipsPager(QListWidget):
         return super().currentIndex().row()
 
     def setPreviousButtonDisplayMode(self, mode: PipsScrollButtonDisplayMode):
-        """ 设置previous 按钮的display 模式 """
+        """设置上一页按钮的显示模式
+
+        Args:
+            mode: 显示模式
+        """
         self.previousButtonDisplayMode = mode
         self.preButton.setVisible(self.isPreviousButtonVisible())
 
     def setNextButtonDisplayMode(self, mode: PipsScrollButtonDisplayMode):
-        """ 设置next 按钮的display 模式 """
+        """设置下一页按钮的显示模式
+
+        Args:
+            mode: 显示模式
+        """
         self.nextButtonDisplayMode = mode
         self.nextButton.setVisible(self.isNextButtonVisible())
 
@@ -318,14 +348,14 @@ class PipsPager(QListWidget):
 
 
 class HorizontalPipsPager(PipsPager):
-    """ Horizontal pips pager """
+    """水平方向 Pips 分页导航控件"""
 
     def __init__(self, parent=None):
         super().__init__(Qt.Horizontal, parent)
 
 
 class VerticalPipsPager(PipsPager):
-    """ Vertical pips pager """
+    """垂直方向 Pips 分页导航控件"""
 
     def __init__(self, parent=None):
         super().__init__(Qt.Vertical, parent)

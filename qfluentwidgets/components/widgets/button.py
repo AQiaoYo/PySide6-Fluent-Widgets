@@ -1,4 +1,9 @@
 # coding: utf-8
+""" 按钮组件模块
+
+提供 PushButton、ToolButton、RadioButton 及其变体，
+支持主题色、透明、下拉、分离式等样式
+"""
 from typing import Union
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
@@ -16,17 +21,21 @@ from .menu import RoundMenu, MenuAnimationType
 
 
 class PushButton(QPushButton):
-    """ 按钮
+    """ 按钮组件
 
-    构造函数
-    ------------
-    * PushButton(`父部件`: QWidget = None)
-    * PushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
-    * PushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * PushButton(parent: QWidget = None)
+        * PushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * PushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """ 初始化按钮
+
+        Args:
+            parent: 父部件，默认为 None
+        """
         super().__init__(parent)
         FluentStyleSheet.BUTTON.apply(self)
         self.isPressed = False
@@ -54,6 +63,11 @@ class PushButton(QPushButton):
         pass
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
+        """ 设置按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase、str 或 None
+        """
         if icon is None or (isinstance(icon, QIcon) and icon.isNull()):
             self.setProperty('hasIcon', False)
         else:
@@ -64,9 +78,25 @@ class PushButton(QPushButton):
         self.update()
 
     def icon(self):
+        """ 获取按钮图标
+
+        Returns:
+            QIcon 图标实例
+        """
         return toQIcon(self._icon)
 
     def setProperty(self, name: str, value) -> bool:
+        """ 设置属性
+
+        当 name 为 'icon' 时，自动调用 setIcon 处理
+
+        Args:
+            name: 属性名
+            value: 属性值
+
+        Returns:
+            设置是否成功
+        """
         if name != 'icon':
             return super().setProperty(name, value)
 
@@ -90,7 +120,14 @@ class PushButton(QPushButton):
         self.update()
 
     def _drawIcon(self, icon, painter, rect, state=QIcon.Off):
-        """ 绘制图标 """
+        """ 绘制按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase 或 str
+            painter: QPainter 绘图对象
+            rect: 绘制区域
+            state: 图标状态，默认为 QIcon.Off
+        """
         drawIcon(icon, painter, rect, state)
 
     def paintEvent(self, e):
@@ -124,11 +161,10 @@ class PushButton(QPushButton):
 class PrimaryPushButton(PushButton):
     """ 主题色按钮
 
-    构造函数
-    ------------
-    * PrimaryPushButton(`父部件`: QWidget = None)
-    * PrimaryPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
-    * PrimaryPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimaryPushButton(parent: QWidget = None)
+        * PrimaryPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * PrimaryPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def _drawIcon(self, icon, painter, rect, state=QIcon.Off):
@@ -147,22 +183,20 @@ class PrimaryPushButton(PushButton):
 class TransparentPushButton(PushButton):
     """ 透明按钮
 
-    构造函数
-    ------------
-    * TransparentPushButton(`父部件`: QWidget = None)
-    * TransparentPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
-    * TransparentPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentPushButton(parent: QWidget = None)
+        * TransparentPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * TransparentPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
 
 class ToggleButton(PushButton):
     """ 切换按钮
 
-    构造函数
-    ------------
-    * ToggleButton(`父部件`: QWidget = None)
-    * ToggleButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
-    * ToggleButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * ToggleButton(parent: QWidget = None)
+        * ToggleButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * ToggleButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def _postInit(self):
@@ -182,23 +216,20 @@ TogglePushButton = ToggleButton
 class TransparentTogglePushButton(TogglePushButton):
     """ 透明切换按钮
 
-    构造函数
-    ------------
-    * TransparentTogglePushButton(`父部件`: QWidget = None)
-    * TransparentTogglePushButton(`文本`: str, `父部件`: QWidget = None,
-                                  `图标`: QIcon | str | FluentIconBase = None)
-    * TransparentTogglePushButton(`图标`: QIcon | FluentIconBase, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentTogglePushButton(parent: QWidget = None)
+        * TransparentTogglePushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * TransparentTogglePushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
 
 class HyperlinkButton(PushButton):
     """ 超链接按钮
 
-    构造函数
-    ------------
-    * HyperlinkButton(`父部件`: QWidget = None)
-    * HyperlinkButton(`url`: str, `文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
-    * HyperlinkButton(`图标`: QIcon | FluentIconBase, `url`: str, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * HyperlinkButton(parent: QWidget = None)
+        * HyperlinkButton(url: str, text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * HyperlinkButton(icon: QIcon | FluentIconBase, url: str, text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
@@ -226,9 +257,19 @@ class HyperlinkButton(PushButton):
         self.__init__(url, text, parent, icon)
 
     def getUrl(self):
+        """ 获取超链接 URL
+
+        Returns:
+            QUrl URL 实例
+        """
         return self._url
 
     def setUrl(self, url: Union[str, QUrl]):
+        """ 设置超链接 URL
+
+        Args:
+            url: URL 字符串或 QUrl 实例
+        """
         self._url = QUrl(url)
 
     def _onClicked(self):
@@ -249,11 +290,9 @@ class HyperlinkButton(PushButton):
 class RadioButton(QRadioButton):
     """ 单选按钮
 
-    构造函数
-    ------------
-    * RadioButton(`父部件`: QWidget = None)
-    * RadioButton(`url`: 文本, `文本`: str, `父部件`: QWidget = None,
-                  `图标`: QIcon | str | FluentIconBase = None)
+    构造函数重载:
+        * RadioButton(parent: QWidget = None)
+        * RadioButton(text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
@@ -370,19 +409,41 @@ class RadioButton(QRadioButton):
         return self._darkTextColor
 
     def setLightTextColor(self, color: QColor):
+        """ 设置亮色主题下的文本颜色
+
+        Args:
+            color: 文本颜色
+        """
         self._lightTextColor = QColor(color)
         self.update()
 
     def setDarkTextColor(self, color: QColor):
+        """ 设置暗色主题下的文本颜色
+
+        Args:
+            color: 文本颜色
+        """
         self._darkTextColor = QColor(color)
         self.update()
 
     def setIndicatorColor(self, light, dark):
+        """ 设置单选指示器颜色
+
+        Args:
+            light: 亮色主题下的指示器颜色
+            dark: 暗色主题下的指示器颜色
+        """
         self.lightIndicatorColor = QColor(light)
         self.darkIndicatorColor = QColor(dark)
         self.update()
 
     def setTextColor(self, light, dark):
+        """ 设置文本颜色（亮色/暗色主题）
+
+        Args:
+            light: 亮色主题下的文本颜色
+            dark: 暗色主题下的文本颜色
+        """
         self.setLightTextColor(light)
         self.setDarkTextColor(dark)
 
@@ -393,10 +454,9 @@ class RadioButton(QRadioButton):
 class ToolButton(QToolButton):
     """ 工具按钮
 
-    构造函数
-    ------------
-    * ToolButton(`父部件`: QWidget = None)
-    * ToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * ToolButton(parent: QWidget = None)
+        * ToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     @singledispatchmethod
@@ -429,13 +489,34 @@ class ToolButton(QToolButton):
         pass
 
     def setIcon(self, icon: Union[QIcon, str, FluentIconBase]):
+        """ 设置按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase 或 str
+        """
         self._icon = icon
         self.update()
 
     def icon(self):
+        """ 获取按钮图标
+
+        Returns:
+            QIcon 图标实例
+        """
         return toQIcon(self._icon)
 
     def setProperty(self, name: str, value) -> bool:
+        """ 设置属性
+
+        当 name 为 'icon' 时，自动调用 setIcon 处理
+
+        Args:
+            name: 属性名
+            value: 属性值
+
+        Returns:
+            设置是否成功
+        """
         if name != 'icon':
             return super().setProperty(name, value)
 
@@ -459,7 +540,14 @@ class ToolButton(QToolButton):
         self.update()
 
     def _drawIcon(self, icon, painter: QPainter, rect: QRectF, state=QIcon.Off):
-        """ 绘制图标 """
+        """ 绘制按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase 或 str
+            painter: QPainter 绘图对象
+            rect: 绘制区域
+            state: 图标状态，默认为 QIcon.Off
+        """
         drawIcon(icon, painter, rect, state)
 
     def paintEvent(self, e):
@@ -483,22 +571,20 @@ class ToolButton(QToolButton):
 
 
 class TransparentToolButton(ToolButton):
-    """ 透明 背景 工具按钮
+    """ 透明背景工具按钮
 
-    构造函数
-    ------------
-    * TransparentToolButton(`父部件`: QWidget = None)
-    * TransparentToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentToolButton(parent: QWidget = None)
+        * TransparentToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
 
 class PrimaryToolButton(ToolButton):
     """ 主题色工具按钮
 
-    构造函数
-    ------------
-    * PrimaryToolButton(`父部件`: QWidget = None)
-    * PrimaryToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimaryToolButton(parent: QWidget = None)
+        * PrimaryToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def _drawIcon(self, icon, painter: QPainter, rect: QRectF, state=QIcon.Off):
@@ -520,10 +606,9 @@ class PrimaryToolButton(ToolButton):
 class ToggleToolButton(ToolButton):
     """ 切换工具按钮
 
-    构造函数
-    ------------
-    * ToggleToolButton(`父部件`: QWidget = None)
-    * ToggleToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * ToggleToolButton(parent: QWidget = None)
+        * ToggleToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def _postInit(self):
@@ -540,10 +625,9 @@ class ToggleToolButton(ToolButton):
 class TransparentToggleToolButton(ToggleToolButton):
     """ 透明切换工具按钮
 
-    构造函数
-    ------------
-    * TransparentToggleToolButton(`父部件`: QWidget = None)
-    * TransparentToggleToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentToggleToolButton(parent: QWidget = None)
+        * TransparentToggleToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
 
@@ -556,9 +640,19 @@ class DropDownButtonBase:
         self.arrowAni = TranslateYAnimation(self)
 
     def setMenu(self, menu: RoundMenu):
+        """ 设置下拉菜单
+
+        Args:
+            menu: RoundMenu 菜单实例
+        """
         self._menu = menu
 
     def menu(self) -> RoundMenu:
+        """ 获取下拉菜单
+
+        Returns:
+            RoundMenu 菜单实例，未设置时返回 None
+        """
         return self._menu
 
     def _showMenu(self):
@@ -611,12 +705,10 @@ class DropDownButtonBase:
 class DropDownPushButton(DropDownButtonBase, PushButton):
     """ 下拉按钮
 
-    构造函数
-    ------------
-    * DropDownPushButton(`父部件`: QWidget = None)
-    * DropDownPushButton(`文本`: str, `父部件`: QWidget = None,
-                         `图标`: QIcon | str | FluentIconBase = None)
-    * DropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * DropDownPushButton(parent: QWidget = None)
+        * DropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * DropDownPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -629,24 +721,21 @@ class DropDownPushButton(DropDownButtonBase, PushButton):
 
 
 class TransparentDropDownPushButton(DropDownPushButton):
-    """透明下拉按钮.
+    """ 透明下拉按钮
 
-    构造函数
-    ------------
-    * TransparentDropDownPushButton(`父部件`: QWidget = None)
-    * TransparentDropDownPushButton(`文本`: str, `父部件`: QWidget = None,
-                                    `图标`: QIcon | str | FluentIconBase = None)
-    * TransparentDropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentDropDownPushButton(parent: QWidget = None)
+        * TransparentDropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * TransparentDropDownPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
 
 class DropDownToolButton(DropDownButtonBase, ToolButton):
     """ 下拉工具按钮
 
-    构造函数
-    ------------
-    * DropDownToolButton(`父部件`: QWidget = None)
-    * DropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * DropDownToolButton(parent: QWidget = None)
+        * DropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -665,10 +754,9 @@ class DropDownToolButton(DropDownButtonBase, ToolButton):
 class TransparentDropDownToolButton(DropDownToolButton):
     """ 透明下拉工具按钮
 
-    构造函数
-    ------------
-    * TransparentDropDownToolButton(`父部件`: QWidget = None)
-    * TransparentDropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * TransparentDropDownToolButton(parent: QWidget = None)
+        * TransparentDropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
 
@@ -683,12 +771,10 @@ class PrimaryDropDownButtonBase(DropDownButtonBase):
 class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
     """ 主题色下拉按钮
 
-    构造函数
-    ------------
-    * PrimaryDropDownPushButton(`父部件`: QWidget = None)
-    * PrimaryDropDownPushButton(`文本`: str, `父部件`: QWidget = None,
-                                `图标`: QIcon | str | FluentIconBase = None)
-    * PrimaryDropDownPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimaryDropDownPushButton(parent: QWidget = None)
+        * PrimaryDropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * PrimaryDropDownPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -701,12 +787,11 @@ class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
 
 
 class PrimaryDropDownToolButton(PrimaryDropDownButtonBase, PrimaryToolButton):
-    """主题色下拉工具按钮.
+    """ 主题色下拉工具按钮
 
-    构造函数
-    ------------
-    * PrimaryDropDownToolButton(`父部件`: QWidget = None)
-    * PrimaryDropDownToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimaryDropDownToolButton(parent: QWidget = None)
+        * PrimaryDropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def mouseReleaseEvent(self, e):
@@ -768,7 +853,7 @@ class PrimarySplitDropButton(PrimaryToolButton):
 
 
 class SplitWidgetBase(QWidget):
-    """ Split 部件 基类 """
+    """ 分离式部件基类 """
 
     dropDownClicked = Signal()
 
@@ -789,11 +874,19 @@ class SplitWidgetBase(QWidget):
         self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def setWidget(self, widget: QWidget):
-        """设置左侧主按钮部件."""
+        """ 设置左侧主按钮部件
+
+        Args:
+            widget: 要设置的部件
+        """
         self.hBoxLayout.insertWidget(0, widget, 1, Qt.AlignLeft)
 
     def setDropButton(self, button):
-        """设置下拉按钮."""
+        """ 设置下拉按钮
+
+        Args:
+            button: 下拉按钮实例
+        """
         self.hBoxLayout.removeWidget(self.dropButton)
         self.dropButton.deleteLater()
 
@@ -803,27 +896,35 @@ class SplitWidgetBase(QWidget):
         self.hBoxLayout.addWidget(button)
 
     def setDropIcon(self, icon: Union[str, QIcon, FluentIconBase]):
-        """设置下拉按钮的图标."""
+        """ 设置下拉按钮的图标
+
+        Args:
+            icon: 图标，可为 str、QIcon 或 FluentIconBase
+        """
         self.dropButton.setIcon(icon)
         self.dropButton.removeEventFilter(self.dropButton.arrowAni)
 
     def setDropIconSize(self, size: QSize):
-        """设置下拉按钮的图标大小."""
+        """ 设置下拉按钮的图标大小
+
+        Args:
+            size: 图标尺寸
+        """
         self.dropButton.setIconSize(size)
 
     def setFlyout(self, flyout):
-        """设置点击下拉按钮时弹出的部件.
+        """ 设置点击下拉按钮时弹出的部件
 
-        参数
-        ----------
-        flyout: QWidget
-            点击下拉按钮时弹出的部件.
-            该部件应提供 `exec(pos: QPoint)` 方法.
+        Args:
+            flyout: 点击下拉按钮时弹出的部件，需提供 exec(pos: QPoint) 方法
         """
         self.flyout = flyout
 
     def showFlyout(self):
-        """ 显示浮出层 """
+        """ 显示浮出层
+
+        若未设置 flyout 则直接返回
+        """
         if not self.flyout:
             return
 
@@ -841,12 +942,11 @@ class SplitWidgetBase(QWidget):
 
 
 class SplitPushButton(SplitWidgetBase):
-    """分离式按钮.
+    """ 分离式按钮
 
-    构造函数
-    ------------
-    * SplitPushButton(`父部件`: QWidget = None)
-    * SplitPushButton(`文本`: str, `父部件`: QWidget = None, `图标`: QIcon | str | FluentIconBase = None)
+    构造函数重载:
+        * SplitPushButton(parent: QWidget = None)
+        * SplitPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
     """
 
     clicked = Signal()
@@ -878,19 +978,44 @@ class SplitPushButton(SplitWidgetBase):
         pass
 
     def text(self):
+        """ 获取按钮文本
+
+        Returns:
+            str 当前文本
+        """
         return self.button.text()
 
     def setText(self, text: str):
+        """ 设置按钮文本
+
+        Args:
+            text: 文本内容
+        """
         self.button.setText(text)
         self.adjustSize()
 
     def icon(self):
+        """ 获取按钮图标
+
+        Returns:
+            QIcon 图标实例
+        """
         return self.button.icon()
 
     def setIcon(self, icon: Union[QIcon, FluentIconBase, str]):
+        """ 设置按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase 或 str
+        """
         self.button.setIcon(icon)
 
     def setIconSize(self, size: QSize):
+        """ 设置图标大小
+
+        Args:
+            size: 图标尺寸
+        """
         self.button.setIconSize(size)
 
     text_ = Property(str, text, setText)
@@ -898,14 +1023,12 @@ class SplitPushButton(SplitWidgetBase):
 
 
 class PrimarySplitPushButton(SplitPushButton):
-    """主题色分离式按钮.
+    """ 主题色分离式按钮
 
-    构造函数
-    ------------
-    * PrimarySplitPushButton(`父部件`: QWidget = None)
-    * PrimarySplitPushButton(`文本`: str, `父部件`: QWidget = None,
-                             `图标`: QIcon | str | FluentIconBase = None)
-    * PrimarySplitPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimarySplitPushButton(parent: QWidget = None)
+        * PrimarySplitPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * PrimarySplitPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def _postInit(self):
@@ -921,12 +1044,11 @@ class PrimarySplitPushButton(SplitPushButton):
 
 
 class SplitToolButton(SplitWidgetBase):
-    """分离式工具按钮.
+    """ 分离式工具按钮
 
-    构造函数
-    ------------
-    * SplitToolButton(`父部件`: QWidget = None)
-    * SplitToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * SplitToolButton(parent: QWidget = None)
+        * SplitToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     clicked = Signal()
@@ -959,24 +1081,38 @@ class SplitToolButton(SplitWidgetBase):
         pass
 
     def icon(self):
+        """ 获取按钮图标
+
+        Returns:
+            QIcon 图标实例
+        """
         return self.button.icon()
 
     def setIcon(self, icon: Union[QIcon, FluentIconBase, str]):
+        """ 设置按钮图标
+
+        Args:
+            icon: 图标，可为 QIcon、FluentIconBase 或 str
+        """
         self.button.setIcon(icon)
 
     def setIconSize(self, size: QSize):
+        """ 设置图标大小
+
+        Args:
+            size: 图标尺寸
+        """
         self.button.setIconSize(size)
 
     icon_ = Property(QIcon, icon, setIcon)
 
 
 class PrimarySplitToolButton(SplitToolButton):
-    """主题色分离式工具按钮.
+    """ 主题色分离式工具按钮
 
-    构造函数
-    ------------
-    * PrimarySplitToolButton(`父部件`: QWidget = None)
-    * PrimarySplitToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * PrimarySplitToolButton(parent: QWidget = None)
+        * PrimarySplitToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def _postInit(self):
@@ -992,7 +1128,7 @@ class PrimarySplitToolButton(SplitToolButton):
 
 
 class PillButtonBase:
-    """ Pill 按钮 基类 """
+    """ Pill 按钮基类 """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1036,12 +1172,10 @@ class PillButtonBase:
 class PillPushButton(TogglePushButton, PillButtonBase):
     """ Pill 按钮
 
-    构造函数
-    ------------
-    * PillPushButton(`父部件`: QWidget = None)
-    * PillPushButton(`文本`: str, `父部件`: QWidget = None,
-                     `图标`: QIcon | str | FluentIconBase = None)
-    * PillPushButton(`图标`: QIcon | FluentIcon, `文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+        * PillPushButton(parent: QWidget = None)
+        * PillPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
+        * PillPushButton(icon: QIcon | FluentIconBase, text: str, parent: QWidget = None)
     """
 
     def paintEvent(self, e):
@@ -1050,12 +1184,11 @@ class PillPushButton(TogglePushButton, PillButtonBase):
 
 
 class PillToolButton(ToggleToolButton, PillButtonBase):
-    """ Pill 按钮
+    """ Pill 工具按钮
 
-    构造函数
-    ------------
-    * PillToolButton(`父部件`: QWidget = None)
-    * PillToolButton(`图标`: QIcon | str | FluentIconBase, `父部件`: QWidget = None)
+    构造函数重载:
+        * PillToolButton(parent: QWidget = None)
+        * PillToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
     """
 
     def paintEvent(self, e):

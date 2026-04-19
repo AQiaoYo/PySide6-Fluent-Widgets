@@ -13,7 +13,7 @@ from .flyout import FlyoutView, FlyoutViewBase
 
 
 class TeachingTipTailPosition(Enum):
-    """ 教学提示 tail 位置 """
+    """教学提示尾部位置"""
     TOP = 0
     BOTTOM = 1
     LEFT = 2
@@ -37,7 +37,7 @@ class ImagePosition(Enum):
 
 
 class TeachingTipView(FlyoutView):
-    """ 教学提示 视图 """
+    """教学提示视图"""
 
     def __init__(self, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                  image: Union[str, QPixmap, QImage] = None, isClosable=True, tailPosition=TeachingTipTailPosition.BOTTOM,
@@ -84,7 +84,7 @@ class TeachingTipView(FlyoutView):
 
 
 class TeachTipBubble(QWidget):
-    """ 教学提示 bubble """
+    """教学提示气泡"""
 
     def __init__(self, view: FlyoutViewBase, tailPosition=TeachingTipTailPosition.BOTTOM, parent=None):
         super().__init__(parent=parent)
@@ -118,26 +118,15 @@ class TeachingTip(QWidget):
 
     def __init__(self, view: FlyoutViewBase, target: QWidget, duration=1000,
                  tailPosition=TeachingTipTailPosition.BOTTOM, parent=None, isDeleteOnClose=True):
-        """
-        参数
-        ----------
-        target: QWidget
-            目标 部件 到 显示 tip
-
-        view: FlyoutViewBase
-            教学提示 视图
-
-        duration: int
-            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
-
-        tailPosition: TeachingTipTailPosition
-            气泡尾巴的位置.
-
-        parent: QWidget
-            父部件.
-
-        isDeleteOnClose: bool
-            是否 delete 浮出层 automatically 当 浮出层 is closed
+        """初始化并显示教学提示
+        
+        Args:
+            view: 教学提示视图
+            target: 目标部件
+            duration: 教学提示显示时长，单位为毫秒。如果时长小于 0，教学提示将不会自动消失
+            tailPosition: 气泡尾巴的位置
+            parent: 父部件
+            isDeleteOnClose: 浮出层关闭后是否自动删除
         """
         super().__init__(parent=parent)
         self.target = target
@@ -162,7 +151,12 @@ class TeachingTip(QWidget):
             parent.window().installEventFilter(self)
 
     def setShadowEffect(self, blurRadius=35, offset=(0, 8)):
-        """ 将shadow添加到对话框 """
+        """添加阴影效果
+        
+        Args:
+            blurRadius: 模糊半径
+            offset: 阴影偏移量
+        """
         color = QColor(0, 0, 0, 80 if isDarkTheme() else 30)
         self.shadowEffect = QGraphicsDropShadowEffect(self.bubble)
         self.shadowEffect.setBlurRadius(blurRadius)
@@ -205,7 +199,13 @@ class TeachingTip(QWidget):
         return super().eventFilter(obj, e)
 
     def addWidget(self, widget: QWidget, stretch=0, align=Qt.AlignLeft):
-        """向 teaching tip 中添加部件."""
+        """向教学提示中添加部件
+        
+        Args:
+            widget: 要添加的部件
+            stretch: 拉伸因子
+            align: 对齐方式
+        """
         self.view.addSpacing(8)
         self.view.addWidget(widget, stretch, align)
 
@@ -219,26 +219,15 @@ class TeachingTip(QWidget):
     @classmethod
     def make(cls, view: FlyoutViewBase, target: QWidget, duration=1000, tailPosition=TeachingTipTailPosition.BOTTOM,
              parent=None, isDeleteOnClose=True):
-        """
-        参数
-        ----------
-        view: FlyoutViewBase
-            教学提示 视图
-
-        target: QWidget
-            目标 部件 到 显示 tip
-
-        duration: int
-            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
-
-        tailPosition: TeachingTipTailPosition
-            气泡尾巴的位置.
-
-        parent: QWidget
-            父部件.
-
-        isDeleteOnClose: bool
-            浮出层关闭后是否自动删除.
+        """创建教学提示
+        
+        Args:
+            view: 教学提示视图
+            target: 目标部件
+            duration: 教学提示显示时长，单位为毫秒。如果时长小于 0，教学提示将不会自动消失
+            tailPosition: 气泡尾巴的位置
+            parent: 父部件
+            isDeleteOnClose: 浮出层关闭后是否自动删除
         """
         w = cls(view, target, duration, tailPosition, parent, isDeleteOnClose)
         w.show()
@@ -248,35 +237,19 @@ class TeachingTip(QWidget):
     def create(cls, target: QWidget, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                image: Union[str, QPixmap, QImage] = None, isClosable=True, duration=1000,
                tailPosition=TeachingTipTailPosition.BOTTOM, parent=None, isDeleteOnClose=True):
-        """
-        参数
-        ----------
-        target: QWidget
-            要显示提示的目标部件.
-
-        title: str
-            教学提示标题.
-
-        content: str
-            教学提示内容.
-
-        icon: InfoBarIcon | FluentIconBase | QIcon | str
-            教学提示图标.
-
-        image: str | QPixmap | QImage
-            教学提示图片.
-
-        isClosable: bool
-            是否显示关闭按钮.
-
-        duraction: int
-            教学提示显示时长, 单位为毫秒. 如果时长小于 0, 教学提示将不会自动消失.
-
-        parent: QWidget
-            父部件.
-
-        isDeleteOnClose: bool
-            是否 delete 浮出层 automatically 当 浮出层 is closed
+        """创建教学提示
+        
+        Args:
+            target: 要显示提示的目标部件
+            title: 教学提示标题
+            content: 教学提示内容
+            icon: 教学提示图标
+            image: 教学提示图片
+            isClosable: 是否显示关闭按钮
+            duration: 教学提示显示时长，单位为毫秒。如果时长小于 0，教学提示将不会自动消失
+            tailPosition: 气泡尾巴的位置
+            parent: 父部件
+            isDeleteOnClose: 浮出层关闭后是否自动删除
         """
         view = TeachingTipView(title, content, icon, image, isClosable, tailPosition)
         w = cls.make(view, target, duration, tailPosition, parent, isDeleteOnClose)
@@ -285,7 +258,7 @@ class TeachingTip(QWidget):
 
 
 class PopupTeachingTip(TeachingTip):
-    """ Pop up 教学提示 """
+    """弹出式教学提示"""
 
     def __init__(self, view: FlyoutViewBase, target: QWidget, duration=1000,
                  tailPosition=TeachingTipTailPosition.BOTTOM, parent=None, isDeleteOnClose=True):
@@ -294,13 +267,17 @@ class PopupTeachingTip(TeachingTip):
 
 
 class TeachingTipManager(QObject):
-    """ 教学提示 管理器 """
+    """教学提示管理器"""
 
     def __init__(self):
         super().__init__()
 
     def doLayout(self, tip: TeachTipBubble):
-        """ manage 布局 的 tip """
+        """管理 tip 的布局
+        
+        Args:
+            tip: 教学提示气泡
+        """
         tip.hBoxLayout.setContentsMargins(0, 0, 0, 0)
 
     def imagePosition(self):
@@ -317,17 +294,33 @@ class TeachingTipManager(QObject):
         return QPoint(x, y)
 
     def draw(self, tip: TeachTipBubble, painter: QPainter):
-        """绘制气泡外形."""
+        """绘制气泡外形
+        
+        Args:
+            tip: 教学提示气泡
+            painter: 画笔
+        """
         rect = tip.rect().adjusted(1, 1, -1, -1)
         painter.drawRoundedRect(rect, 8, 8)
 
     def _pos(self, tip: TeachingTip):
-        """ 返回tip的poisition """
+        """返回 tip 的位置
+        
+        Args:
+            tip: 教学提示
+        
+        Returns:
+            tip 的位置
+        """
         return tip.pos()
 
     @staticmethod
     def make(position: TeachingTipTailPosition):
-        """根据显示位置创建教学提示尾部管理器."""
+        """根据显示位置创建教学提示尾部管理器
+        
+        Args:
+            position: 尾部位置
+        """
         managers = {
             TeachingTipTailPosition.TOP: TopTailTeachingTipManager,
             TeachingTipTailPosition.BOTTOM: BottomTailTeachingTipManager,
@@ -352,7 +345,7 @@ class TeachingTipManager(QObject):
 
 
 class TopTailTeachingTipManager(TeachingTipManager):
-    """ Top tail 教学提示 管理器 """
+    """顶部尾部教学提示管理器"""
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 8, 0, 0)
@@ -380,7 +373,7 @@ class TopTailTeachingTipManager(TeachingTipManager):
 
 
 class BottomTailTeachingTipManager(TeachingTipManager):
-    """ Bottom tail 教学提示 管理器 """
+    """底部尾部教学提示管理器"""
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 0, 0, 8)
@@ -405,7 +398,7 @@ class BottomTailTeachingTipManager(TeachingTipManager):
 
 
 class LeftTailTeachingTipManager(TeachingTipManager):
-    """ Left tail 教学提示 管理器 """
+    """左侧尾部教学提示管理器"""
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(8, 0, 0, 0)
@@ -434,7 +427,7 @@ class LeftTailTeachingTipManager(TeachingTipManager):
 
 
 class RightTailTeachingTipManager(TeachingTipManager):
-    """ Left tail 教学提示 管理器 """
+    """右侧尾部教学提示管理器"""
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 0, 8, 0)
@@ -463,7 +456,7 @@ class RightTailTeachingTipManager(TeachingTipManager):
 
 
 class TopLeftTailTeachingTipManager(TopTailTeachingTipManager):
-    """ Top left tail 教学提示 管理器 """
+    """顶部左侧尾部教学提示管理器"""
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -485,7 +478,7 @@ class TopLeftTailTeachingTipManager(TopTailTeachingTipManager):
 
 
 class TopRightTailTeachingTipManager(TopTailTeachingTipManager):
-    """ Top right tail 教学提示 管理器 """
+    """顶部右侧尾部教学提示管理器"""
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -507,7 +500,7 @@ class TopRightTailTeachingTipManager(TopTailTeachingTipManager):
 
 
 class BottomLeftTailTeachingTipManager(BottomTailTeachingTipManager):
-    """ Bottom left tail 教学提示 管理器 """
+    """底部左侧尾部教学提示管理器"""
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -529,7 +522,7 @@ class BottomLeftTailTeachingTipManager(BottomTailTeachingTipManager):
 
 
 class BottomRightTailTeachingTipManager(BottomTailTeachingTipManager):
-    """ Bottom right tail 教学提示 管理器 """
+    """底部右侧尾部教学提示管理器"""
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -551,7 +544,7 @@ class BottomRightTailTeachingTipManager(BottomTailTeachingTipManager):
 
 
 class LeftTopTailTeachingTipManager(LeftTailTeachingTipManager):
-    """ Left top tail 教学提示 管理器 """
+    """左侧顶部尾部教学提示管理器"""
 
     def imagePosition(self):
         return ImagePosition.BOTTOM
@@ -577,7 +570,7 @@ class LeftTopTailTeachingTipManager(LeftTailTeachingTipManager):
 
 
 class LeftBottomTailTeachingTipManager(LeftTailTeachingTipManager):
-    """ Left bottom tail 教学提示 管理器 """
+    """左侧底部尾部教学提示管理器"""
 
     def imagePosition(self):
         return ImagePosition.TOP
@@ -603,7 +596,7 @@ class LeftBottomTailTeachingTipManager(LeftTailTeachingTipManager):
 
 
 class RightTopTailTeachingTipManager(RightTailTeachingTipManager):
-    """ Right top tail 教学提示 管理器 """
+    """右侧顶部尾部教学提示管理器"""
 
     def imagePosition(self):
         return ImagePosition.BOTTOM
@@ -629,7 +622,7 @@ class RightTopTailTeachingTipManager(RightTailTeachingTipManager):
 
 
 class RightBottomTailTeachingTipManager(RightTailTeachingTipManager):
-    """ Right bottom tail 教学提示 管理器 """
+    """右侧底部尾部教学提示管理器"""
 
     def imagePosition(self):
         return ImagePosition.TOP

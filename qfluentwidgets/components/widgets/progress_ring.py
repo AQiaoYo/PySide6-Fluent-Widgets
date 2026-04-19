@@ -1,4 +1,6 @@
 # coding: utf-8
+"""进度环控件"""
+
 from PySide6.QtCore import (Qt, QRectF, QEasingCurve, QPropertyAnimation, QParallelAnimationGroup,
                           QSequentialAnimationGroup, Property)
 from PySide6.QtGui import QColor, QPen, QPainter, QFont
@@ -10,9 +12,15 @@ from ...common.style_sheet import themeColor, isDarkTheme
 
 
 class ProgressRing(ProgressBar):
-    """ 进度环 """
+    """进度环"""
 
     def __init__(self, parent=None, useAni=True):
+        """构造函数
+
+        Args:
+            parent: 父级控件
+            useAni: 是否使用动画
+        """
         super().__init__(parent, useAni=useAni)
         self.lightBackgroundColor = QColor(0, 0, 0, 34)
         self.darkBackgroundColor = QColor(255, 255, 255, 34)
@@ -23,19 +31,39 @@ class ProgressRing(ProgressBar):
         setFont(self)
 
     def getStrokeWidth(self):
+        """获取描边宽度
+
+        Returns:
+            描边宽度
+        """
         return self._strokeWidth
 
     def setStrokeWidth(self, w: int):
+        """设置描边宽度
+
+        Args:
+            w: 描边宽度
+        """
         self._strokeWidth = w
         self.update()
 
     def _drawText(self, painter: QPainter, text: str):
-        """ 绘制文本 """
+        """绘制文本
+
+        Args:
+            painter: 绘制器
+            text: 文本内容
+        """
         painter.setFont(self.font())
         painter.setPen(Qt.white if isDarkTheme() else Qt.black)
         painter.drawText(self.rect(), Qt.AlignCenter, text)
 
     def paintEvent(self, e):
+        """绘制进度环
+
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -66,9 +94,15 @@ class ProgressRing(ProgressBar):
 
 
 class IndeterminateProgressRing(QProgressBar):
-    """ Indeterminate 进度环 """
+    """不确定进度环"""
 
     def __init__(self, parent=None, start=True):
+        """构造函数
+
+        Args:
+            parent: 父级控件
+            start: 是否自动开始动画
+        """
         super().__init__(parent=parent)
         self.lightBackgroundColor = QColor(0, 0, 0, 0)
         self.darkBackgroundColor = QColor(255, 255, 255, 0)
@@ -123,72 +157,115 @@ class IndeterminateProgressRing(QProgressBar):
 
     @Property(int)
     def startAngle(self):
+        """获取起始角度
+
+        Returns:
+            起始角度
+        """
         return self._startAngle
 
     @startAngle.setter
     def startAngle(self, angle: int):
+        """设置起始角度
+
+        Args:
+            angle: 起始角度
+        """
         self._startAngle = angle
         self.update()
 
     @Property(int)
     def spanAngle(self):
+        """获取跨度角度
+
+        Returns:
+            跨度角度
+        """
         return self._spanAngle
 
     @spanAngle.setter
     def spanAngle(self, angle: int):
+        """设置跨度角度
+
+        Args:
+            angle: 跨度角度
+        """
         self._spanAngle = angle
         self.update()
 
     def getStrokeWidth(self):
+        """获取描边宽度
+
+        Returns:
+            描边宽度
+        """
         return self._strokeWidth
 
     def setStrokeWidth(self, w: int):
+        """设置描边宽度
+
+        Args:
+            w: 描边宽度
+        """
         self._strokeWidth = w
         self.update()
 
     def start(self):
-        """ 开始spin """
+        """开始动画"""
         self._startAngle = 0
         self._spanAngle = 0
         self.aniGroup.start()
 
     def stop(self):
-        """ 停止spin """
+        """停止动画"""
         self.aniGroup.stop()
         self.startAngle = 0
         self.spanAngle = 0
 
     def lightBarColor(self):
+        """获取亮色模式下的条颜色
+
+        Returns:
+            条颜色
+        """
         return self._lightBarColor if self._lightBarColor.isValid() else themeColor()
 
     def darkBarColor(self):
+        """获取暗色模式下的条颜色
+
+        Returns:
+            条颜色
+        """
         return self._darkBarColor if self._darkBarColor.isValid() else themeColor()
 
     def setCustomBarColor(self, light, dark):
-        """ 设置 自定义 条颜色
+        """设置自定义条颜色
 
-        参数
-        ----------
-        亮色, dark: str | Qt.GlobalColor | QColor
-            条颜色 中的 亮色/暗色主题模式
+        Args:
+            light (str | Qt.GlobalColor | QColor): 亮色主题下的条颜色
+            dark (str | Qt.GlobalColor | QColor): 暗色主题下的条颜色
         """
         self._lightBarColor = QColor(light)
         self._darkBarColor = QColor(dark)
         self.update()
 
     def setCustomBackgroundColor(self, light, dark):
-        """ 设置 自定义 背景色
+        """设置自定义背景颜色
 
-        参数
-        ----------
-        亮色, dark: str | Qt.GlobalColor | QColor
-            背景色 中的 亮色/暗色主题模式
+        Args:
+            light (str | Qt.GlobalColor | QColor): 亮色主题下的背景颜色
+            dark (str | Qt.GlobalColor | QColor): 暗色主题下的背景颜色
         """
         self.lightBackgroundColor = QColor(light)
         self.darkBackgroundColor = QColor(dark)
         self.update()
 
     def paintEvent(self, e):
+        """绘制不确定进度环
+
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 

@@ -48,22 +48,17 @@ class StateCloseButton(QToolButton):
 
 
 class StateToolTip(QWidget):
-    """状态工具提示."""
+    """状态工具提示"""
 
     closedSignal = Signal()
 
     def __init__(self, title, content, parent=None):
-        """
-        参数
-        ----------
-        title: str
-            工具提示标题.
-
-        content: str
-            工具提示内容.
-
-        parant:
-            父部件 窗口
+        """初始化状态工具提示
+        
+        Args:
+            title: 工具提示标题
+            content: 工具提示内容
+            parent: 父窗口
         """
         super().__init__(parent)
         self.title = title
@@ -84,7 +79,7 @@ class StateToolTip(QWidget):
         self.__initWidget()
 
     def __initWidget(self):
-        """ 初始化部件 """
+        """初始化部件"""
         self.setAttribute(Qt.WA_StyledBackground)
         self.setGraphicsEffect(self.opacityEffect)
         self.opacityEffect.setOpacity(1)
@@ -101,7 +96,7 @@ class StateToolTip(QWidget):
         self.rotateTimer.start()
 
     def __initLayout(self):
-        """ 初始化布局 """
+        """初始化布局"""
         self.setFixedSize(max(self.titleLabel.width(),
                           self.contentLabel.width()) + 56, 51)
         self.titleLabel.move(32, 9)
@@ -109,7 +104,7 @@ class StateToolTip(QWidget):
         self.closeButton.move(self.width() - 24, 19)
 
     def __setQss(self):
-        """ 设置样式表 """
+        """设置样式表"""
         self.titleLabel.setObjectName("titleLabel")
         self.contentLabel.setObjectName("contentLabel")
 
@@ -119,13 +114,13 @@ class StateToolTip(QWidget):
         self.contentLabel.adjustSize()
 
     def setTitle(self, title: str):
-        """设置工具提示标题."""
+        """设置工具提示标题"""
         self.title = title
         self.titleLabel.setText(title)
         self.titleLabel.adjustSize()
 
     def setContent(self, content: str):
-        """设置工具提示内容."""
+        """设置工具提示内容"""
         self.content = content
         self.contentLabel.setText(content)
 
@@ -133,19 +128,19 @@ class StateToolTip(QWidget):
         self.contentLabel.adjustSize()
 
     def setState(self, isDone=False):
-        """设置工具提示状态."""
+        """设置工具提示状态"""
         self.isDone = isDone
         self.update()
         if isDone:
             QTimer.singleShot(1000, self.__fadeOut)
 
     def __onCloseButtonClicked(self):
-        """ 关闭 按钮 clicked 槽函数 """
+        """关闭按钮 clicked 槽函数"""
         self.closedSignal.emit()
         self.hide()
 
     def __fadeOut(self):
-        """ 淡出 """
+        """淡出"""
         self.rotateTimer.stop()
         self.animation.setDuration(200)
         self.animation.setStartValue(1)
@@ -154,12 +149,12 @@ class StateToolTip(QWidget):
         self.animation.start()
 
     def __rotateTimerFlowSlot(self):
-        """ rotate 定时器 时间 out 槽函数 """
+        """旋转定时器超时槽函数"""
         self.rotateAngle = (self.rotateAngle + self.deltaAngle) % 360
         self.update()
 
     def getSuitablePos(self):
-        """ 获取 suitable 位置 中的 main 窗口 """
+        """获取主窗口中的合适位置"""
         for i in range(10):
             dy = i*(self.height() + 16)
             pos = QPoint(self.parent().width() - self.width() - 24, 50+dy)
@@ -172,7 +167,7 @@ class StateToolTip(QWidget):
         return pos
 
     def paintEvent(self, e):
-        """绘制状态工具提示."""
+        """绘制状态工具提示"""
         super().paintEvent(e)
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)

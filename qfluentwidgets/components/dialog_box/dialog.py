@@ -13,7 +13,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class Ui_MessageBox:
-    """ Ui 的 message box """
+    """Ui_MessageBox 消息框界面"""
 
     yesSignal = Signal()
     cancelSignal = Signal()
@@ -104,7 +104,11 @@ class Ui_MessageBox:
         self.cancelButton.adjustSize()
 
     def setContentCopyable(self, isCopyable: bool):
-        """ 设置 是否 内容 is copyable """
+        """设置内容是否可复制
+        
+        Args:
+            isCopyable: 内容是否可复制
+        """
         if isCopyable:
             self.contentLabel.setTextInteractionFlags(
                 Qt.TextInteractionFlag.TextSelectableByMouse)
@@ -122,7 +126,7 @@ class Ui_MessageBox:
 
 
 class Dialog(FramelessDialog, Ui_MessageBox):
-    """ 对话框 box """
+    """基于 Ui_MessageBox 的无边框对话框"""
 
     yesSignal = Signal()
     cancelSignal = Signal()
@@ -147,7 +151,7 @@ class Dialog(FramelessDialog, Ui_MessageBox):
 
 
 class MessageBox(MaskDialogBase, Ui_MessageBox):
-    """ Message box """
+    """基于 Ui_MessageBox 的遮罩消息框"""
 
     yesSignal = Signal()
     cancelSignal = Signal()

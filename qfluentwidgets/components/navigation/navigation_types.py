@@ -1,9 +1,11 @@
 # coding: utf-8
+"""导航类型定义"""
+
 from enum import Enum
 
 
 class NavigationDisplayMode(Enum):
-    """ Navigation display 模式 """
+    """导航显示模式"""
 
     MINIMAL = 0
     COMPACT = 1
@@ -12,7 +14,7 @@ class NavigationDisplayMode(Enum):
 
 
 class NavigationItemPosition(Enum):
-    """ Navigation 项 位置 """
+    """导航项位置"""
 
     TOP = 0
     SCROLL = 1
@@ -20,4 +22,4 @@ class NavigationItemPosition(Enum):
 
 
 class RouteKeyError(Exception):
-    """ 路由键 错误 """
+    """路由键错误"""

@@ -69,19 +69,24 @@ class TableItemDelegate(QStyledItemDelegate):
         editor.setGeometry(x, y, w, rect.height())
 
     def setCheckedColor(self, light, dark):
-        """ 设置指示器 中的 选中 状态的颜色
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置指示器选中状态的颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
         self.parent().viewport().update()
 
     def _drawBackground(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        """ 绘制行 背景 """
+        """绘制行背景
+        
+        Args:
+            painter: 绘制器
+            option: 样式选项
+            index: 模型索引
+        """
         r = 5
         if index.column() == 0:
             rect = option.rect.adjusted(4, 0, r + 1, 0)
@@ -94,7 +99,13 @@ class TableItemDelegate(QStyledItemDelegate):
             painter.drawRect(rect)
 
     def _drawIndicator(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
-        """ 绘制指示器 """
+        """绘制指示器
+        
+        Args:
+            painter: 绘制器
+            option: 样式选项
+            index: 模型索引
+        """
         y, h = option.rect.y(), option.rect.height()
         ph = round(0.35*h if self.pressedRow == index.row() else 0.257*h)
         painter.setBrush(autoFallbackThemeColor(self.lightCheckedColor, self.darkCheckedColor))
@@ -227,32 +238,47 @@ class TableBase:
         self.verticalHeader().sectionClicked.connect(self.selectRow)
 
     def setBorderVisible(self, isVisible: bool):
-        """ 设置边框的可见性 """
+        """设置边框的可见性
+        
+        Args:
+            isVisible: 是否显示边框
+        """
         self.setProperty("isBorderVisible", isVisible)
         updateDynamicStyle(self)
 
     def setBorderRadius(self, radius: int):
-        """ 设置边框的半径 """
+        """设置边框的半径
+        
+        Args:
+            radius: 圆角半径
+        """
         qss = f"QTableView{{border-radius: {radius}px}}"
         setCustomStyleSheet(self, qss, qss)
 
     def setCheckedColor(self, light, dark):
-        """ 设置 颜色 中的 选中状态
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置选中状态的颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.delegate.setCheckedColor(light, dark)
 
     def _setHoverRow(self, row: int):
-        """ 设置 悬停行 """
+        """设置悬停行
+        
+        Args:
+            row: 行号
+        """
         self.delegate.setHoverRow(row)
         self.viewport().update()
 
     def _setPressedRow(self, row: int):
-        """ 设置 按下行 """
+        """设置按下行
+        
+        Args:
+            row: 行号
+        """
         if self.selectionMode() == QTableView.SelectionMode.NoSelection:
             return
 

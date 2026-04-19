@@ -1,15 +1,22 @@
 # coding: utf-8
+"""日期时间选择器组件"""
+
 from PySide6.QtCore import Qt, Signal, QDate, QCalendar, Property
 
 from .picker_base import PickerBase, PickerPanel, PickerColumnFormatter, DigitFormatter
 
 
 class DatePickerBase(PickerBase):
-    """ 日期选择器 基类 """
+    """日期选择器基类"""
 
     dateChanged = Signal(QDate)
 
     def __init__(self, parent=None):
+        """构造函数
+
+        Args:
+            parent: 父部件，默认为 None
+        """
         super().__init__(parent)
         self._date = QDate()
         self.calendar = QCalendar()
@@ -18,35 +25,75 @@ class DatePickerBase(PickerBase):
         self._dayFormatter = None
 
     def getDate(self):
+        """获取当前日期
+
+        Returns:
+            QDate: 当前日期
+        """
         return self._date
 
     def setDate(self, date: QDate):
-        """ 设置 当前 日期 """
+        """设置当前日期
+
+        Args:
+            date: 要设置的日期
+        """
         raise NotImplementedError
 
     def setYearFormatter(self, formatter: PickerColumnFormatter):
+        """设置年份列的格式化器
+
+        Args:
+            formatter: 年份列格式化器
+        """
         self._yearFormatter = formatter
 
     def setMonthFormatter(self, formatter: PickerColumnFormatter):
+        """设置月份列的格式化器
+
+        Args:
+            formatter: 月份列格式化器
+        """
         self._monthFormatter = formatter
 
     def setDayFormatter(self, formatter: PickerColumnFormatter):
+        """设置日期列的格式化器
+
+        Args:
+            formatter: 日期列格式化器
+        """
         self._dayFormatter = formatter
 
     def yearFormatter(self):
+        """获取年份列的格式化器
+
+        Returns:
+            PickerColumnFormatter: 年份列格式化器，若未设置则返回 DigitFormatter
+        """
         return self._yearFormatter or DigitFormatter()
 
     def dayFormatter(self):
+        """获取日期列的格式化器
+
+        Returns:
+            PickerColumnFormatter: 日期列格式化器，若未设置则返回 DigitFormatter
+        """
         return self._dayFormatter or DigitFormatter()
 
     def monthFormatter(self):
+        """获取月份列的格式化器
+
+        Returns:
+            PickerColumnFormatter: 月份列格式化器，若未设置则返回 MonthFormatter
+        """
         return self._monthFormatter or MonthFormatter()
 
 
 class MonthFormatter(PickerColumnFormatter):
-    """ 月份 formatter """
+    """月份格式化器"""
 
     def __init__(self):
+        """构造函数"""
         super().__init__()
         self.months = [
             self.tr('January'), self.tr('February'), self.tr('March'),
@@ -56,30 +103,41 @@ class MonthFormatter(PickerColumnFormatter):
         ]
 
     def encode(self, month):
+        """将月份数字编码为名称
+
+        Args:
+            month: 月份数字（1-12）
+
+        Returns:
+            str: 月份名称
+        """
         return self.months[int(month) - 1]
 
     def decode(self, value):
+        """将月份名称解码为数字
+
+        Args:
+            value: 月份名称
+
+        Returns:
+            int: 月份数字（1-12）
+        """
         return self.months.index(value) + 1
 
 
 class DatePicker(DatePickerBase):
-    """ 日期选择器 """
+    """日期选择器"""
 
     MM_DD_YYYY = 0
     YYYY_MM_DD = 1
 
     def __init__(self, parent=None, format=MM_DD_YYYY, isMonthTight=True):
-        """
-        参数
-        ----------
-        parent: QWidget
-            父部件.
+        """构造函数
 
-        format: int
-            日期格式, 可选 `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`.
-
-        isMonthTight: bool
-            is 月份 列 tight
+        Args:
+            parent: 父部件，默认为 None
+            format: 日期格式，可选 DatePicker.MM_DD_YYYY 或 DatePicker.YYYY_MM_DD
+            isMonthTight: 月份列是否使用紧凑布局
         """
         super().__init__(parent=parent)
         self.MONTH = self.tr('month')
@@ -90,12 +148,10 @@ class DatePicker(DatePickerBase):
         self.setDateFormat(format)
 
     def setDateFormat(self, format: int):
-        """ 设置日期的format
+        """设置日期格式
 
-        参数
-        ----------
-        format: int
-            format 的 日期, could be `DatePicker.MM_DD_YYYY` 或 `DatePicker.YYYY_MM_DD`
+        Args:
+            format: 日期格式，可选 DatePicker.MM_DD_YYYY 或 DatePicker.YYYY_MM_DD
         """
         self.clearColumns()
         y = QDate.currentDate().year()
@@ -127,6 +183,11 @@ class DatePicker(DatePickerBase):
         self.setColumnWidth(self.monthIndex, self._monthColumnWidth())
 
     def panelInitialValue(self):
+        """获取面板初始值
+
+        Returns:
+            list: 面板的初始日期值列表
+        """
         if any(self.value()):
             return self.value()
 
@@ -137,7 +198,11 @@ class DatePicker(DatePickerBase):
         return [y, m, d] if self.dateFormat == self.YYYY_MM_DD else [m, d, y]
 
     def setMonthTight(self, isTight: bool):
-        """ 设置 是否 月份 列 is tight """
+        """设置月份列是否使用紧凑布局
+
+        Args:
+            isTight: 是否使用紧凑布局
+        """
         if self.isMonthTight == isTight:
             return
 
@@ -186,9 +251,19 @@ class DatePicker(DatePickerBase):
             self.dateChanged.emit(date)
 
     def getDate(self):
+        """获取当前日期
+
+        Returns:
+            QDate: 当前日期
+        """
         return self._date
 
     def setDate(self, date: QDate):
+        """设置当前日期
+
+        Args:
+            date: 要设置的日期
+        """
         if not date.isValid() or date.isNull():
             return
 
@@ -202,39 +277,60 @@ class DatePicker(DatePickerBase):
 
 
 class ZhFormatter(PickerColumnFormatter):
-    """ Chinese 日期 formatter """
+    """中文日期格式化器"""
 
     suffix = ""
 
     def encode(self, value):
+        """将数值编码为带后缀的字符串
+
+        Args:
+            value: 数值
+
+        Returns:
+            str: 带后缀的字符串
+        """
         return str(value) + self.suffix
 
     def decode(self, value: str):
+        """将带后缀的字符串解码为数值
+
+        Args:
+            value: 带后缀的字符串
+
+        Returns:
+            int: 数值
+        """
         return int(value[:-1])
 
 
 class ZhYearFormatter(ZhFormatter):
-    """ Chinese 年份 formatter """
+    """中文年份格式化器"""
 
     suffix = "年"
 
 
 class ZhMonthFormatter(ZhFormatter):
-    """ Chinese 月份 formatter """
+    """中文月份格式化器"""
 
     suffix = "月"
 
 
 class ZhDayFormatter(ZhFormatter):
-    """ Chinese 日期 formatter """
+    """中文日期格式化器"""
 
     suffix = "日"
 
 
 class ZhDatePicker(DatePicker):
-    """ Chinese 日期选择器 """
+    """中文日期选择器"""
 
     def __init__(self, parent=None):
+        """构造函数
+
+        Args:
+            parent: 父部件，默认为 None
+        """
         super().__init__(parent, DatePicker.YYYY_MM_DD)
         self.MONTH = "月"
         self.YEAR = "年"

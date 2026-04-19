@@ -11,7 +11,7 @@ from .scroll_area import SmoothScrollDelegate
 
 
 class TreeItemDelegate(QStyledItemDelegate):
-    """ Tree 项 委托 """
+    """TreeItemDelegate 树形项委托"""
 
     def __init__(self, parent: QTreeView):
         super().__init__(parent)
@@ -19,12 +19,11 @@ class TreeItemDelegate(QStyledItemDelegate):
         self.darkCheckedColor = QColor()
 
     def setCheckedColor(self, light, dark):
-        """ 设置指示器 中的 选中 状态的颜色
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置指示器选中状态的颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
@@ -147,7 +146,7 @@ class TreeItemDelegate(QStyledItemDelegate):
 
 
 class TreeViewBase:
-    """ 树视图 基类 """
+    """TreeViewBase 树视图基类"""
 
     def _initView(self):
         self.scrollDelagate = SmoothScrollDelegate(self)
@@ -163,12 +162,11 @@ class TreeViewBase:
         updateDynamicStyle(self)
 
     def setCheckedColor(self, light, dark):
-        """ 设置 颜色 中的 选中状态
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置选中状态的颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.itemDelegate().setCheckedColor(light, dark)
 
@@ -177,27 +175,36 @@ class TreeViewBase:
         return QTreeView.drawBranches(self, painter, rect, index)
 
     def setBorderVisible(self, isVisible: bool):
-        """ 设置边框的可见性 """
+        """设置边框的可见性
+        
+        Args:
+            isVisible: 边框是否可见
+        """
         self.setProperty("isBorderVisible", isVisible)
         updateDynamicStyle(self)
 
     def setBorderRadius(self, radius: int):
-        """ 设置边框的半径 """
+        """设置边框的半径
+        
+        Args:
+            radius: 边框圆角半径
+        """
         qss = f"QTreeView{{border-radius: {radius}px}}"
         setCustomStyleSheet(self, qss, qss)
 
 
 class TreeWidget(TreeViewBase, QTreeWidget):
-    """ Tree 部件 """
+    """TreeWidget 树形部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._initView()
 
     def viewportEvent(self, event):
-        """
-        捕获 点击 事件 到 重写 项 "expand/collapse" function which is
-        still called 中的 place it was before moving branches 中的 drawBranches method.
+        """捕获点击事件以重写项的展开/折叠功能
+        
+        Args:
+            event: 视图事件
         """
         if event.type() != QEvent.Type.MouseButtonPress:
             return super().viewportEvent(event)
@@ -224,16 +231,17 @@ class TreeWidget(TreeViewBase, QTreeWidget):
 
 
 class TreeView(TreeViewBase, QTreeView):
-    """ 树视图 """
+    """TreeView 树视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
         self._initView()
 
     def viewportEvent(self, event):
-        """
-        捕获 点击 事件 到 重写 项 "expand/collapse" function which is
-        still called 中的 place it was before moving branches 中的 drawBranches method.
+        """捕获点击事件以重写项的展开/折叠功能
+        
+        Args:
+            event: 视图事件
         """
         if event.type() != QEvent.Type.MouseButtonPress:
             return super().viewportEvent(event)

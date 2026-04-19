@@ -1,3 +1,5 @@
+"""设置组件模块"""
+
 from .setting_card import (SettingCard, SwitchSettingCard, RangeSettingCard,
                            PushSettingCard, ColorSettingCard, HyperlinkCard,
                            PrimaryPushSettingCard, ColorPickerButton, ComboBoxSettingCard)

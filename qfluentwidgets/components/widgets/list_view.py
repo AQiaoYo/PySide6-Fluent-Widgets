@@ -1,4 +1,6 @@
 # coding: utf-8
+"""列表视图组件"""
+
 from typing import List, Union
 
 from PySide6.QtCore import Qt, QModelIndex, Property
@@ -12,7 +14,7 @@ from ...common.color import autoFallbackThemeColor
 
 
 class ListItemDelegate(TableItemDelegate):
-    """ 列表 项 委托 """
+    """列表项委托"""
 
     def __init__(self, parent: QListView):
         super().__init__(parent)
@@ -43,12 +45,12 @@ class ListBase:
         self.pressed.connect(lambda i: self._setPressedRow(i.row()))
 
     def _setHoverRow(self, row: int):
-        """ 设置 悬停行 """
+        """设置悬停行"""
         self.delegate.setHoverRow(row)
         self.viewport().update()
 
     def _setPressedRow(self, row: int):
-        """ 设置 按下行 """
+        """设置按下行"""
         if self.selectionMode() == QListView.SelectionMode.NoSelection:
             return
 
@@ -107,18 +109,17 @@ class ListBase:
         self._setSelectedRows(self.selectedIndexes())
 
     def setCheckedColor(self, light, dark):
-        """ 设置 颜色 中的 选中状态
+        """设置选中状态的颜色
 
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.delegate.setCheckedColor(light, dark)
 
 
 class ListWidget(ListBase, QListWidget):
-    """ 列表 部件 """
+    """列表部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -144,7 +145,7 @@ class ListWidget(ListBase, QListWidget):
 
 
 class ListView(ListBase, QListView):
-    """ 列表视图 """
+    """列表视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)

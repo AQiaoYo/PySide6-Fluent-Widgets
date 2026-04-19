@@ -1,4 +1,6 @@
 # coding: utf-8
+"""导航栏组件模块"""
+
 from typing import Union, List
 
 from PySide6.QtCore import (Qt, Signal, QRect, QRectF, QPropertyAnimation, Property, QMargins,
@@ -19,7 +21,7 @@ from ..widgets.info_badge import InfoBadgeManager, InfoBadgePosition
 
 
 class NavigationWidget(QWidget):
-    """ 导航部件 """
+    """导航栏组件基类"""
 
     clicked = Signal(bool)  # 是否 triggered by user
     selectedChanged = Signal(bool)
@@ -70,7 +72,11 @@ class NavigationWidget(QWidget):
         self.clicked.emit(True)
 
     def setCompacted(self, isCompacted: bool):
-        """ 设置 是否 部件 is compacted """
+        """设置组件是否为紧凑模式
+
+        Args:
+            isCompacted: 是否为紧凑模式
+        """
         if isCompacted == self.isCompacted:
             return
 
@@ -83,12 +89,10 @@ class NavigationWidget(QWidget):
         self.update()
 
     def setSelected(self, isSelected: bool):
-        """ 设置 是否 按钮 is selected
+        """设置按钮是否被选中
 
-        参数
-        ----------
-        isSelected: bool
-            是否 按钮 is selected
+        Args:
+            isSelected: 是否被选中
         """
         if not self.isSelectable:
             return
@@ -102,17 +106,30 @@ class NavigationWidget(QWidget):
         return self.darkTextColor if isDarkTheme() else self.lightTextColor
 
     def setLightTextColor(self, color):
-        """ 设置 文本颜色 中的 亮色主题模式 """
+        """设置亮色主题下的文本颜色
+
+        Args:
+            color: 文本颜色
+        """
         self.lightTextColor = QColor(color)
         self.update()
 
     def setDarkTextColor(self, color):
-        """ 设置 文本颜色 中的 暗色主题模式 """
+        """设置暗色主题下的文本颜色
+
+        Args:
+            color: 文本颜色
+        """
         self.darkTextColor = QColor(color)
         self.update()
 
     def setTextColor(self, light, dark):
-        """ 设置 文本颜色 中的 亮色/暗色主题模式 """
+        """设置亮色/暗色主题下的文本颜色
+
+        Args:
+            light: 亮色主题下的文本颜色
+            dark: 暗色主题下的文本颜色
+        """
         self.setLightTextColor(light)
         self.setDarkTextColor(dark)
 
@@ -124,7 +141,7 @@ class NavigationWidget(QWidget):
         return QMargins(0, 0, 0, 0)
 
     def indicatorRect(self):
-        """ 获取 指示器 几何区域 """
+        """获取指示器的几何区域"""
         m = self._margins()
         return QRectF(m.left(), 10, 3, 16)
 
@@ -136,17 +153,15 @@ class NavigationWidget(QWidget):
 
 
 class NavigationPushButton(NavigationWidget):
-    """ Navigation 按钮 """
+    """导航栏推送按钮"""
 
     def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool, parent=None):
         """
-        参数
-        ----------
-        icon: str | QIcon | FluentIconBase
-            要绘制的图标.
-
-        text: str
-            按钮文本.
+        Args:
+            icon: 图标
+            text: 按钮文本
+            isSelectable: 是否可选中
+            parent: 父组件
         """
         super().__init__(isSelectable=isSelectable, parent=parent)
 
@@ -214,7 +229,7 @@ class NavigationPushButton(NavigationWidget):
 
 
 class NavigationToolButton(NavigationPushButton):
-    """ Navigation 工具按钮 """
+    """导航栏工具按钮"""
 
     def __init__(self, icon: Union[str, QIcon, FIF], parent=None):
         super().__init__(icon, '', False, parent)
@@ -224,7 +239,7 @@ class NavigationToolButton(NavigationPushButton):
 
 
 class NavigationSeparator(NavigationWidget):
-    """ Navigation 分隔符 """
+    """导航栏分隔符"""
 
     def __init__(self, parent=None):
         super().__init__(False, parent=parent)
@@ -248,7 +263,7 @@ class NavigationSeparator(NavigationWidget):
 
 
 class NavigationItemHeader(NavigationWidget):
-    """ Navigation 项 header 用于 grouping 项 """
+    """导航栏项标题，用于对项进行分组"""
 
     def __init__(self, text: str, parent=None):
         super().__init__(False, parent=parent)
@@ -279,7 +294,11 @@ class NavigationItemHeader(NavigationWidget):
         self.update()
 
     def setCompacted(self, isCompacted: bool):
-        """ 设置 是否 部件 is compacted """
+        """设置组件是否为紧凑模式
+
+        Args:
+            isCompacted: 是否为紧凑模式
+        """
         self.isCompacted = isCompacted
 
         # 停止any running 动画
@@ -301,12 +320,16 @@ class NavigationItemHeader(NavigationWidget):
         self.update()
 
     def _onCollapseFinished(self):
-        """ called 当 折叠 动画 finishes """
+        """折叠动画完成时调用"""
         if not self.isCompacted:
             self.setVisible(False)
 
     def _onHeightChanged(self, value):
-        """ called 当 高度 动画 值 changes """
+        """高度动画数值变化时调用
+
+        Args:
+            value: 高度数值
+        """
         self.setFixedHeight(value)
 
     def mousePressEvent(self, e):
@@ -345,7 +368,7 @@ class NavigationItemHeader(NavigationWidget):
 
 
 class NavigationTreeItem(NavigationPushButton):
-    """ Navigation tree 项 部件 """
+    """导航栏树形项组件"""
 
     itemClicked = Signal(bool, bool)    # triggerByUser, clickArrow
 
@@ -418,75 +441,76 @@ class NavigationTreeItem(NavigationPushButton):
 
 
 class NavigationTreeWidgetBase(NavigationWidget):
-    """ Navigation tree 部件 基类 """
+    """导航栏树形组件基类"""
 
     def addChild(self, child):
-        """ 添加 child
+        """添加子节点
 
-        参数
-        ----------
-        child: NavigationTreeWidgetBase
-            child 项
+        Args:
+            child: 子节点组件
         """
         raise NotImplementedError
 
     def insertChild(self, index: int, child: NavigationWidget):
-        """ 插入 child
+        """插入子节点
 
-        参数
-        ----------
-        child: NavigationTreeWidgetBase
-            child 项
+        Args:
+            index: 插入位置索引
+            child: 子节点组件
         """
         raise NotImplementedError
 
     def removeChild(self, child: NavigationWidget):
-        """ 移除 child
+        """移除子节点
 
-        参数
-        ----------
-        child: NavigationTreeWidgetBase
-            child 项
+        Args:
+            child: 子节点组件
         """
         raise NotImplementedError
 
     def isRoot(self):
-        """ is root node """
+        """是否为根节点"""
         return True
 
     def isLeaf(self):
-        """ is leaf node """
+        """是否为叶子节点"""
         return True
 
     def setExpanded(self, isExpanded: bool):
-        """设置展开状态.
+        """设置节点的展开状态
 
-        参数
-        ----------
-        isExpanded: bool
-            是否展开当前节点.
+        Args:
+            isExpanded: 是否展开当前节点
         """
         raise NotImplementedError
 
     def childItems(self) -> list:
-        """返回子项列表."""
+        """返回子项列表"""
         raise NotImplementedError
 
     def setRememberExpandState(self, remember: bool):
-        """设置是否记住展开状态."""
+        """设置是否记住展开状态
+
+        Args:
+            remember: 是否记住展开状态
+        """
         raise NotImplementedError
 
     def saveExpandState(self):
-        """保存当前展开状态."""
+        """保存当前展开状态"""
         raise NotImplementedError
 
     def restoreExpandState(self, ani=True):
-        """ restore saved 展开 state """
+        """恢复保存的展开状态
+
+        Args:
+            ani: 是否使用动画
+        """
         raise NotImplementedError
 
 
 class NavigationTreeWidget(NavigationTreeWidgetBase):
-    """ Navigation tree 部件 """
+    """导航栏树形组件"""
 
     expanded = Signal()
 
@@ -538,21 +562,21 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
         return self.itemWidget.textColor()
 
     def setLightTextColor(self, color):
-        """ 设置 文本颜色 中的 亮色主题模式 """
+        """设置亮色主题下的文本颜色"""
         self.itemWidget.setLightTextColor(color)
 
     def setDarkTextColor(self, color):
-        """ 设置 文本颜色 中的 暗色主题模式 """
+        """设置暗色主题下的文本颜色"""
         self.itemWidget.setDarkTextColor(color)
 
     def setTextColor(self, light, dark):
-        """ 设置 文本颜色 中的 亮色/暗色主题模式 """
+        """设置亮色/暗色主题下的文本颜色"""
         self.lightTextColor = QColor(light)
         self.darkTextColor = QColor(dark)
         self.itemWidget.setTextColor(light, dark)
 
     def setIndicatorColor(self, light, dark):
-        """ 设置 指示器 颜色 中的 亮色/暗色主题模式 """
+        """设置亮色/暗色主题下的指示器颜色"""
         self.lightIndicatorColor = QColor(light)
         self.darkIndicatorColor = QColor(dark)
         self.itemWidget.setIndicatorColor(light, dark)
@@ -626,7 +650,12 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
         return self.treeChildren
 
     def setExpanded(self, isExpanded: bool, ani=False):
-        """ 设置 expanded 状态 """
+        """设置展开状态
+
+        Args:
+            isExpanded: 是否展开
+            ani: 是否使用动画
+        """
         if isExpanded == self.isExpanded:
             return
 
@@ -690,7 +719,7 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
 
 
 class NavigationAvatarWidget(NavigationWidget):
-    """ Avatar 部件 """
+    """用户头像组件"""
 
     def __init__(self, name: str, avatar: Union[str, QPixmap, QImage] = None, parent=None):
         super().__init__(isSelectable=False, parent=parent)
@@ -748,7 +777,7 @@ class NavigationAvatarWidget(NavigationWidget):
 
 @InfoBadgeManager.register(InfoBadgePosition.NAVIGATION_ITEM)
 class NavigationItemInfoBadgeManager(InfoBadgeManager):
-    """ Navigation 项 信息徽标 管理器 """
+    """导航栏项信息徽标管理器"""
 
     def eventFilter(self, obj, e: QEvent):
         if obj is self.target:
@@ -776,7 +805,7 @@ class NavigationItemInfoBadgeManager(InfoBadgeManager):
 
 
 class NavigationFlyoutMenu(ScrollArea):
-    """ Navigation 浮出层 菜单 """
+    """导航栏浮出菜单"""
 
     expanded = Signal()
 
@@ -859,7 +888,7 @@ class NavigationFlyoutMenu(ScrollArea):
 
 
 class NavigationUserCard(NavigationAvatarWidget):
-    """ Navigation user card 部件 """
+    """导航栏用户卡片组件"""
 
     def __init__(self, parent=None):
         super().__init__(name="", parent=parent)
@@ -895,52 +924,85 @@ class NavigationUserCard(NavigationAvatarWidget):
         self.setFixedSize(40, 36)
 
     def setAvatarIcon(self, icon: FIF):
-        """ 设置 avatar 图标 当 no 图像 is 设置 """
+        """设置头像图标，用于未设置图像时
+
+        Args:
+            icon: 头像图标
+        """
         self.avatar.setImage(toQIcon(icon).pixmap(64, 64))
         self.update()
 
     def setAvatarBackgroundColor(self, light: QColor, dark: QColor):
-        """ 设置 avatar 背景色 中的 亮色/暗色主题模式 """
+        """设置亮色/暗色主题下的头像背景色
+
+        Args:
+            light: 亮色主题下的背景色
+            dark: 暗色主题下的背景色
+        """
         self.avatar.setBackgroundColor(light, dark)
         self.update()
 
     def title(self):
-        """ 获取 user card 标题 """
+        """返回用户卡片标题"""
         return self._title
 
     def setTitle(self, title: str):
-        """ 设置 user card 标题 """
+        """设置用户卡片标题
+
+        Args:
+            title: 标题文本
+        """
         self._title = title
         self.setName(title)
         self.update()
 
     def subtitle(self):
-        """ 获取 user card subtitle """
+        """返回用户卡片副标题"""
         return self._subtitle
 
     def setSubtitle(self, subtitle: str):
-        """ 设置 user card subtitle """
+        """设置用户卡片副标题
+
+        Args:
+            subtitle: 副标题文本
+        """
         self._subtitle = subtitle
         self.update()
 
     def setTitleFontSize(self, size: int):
-        """ 设置 标题 font 大小 """
+        """设置标题字体大小
+
+        Args:
+            size: 字体大小
+        """
         self._titleSize = size
         self.update()
 
     def setSubtitleFontSize(self, size: int):
-        """ 设置 subtitle font 大小 """
+        """设置副标题字体大小
+
+        Args:
+            size: 字体大小
+        """
         self._subtitleSize = size
         self.update()
 
     def setAnimationDuration(self, duration: int):
-        """ 设置 动画 持续时间 中的 milliseconds """
+        """设置动画持续时间
+
+        Args:
+            duration: 持续时间，单位为毫秒
+        """
         self._animationDuration = duration
         self._radiusAni.setDuration(duration)
         self._opacityAni.setDuration(int(duration * 0.8))
 
     def setCompacted(self, isCompacted: bool):
-        """ 设置 是否 部件 is compacted """
+        """设置组件是否为紧凑模式
+
+        Args:
+            isCompacted: 是否为紧凑模式
+        """
         if isCompacted == self.isCompacted:
             return
 
@@ -980,7 +1042,7 @@ class NavigationUserCard(NavigationAvatarWidget):
             self._drawText(painter)
 
     def _drawText(self, painter: QPainter):
-        """ 绘制标题 和 subtitle """
+        """绘制标题和副标题"""
         textX = 16 + int(self.avatar.radius * 2) + 12
         textWidth = self.width() - textX - 16
 
@@ -1009,7 +1071,7 @@ class NavigationUserCard(NavigationAvatarWidget):
                              self._subtitle)
 
     def _updateAvatarPosition(self):
-        """根据当前尺寸更新头像位置."""
+        """根据当前尺寸更新头像位置"""
         if self.isCompacted:
             self.avatar.move(8, 6)
         else:
@@ -1036,7 +1098,7 @@ class NavigationUserCard(NavigationAvatarWidget):
 
 
 class NavigationIndicator(QWidget):
-    """ Navigation 指示器 """
+    """导航栏指示器"""
 
     aniFinished = Signal()
 
@@ -1056,15 +1118,12 @@ class NavigationIndicator(QWidget):
         self.scaleSlideAni.finished.connect(self.aniFinished)
 
     def startAnimation(self, startRect: QRectF, endRect: QRectF, useCrossFade=False):
-        """启动指示器动画.
+        """启动指示器动画
 
-        参数
-        -----------
-        endRect: QRectF
-            指示器结束时的几何区域.
-
-        useCrossFade: bool
-            是否使用交叉淡化动画.
+        Args:
+            startRect: 起始几何区域
+            endRect: 结束几何区域
+            useCrossFade: 是否使用交叉淡化动画
         """
         self.setGeometry(startRect.toRect())
         self.show()
@@ -1073,7 +1132,7 @@ class NavigationIndicator(QWidget):
         self.scaleSlideAni.startAnimation(endRect, useCrossFade)
 
     def stopAnimation(self):
-        """ 停止动画 """
+        """停止动画"""
         self.scaleSlideAni.stopAnimation()
         self.hide()
 

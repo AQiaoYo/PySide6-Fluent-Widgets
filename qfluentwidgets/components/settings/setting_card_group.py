@@ -1,4 +1,6 @@
 # coding: utf-8
+"""设置卡片分组"""
+
 from typing import List
 
 from PySide6.QtCore import Qt
@@ -10,9 +12,15 @@ from ..layout.expand_layout import ExpandLayout
 
 
 class SettingCardGroup(QWidget):
-    """ Setting card 分组 """
+    """设置卡片分组"""
 
     def __init__(self, title: str, parent=None):
+        """初始化设置卡片分组
+
+        Args:
+            title: 分组标题
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent=parent)
         self.titleLabel = QLabel(title, self)
         self.vBoxLayout = QVBoxLayout(self)
@@ -33,16 +41,25 @@ class SettingCardGroup(QWidget):
         self.titleLabel.adjustSize()
 
     def addSettingCard(self, card: QWidget):
-        """ 将setting card添加到分组 """
+        """添加设置卡片到分组
+
+        Args:
+            card: 要添加的设置卡片
+        """
         card.setParent(self)
         self.cardLayout.addWidget(card)
         self.adjustSize()
 
     def addSettingCards(self, cards: List[QWidget]):
-        """ 将setting cards添加到分组 """
+        """批量添加设置卡片到分组
+
+        Args:
+            cards: 要添加的设置卡片列表
+        """
         for card in cards:
             self.addSettingCard(card)
 
     def adjustSize(self):
+        """调整控件大小以适应内容"""
         h = self.cardLayout.heightForWidth(self.width()) + 46
         return self.resize(self.width(), h)

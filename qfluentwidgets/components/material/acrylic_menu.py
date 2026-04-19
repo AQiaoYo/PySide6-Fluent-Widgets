@@ -40,7 +40,11 @@ class AcrylicMenuActionListWidget(MenuActionListWidget):
         return 6
 
     def setItemHeight(self, height: int):
-        """ 设置项的高度 """
+        """设置项的高度
+        
+        Args:
+            height: 项的高度
+        """
         if height == self._itemHeight:
             return
 
@@ -149,7 +153,11 @@ class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
         return super().exec(pos, ani, aniType)
 
     def setItems(self, items):
-        """ 设置 completion 项 """
+        """设置 completion 项
+        
+        Args:
+            items: 要设置的项
+        """
         self.view.clear()
 
         self.items = items
@@ -165,7 +173,7 @@ class AcrylicCompleterMenu(AcrylicMenuBase, CompleterMenu):
 
 
 class AcrylicLineEditMenu(AcrylicMenuBase, LineEditMenu):
-    """ 亚克力 行编辑器 菜单 """
+    """亚克力 LineEdit 菜单"""
 
     def __init__(self, parent: QLineEdit):
         super().__init__(parent)
@@ -176,7 +184,7 @@ class AcrylicLineEditMenu(AcrylicMenuBase, LineEditMenu):
 
 
 class AcrylicCheckableMenu(AcrylicMenuBase, CheckableMenu):
-    """ 可选中菜单 """
+    """亚克力 Checkable 菜单"""
 
     def __init__(self, title="", parent=None, indicatorType=MenuIndicatorType.CHECK):
         super().__init__(title, parent, indicatorType)
@@ -197,7 +205,7 @@ class AcrylicSystemTrayMenu(AcrylicMenu):
 
 
 class AcrylicCheckableSystemTrayMenu(AcrylicCheckableMenu):
-    """ 可选中系统托盘菜单 """
+    """亚克力 Checkable 系统托盘菜单"""
 
     def showEvent(self, e):
         super().showEvent(e)

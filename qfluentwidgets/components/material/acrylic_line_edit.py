@@ -4,7 +4,7 @@ from ..widgets.line_edit import LineEdit, SearchLineEdit
 
 
 class AcrylicLineEditBase:
-    """亚克力行编辑器基类."""
+    """亚克力行编辑器基类"""
 
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -20,8 +20,8 @@ class AcrylicLineEditBase:
 
 
 class AcrylicLineEdit(AcrylicLineEditBase, LineEdit):
-    """ 亚克力 行编辑器 """
+    """亚克力行编辑器"""
 
 
 class AcrylicSearchLineEdit(AcrylicLineEditBase, SearchLineEdit):
-    """ 亚克力 search 行编辑器 """
+    """亚克力 search 行编辑器"""

@@ -12,7 +12,7 @@ from ..layout.v_box_layout import VBoxLayout
 
 
 class ExpandButton(QAbstractButton):
-    """ 展开按钮 """
+    """展开按钮"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -91,7 +91,7 @@ class ExpandButton(QAbstractButton):
 
 
 class SpaceWidget(QWidget):
-    """ Spacing 部件 """
+    """间距部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -100,7 +100,7 @@ class SpaceWidget(QWidget):
 
 
 class HeaderSettingCard(SettingCard):
-    """ Header setting card """
+    """标题设置卡片"""
 
     def __init__(self, icon, title, content=None, parent=None):
         super().__init__(icon, title, content, parent)
@@ -127,7 +127,11 @@ class HeaderSettingCard(SettingCard):
         return super().eventFilter(obj, e)
 
     def addWidget(self, widget: QWidget):
-        """ 将部件添加到tail """
+        """将部件添加到尾部
+        
+        Args:
+            widget: 要添加的部件
+        """
         N = self.hBoxLayout.count()
         self.hBoxLayout.removeItem(self.hBoxLayout.itemAt(N - 1))
         self.hBoxLayout.addWidget(widget, 0, Qt.AlignRight)
@@ -158,7 +162,7 @@ class HeaderSettingCard(SettingCard):
 
 
 class ExpandBorderWidget(QWidget):
-    """ 展开setting card 边框 部件 """
+    """展开设置卡片边框部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -196,7 +200,7 @@ class ExpandBorderWidget(QWidget):
 
 
 class ExpandSettingCard(QScrollArea):
-    """可展开的设置卡片."""
+    """可展开的设置卡片"""
 
     def __init__(self, icon: Union[str, QIcon, FIF], title: str, content: str = None, parent=None):
         super().__init__(parent=parent)
@@ -217,7 +221,7 @@ class ExpandSettingCard(QScrollArea):
         self.__initWidget()
 
     def __initWidget(self):
-        """ 初始化部件 """
+        """初始化部件"""
         self.setWidget(self.scrollWidget)
         self.setWidgetResizable(True)
         self.setFixedHeight(self.card.height())
@@ -247,7 +251,11 @@ class ExpandSettingCard(QScrollArea):
         self.card.expandButton.clicked.connect(self.toggleExpand)
 
     def addWidget(self, widget: QWidget):
-        """将部件添加到尾部区域."""
+        """将部件添加到尾部区域
+        
+        Args:
+            widget: 要添加的部件
+        """
         self.card.addWidget(widget)
         self._adjustViewSize()
 
@@ -255,7 +263,11 @@ class ExpandSettingCard(QScrollArea):
         e.ignore()
 
     def setExpand(self, isExpand: bool):
-        """设置卡片的展开状态."""
+        """设置卡片的展开状态
+        
+        Args:
+            isExpand: 是否展开
+        """
         if self.isExpand == isExpand:
             return
 
@@ -280,7 +292,7 @@ class ExpandSettingCard(QScrollArea):
         self.card.expandButton.setExpand(isExpand)
 
     def toggleExpand(self):
-        """ 切换展开 状态 """
+        """切换展开状态"""
         self.setExpand(not self.isExpand)
 
     def resizeEvent(self, e):
@@ -293,7 +305,7 @@ class ExpandSettingCard(QScrollArea):
         self.setFixedHeight(max(h + vh - self.verticalScrollBar().value(), h))
 
     def _adjustViewSize(self):
-        """ 调整视图 大小 """
+        """调整视图大小"""
         h = self.viewLayout.sizeHint().height()
         self.spaceWidget.setFixedHeight(h)
 
@@ -301,13 +313,17 @@ class ExpandSettingCard(QScrollArea):
             self.setFixedHeight(self.card.height()+h)
 
     def setValue(self, value):
-        """ 设置配置 项的值 """
+        """设置配置项的值
+        
+        Args:
+            value: 配置项的值
+        """
         pass
 
 
 
 class GroupSeparator(QWidget):
-    """分组分隔符."""
+    """分组分隔符"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -371,7 +387,12 @@ class GroupWidget(QWidget):
         self.contentLabel.setVisible(bool(content))
 
     def setIconSize(self, width: int, height: int):
-        """ 设置 图标 固定大小 """
+        """设置图标固定大小
+        
+        Args:
+            width: 图标宽度
+            height: 图标高度
+        """
         self.iconWidget.setFixedSize(width, height)
 
     def setIcon(self, icon: Union[str, QIcon, FIF]):
@@ -381,7 +402,7 @@ class GroupWidget(QWidget):
 
 
 class ExpandGroupSettingCard(ExpandSettingCard):
-    """可展开的分组设置卡片."""
+    """可展开的分组设置卡片"""
 
     def __init__(self, icon: Union[str, QIcon, FIF], title: str, content: str = None, parent=None):
         super().__init__(icon, title, content, parent)
@@ -391,7 +412,11 @@ class ExpandGroupSettingCard(ExpandSettingCard):
         self.viewLayout.setSpacing(0)
 
     def addGroupWidget(self, widget: QWidget):
-        """向分组中添加部件."""
+        """向分组中添加部件
+        
+        Args:
+            widget: 要添加的部件
+        """
         # 添加分隔符.
         if self.viewLayout.count() >= 1:
             self.viewLayout.addWidget(GroupSeparator(self.view))
@@ -402,31 +427,25 @@ class ExpandGroupSettingCard(ExpandSettingCard):
         self._adjustViewSize()
 
     def addGroup(self, icon: Union[str, QIcon, FIF], title: str, content: str, widget: QWidget, stretch=0) -> GroupWidget:
-        """添加分组.
-
-        参数
-        ----------
-        icon: str | QIcon | FluentIconBase
-            分组图标.
-
-        title: str
-            分组标题.
-
-        content: str
-            分组描述.
-
-        widget: str
-            分组对应的部件.
-
-        stretch: int
-            部件的拉伸系数.
+        """添加分组
+        
+        Args:
+            icon: 分组图标
+            title: 分组标题
+            content: 分组描述
+            widget: 分组对应的部件
+            stretch: 部件的拉伸系数
         """
         group = GroupWidget(icon, title, content, widget, stretch)
         self.addGroupWidget(group)
         return group
 
     def removeGroupWidget(self, widget: QWidget):
-        """从卡片中移除分组."""
+        """从卡片中移除分组
+        
+        Args:
+            widget: 要移除的部件
+        """
         if widget not in self.widgets:
             return
 
@@ -452,7 +471,7 @@ class ExpandGroupSettingCard(ExpandSettingCard):
         self._adjustViewSize()
 
     def _adjustViewSize(self):
-        """调整视图大小."""
+        """调整视图大小"""
         h = sum(w.sizeHint().height() + 3 for w in self.widgets)
         self.spaceWidget.setFixedHeight(h)
 
@@ -461,10 +480,10 @@ class ExpandGroupSettingCard(ExpandSettingCard):
 
 
 class SimpleExpandGroupSettingCard(ExpandGroupSettingCard):
-    """简易可展开分组设置卡片."""
+    """简易可展开分组设置卡片"""
 
     def _adjustViewSize(self):
-        """调整视图大小."""
+        """调整视图大小"""
         h = self.viewLayout.sizeHint().height()
         self.spaceWidget.setFixedHeight(h)
 

@@ -8,7 +8,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class MessageDialog(MaskDialogBase):
-    """ Win10 style message 对话框 box 使用 遮罩 """
+    """基于 MaskDialogBase 的 Win10 风格 MessageDialog，使用遮罩效果"""
 
     yesSignal = Signal()
     cancelSignal = Signal()

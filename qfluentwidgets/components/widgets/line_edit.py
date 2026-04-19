@@ -1,4 +1,6 @@
 # coding: utf-8
+"""输入框组件"""
+
 from typing import List, Union
 from PySide6.QtCore import QSize, Qt, QRectF, Signal, QPoint, QTimer, QEvent, QAbstractItemModel, Property, QModelIndex
 from PySide6.QtGui import QPainter, QPainterPath, QIcon, QColor, QAction
@@ -17,7 +19,7 @@ from .scroll_bar import SmoothScrollDelegate
 
 
 class LineEditButton(QToolButton):
-    """ 行编辑器 按钮 """
+    """LineEdit 按钮"""
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None):
         super().__init__(parent=parent)
@@ -83,7 +85,7 @@ class LineEditButton(QToolButton):
 
 
 class LineEdit(QLineEdit):
-    """ 行编辑器 """
+    """单行输入框"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -122,7 +124,7 @@ class LineEdit(QLineEdit):
         return self._isError
 
     def setError(self, isError: bool):
-        """ 设置 错误状态 """
+        """设置错误状态"""
         if isError == self.isError():
             return
 
@@ -130,12 +132,11 @@ class LineEdit(QLineEdit):
         self.update()
 
     def setCustomFocusedBorderColor(self, light, dark):
-        """ 设置 边框颜色 中的 聚焦状态
+        """设置聚焦时的边框颜色
 
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            边框颜色 中的 亮色/暗色主题模式
+        Args:
+            light: 亮色主题下的边框颜色，可以是 str、QColor 或 Qt.GlobalColor
+            dark: 暗色主题下的边框颜色，可以是 str、QColor 或 Qt.GlobalColor
         """
         self.lightFocusedBorderColor = QColor(light)
         self.darkFocusedBorderColor = QColor(dark)
@@ -199,7 +200,7 @@ class LineEdit(QLineEdit):
             self.clearButton.setVisible(bool(self.text()))
 
     def __onTextChanged(self, text):
-        """ 文本 changed 槽函数 """
+        """文本改变时的槽函数"""
         if self.isClearButtonEnabled():
             self.clearButton.setVisible(bool(text) and self.hasFocus())
 
@@ -213,12 +214,10 @@ class LineEdit(QLineEdit):
             self._completerMenu.close()
 
     def setCompleterMenu(self, menu):
-        """ 设置 completer 菜单
+        """设置补全菜单
 
-        参数
-        ----------
-        menu: CompleterMenu
-            completer 菜单
+        Args:
+            menu: CompleterMenu 实例
         """
         menu.activated.connect(self._completer.activated)
         menu.indexActivated.connect(lambda idx: self._completer.activated[QModelIndex].emit(idx))
@@ -267,7 +266,7 @@ class LineEdit(QLineEdit):
 
 
 class CompleterMenu(RoundMenu):
-    """ Completer 菜单 """
+    """补全菜单"""
 
     activated = Signal(str)
     indexActivated = Signal(QModelIndex)
@@ -287,7 +286,7 @@ class CompleterMenu(RoundMenu):
         self.setItemHeight(33)
 
     def setCompletion(self, model: QAbstractItemModel, column=0):
-        """ 设置 completion model """
+        """设置补全模型"""
         items = []
         self.indexes.clear()
         for i in range(model.rowCount()):
@@ -301,7 +300,7 @@ class CompleterMenu(RoundMenu):
         return True
 
     def setItems(self, items: List[str]):
-        """ 设置 completion 项 """
+        """设置补全项"""
         self.view.clear()
 
         self.items = items
@@ -342,7 +341,7 @@ class CompleterMenu(RoundMenu):
         return super().exec(pos, ani, aniType)
 
     def popup(self):
-        """ 显示菜单 """
+        """显示菜单"""
         if not self.items:
             return self.close()
 
@@ -384,7 +383,7 @@ class CompleterMenu(RoundMenu):
 
 
 class SearchLineEdit(LineEdit):
-    """ Search 行编辑器 """
+    """搜索输入框"""
 
     searchSignal = Signal(str)
     clearSignal = Signal()
@@ -401,7 +400,7 @@ class SearchLineEdit(LineEdit):
         self.clearButton.clicked.connect(self.clearSignal)
 
     def search(self):
-        """ emit search 信号 """
+        """发射搜索信号"""
         text = self.text().strip()
         if text:
             self.searchSignal.emit(text)
@@ -414,7 +413,7 @@ class SearchLineEdit(LineEdit):
 
 
 class EditLayer(QWidget):
-    """ Edit layer """
+    """编辑层"""
 
     def __init__(self, parent):
         super().__init__(parent=parent)
@@ -448,7 +447,7 @@ class EditLayer(QWidget):
 
 
 class TextEdit(QTextEdit):
-    """ 文本 edit """
+    """文本编辑框"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -464,7 +463,7 @@ class TextEdit(QTextEdit):
 
 
 class PlainTextEdit(QPlainTextEdit):
-    """ Plain 文本 edit """
+    """纯文本编辑框"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -480,7 +479,7 @@ class PlainTextEdit(QPlainTextEdit):
 
 
 class TextBrowser(QTextBrowser):
-    """ 文本 browser """
+    """文本浏览器"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -496,7 +495,7 @@ class TextBrowser(QTextBrowser):
 
 
 class PasswordLineEdit(LineEdit):
-    """ Password 行编辑器 """
+    """密码输入框"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -512,7 +511,7 @@ class PasswordLineEdit(LineEdit):
         self.viewButton.setFixedSize(29, 25)
 
     def setPasswordVisible(self, isVisible: bool):
-        """ 设置password的可见性 """
+        """设置密码可见性"""
         if isVisible:
             self.setEchoMode(QLineEdit.Normal)
         else:
@@ -530,7 +529,7 @@ class PasswordLineEdit(LineEdit):
             self.setTextMargins(0, 0, 28*enable + 30, 0)
 
     def setViewPasswordButtonVisible(self, isVisible: bool):
-        """ 设置视图 password 按钮的可见性 """
+        """设置密码可见按钮的可见性"""
         self.viewButton.setVisible(isVisible)
 
     def eventFilter(self, obj, e):

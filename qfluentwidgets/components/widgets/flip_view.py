@@ -1,4 +1,6 @@
 # coding: utf-8
+"""翻页视图组件"""
+
 from typing import List, Union
 
 from PySide6.QtCore import Qt, Signal, QModelIndex, QSize, Property, QRectF, QPropertyAnimation, QSizeF
@@ -13,7 +15,7 @@ from .button import ToolButton
 
 
 class ScrollButton(ToolButton):
-    """ 滚动按钮 """
+    """滚动按钮"""
 
     def _postInit(self):
         self._opacity = 0
@@ -73,7 +75,7 @@ class ScrollButton(ToolButton):
 
 
 class FlipImageDelegate(QStyledItemDelegate):
-    """ Flip 视图 图像 委托 """
+    """翻页视图图像委托"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -132,12 +134,11 @@ class FlipImageDelegate(QStyledItemDelegate):
 
 
 class FlipView(QListWidget):
-    """ Flip 视图
+    """翻页视图
 
-    构造函数
-    ------------
-    * FlipView(`父部件`: QWidget = None)
-    * FlipView(`orient`: Qt.Orientation, `父部件`: QWidget = None)
+    构造函数重载:
+        * FlipView(parent: QWidget = None)
+        * FlipView(orientation: Qt.Orientation, parent: QWidget = None)
     """
 
     currentIndexChanged = Signal(int)
@@ -196,7 +197,7 @@ class FlipView(QListWidget):
         return self.orientation == Qt.Horizontal
 
     def setItemSize(self, size: QSize):
-        """ 设置项的大小 """
+        """设置项的大小"""
         if size == self.itemSize:
             return
 
@@ -208,26 +209,26 @@ class FlipView(QListWidget):
         self.viewport().update()
 
     def getItemSize(self):
-        """ 获取项的大小 """
+        """获取项的大小"""
         return self._itemSize
 
     def setBorderRadius(self, radius: int):
-        """ 设置项的边框 半径 """
+        """设置项的边框半径"""
         self.delegate.setBorderRadius(radius)
 
     def getBorderRadius(self):
         return self.delegate.borderRadius
 
     def scrollPrevious(self):
-        """ 滚动 到 previous 项 """
+        """滚动到上一项"""
         self.setCurrentIndex(self.currentIndex() - 1)
 
     def scrollNext(self):
-        """ 滚动 到 next 项 """
+        """滚动到下一项"""
         self.setCurrentIndex(self.currentIndex() + 1)
 
     def setCurrentIndex(self, index: int):
-        """ 设置当前索引 """
+        """设置当前索引"""
         if not 0 <= index < self.count() or index == self.currentIndex():
             return
 
@@ -271,11 +272,11 @@ class FlipView(QListWidget):
         return self.item(index).data(Qt.UserRole)
 
     def addImage(self, image: Union[QImage, QPixmap, str]):
-        """ 添加 图像 """
+        """添加图像"""
         self.addImages([image])
 
     def addImages(self, images: List[Union[QImage, QPixmap, str]], targetSize: QSize = None):
-        """ 添加 images """
+        """批量添加图像"""
         if not images:
             return
 
@@ -289,7 +290,7 @@ class FlipView(QListWidget):
             self._currentIndex = 0
 
     def setItemImage(self, index: int, image: Union[QImage, QPixmap, str], targetSize: QSize = None):
-        """ 设置specified 项的图像 """
+        """设置指定项的图像"""
         if not 0 <= index < self.count():
             return
 
@@ -330,15 +331,11 @@ class FlipView(QListWidget):
         item.setSizeHint(QSize(w, h))
 
     def itemImage(self, index: int, load=True) -> QImage:
-        """ 获取specified 项的图像
+        """获取指定项的图像
 
-        参数
-        ----------
-        index: int
-            索引 的 图像
-
-        load: bool
-            是否加载图像数据.
+        Args:
+            index: 图像索引
+            load: 是否加载图像数据
         """
         if not 0 <= index < self.count():
             return
@@ -417,14 +414,14 @@ class FlipView(QListWidget):
 
 
 class HorizontalFlipView(FlipView):
-    """ Horizontal flip 视图 """
+    """水平翻页视图"""
 
     def __init__(self, parent=None):
         super().__init__(Qt.Horizontal, parent)
 
 
 class VerticalFlipView(FlipView):
-    """ Vertical flip 视图 """
+    """垂直翻页视图"""
 
     def __init__(self, parent=None):
         super().__init__(Qt.Vertical, parent)

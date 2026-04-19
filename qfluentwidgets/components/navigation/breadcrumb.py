@@ -1,4 +1,6 @@
 # coding: utf-8
+"""面包屑导航组件"""
+
 import math
 
 from typing import Dict, List
@@ -13,7 +15,7 @@ from ...components.widgets.menu import RoundMenu, MenuAnimationType
 
 
 class BreadcrumbWidget(QWidget):
-    """ Bread crumb 部件 """
+    """面包屑部件"""
 
     clicked = Signal()
 
@@ -41,7 +43,7 @@ class BreadcrumbWidget(QWidget):
 
 
 class ElideButton(BreadcrumbWidget):
-    """ Elide 按钮 """
+    """省略号按钮"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -67,7 +69,7 @@ class ElideButton(BreadcrumbWidget):
 
 
 class BreadcrumbItem(BreadcrumbWidget):
-    """ Breadcrumb 项 """
+    """面包屑项"""
 
     def __init__(self, routeKey: str, text: str, index: int, parent=None):
         super().__init__(parent=parent)
@@ -142,7 +144,7 @@ class BreadcrumbItem(BreadcrumbWidget):
 
 
 class BreadcrumbBar(QWidget):
-    """ Breadcrumb 栏 """
+    """面包屑导航栏"""
 
     currentItemChanged = Signal(str)
     currentIndexChanged = Signal(int)
@@ -165,15 +167,11 @@ class BreadcrumbBar(QWidget):
         self.elideButton.clicked.connect(self._showHiddenItemsMenu)
 
     def addItem(self, routeKey: str, text: str):
-        """ 添加 项
+        """添加项
 
-        参数
-        ----------
-        routeKey: str
-            unique key 的 项
-
-        text: str
-            文本 的 项
+        Args:
+            routeKey (str): 项的唯一标识
+            text (str): 项的显示文本
         """
         if routeKey in self.itemMap:
             return
@@ -244,7 +242,7 @@ class BreadcrumbBar(QWidget):
         self.updateGeometry()
 
     def clear(self):
-        """ 清空all 项 """
+        """清空所有项"""
         while self.items:
             item = self.items.pop()
             self.itemMap.pop(item.routeKey)
@@ -254,7 +252,7 @@ class BreadcrumbBar(QWidget):
         self._currentIndex = -1
 
     def popItem(self):
-        """ pop trailing 项 """
+        """弹出尾部项"""
         if not self.items:
             return
 
@@ -264,7 +262,7 @@ class BreadcrumbBar(QWidget):
             self.clear()
 
     def count(self):
-        """ 返回 number 的 项 """
+        """返回项的数量"""
         return len(self.items)
 
     def updateGeometry(self):

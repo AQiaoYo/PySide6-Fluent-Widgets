@@ -16,7 +16,7 @@ from ..widgets.scroll_area import SingleDirectionScrollArea
 
 
 class FolderListDialog(MaskDialogBase):
-    """ 文件夹 列表 对话框 box """
+    """文件夹列表对话框"""
 
     folderChanged = Signal(list)
 
@@ -104,7 +104,7 @@ class FolderListDialog(MaskDialogBase):
         self.__adjustWidgetSize()
 
     def __showFileDialog(self):
-        """ 显示file 对话框 到 select 文件夹 """
+        """显示文件对话框以选择文件夹"""
         path = QFileDialog.getExistingDirectory(
             self, self.tr("Choose folder"), "./")
 
@@ -123,7 +123,7 @@ class FolderListDialog(MaskDialogBase):
         self.__adjustWidgetSize()
 
     def __showDeleteFolderCardDialog(self):
-        """ 显示delete 文件夹 card 对话框 """
+        """显示删除文件夹卡片的对话框"""
         sender = self.sender()
         title = self.tr('Are you sure you want to delete the folder?')
         content = self.tr("If you delete the ") + f'"{sender.folderName}"' + \
@@ -134,7 +134,11 @@ class FolderListDialog(MaskDialogBase):
         dialog.exec_()
 
     def __deleteFolderCard(self, folderCard):
-        """ delete selected 文件夹 card """
+        """删除选中的文件夹卡片
+        
+        Args:
+            folderCard: 要删除的 FolderCard
+        """
         self.scrollLayout.removeWidget(folderCard)
         index = self.folderCards.index(folderCard)
         self.folderCards.pop(index)
@@ -159,7 +163,7 @@ class FolderListDialog(MaskDialogBase):
         self.completeButton.adjustSize()
 
     def __onButtonClicked(self):
-        """ done 按钮 clicked 槽函数 """
+        """完成按钮点击槽函数"""
         if sorted(self.__originalPaths) != sorted(self.folderPaths):
             self.setEnabled(False)
             QApplication.processEvents()
@@ -174,7 +178,7 @@ class FolderListDialog(MaskDialogBase):
 
 
 class ClickableWindow(QWidget):
-    """ Clickable 窗口 """
+    """可点击窗口"""
 
     clicked = Signal()
 
@@ -205,7 +209,11 @@ class ClickableWindow(QWidget):
         self.update()
 
     def paintEvent(self, e):
-        """ 绘制窗口 """
+        """绘制窗口
+        
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
 
@@ -235,7 +243,7 @@ class ClickableWindow(QWidget):
 
 
 class FolderCard(ClickableWindow):
-    """ 文件夹 card """
+    """文件夹卡片"""
 
     def __init__(self, folderPath: str, parent=None):
         super().__init__(parent)
@@ -246,7 +254,11 @@ class FolderCard(ClickableWindow):
             12, 12, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
     def paintEvent(self, e):
-        """ 绘制card """
+        """绘制卡片
+        
+        Args:
+            e: 绘制事件
+        """
         super().paintEvent(e)
         painter = QPainter(self)
         painter.setRenderHints(
@@ -263,7 +275,15 @@ class FolderCard(ClickableWindow):
             painter.drawPixmap(self.width() - 24, 20, self.__closeIcon)
 
     def __drawText(self, painter, x1, fontSize1, x2, fontSize2):
-        """ 绘制文本 """
+        """绘制文本
+        
+        Args:
+            painter: 画笔
+            x1: 第一个 x 坐标
+            fontSize1: 第一个字体大小
+            x2: 第二个 x 坐标
+            fontSize2: 第二个字体大小
+        """
         # 绘制文件夹 name
         font = QFont("Microsoft YaHei")
         font.setBold(True)
@@ -283,7 +303,7 @@ class FolderCard(ClickableWindow):
 
 
 class AddFolderCard(ClickableWindow):
-    """ 添加 文件夹 card """
+    """添加文件夹卡片"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -292,7 +312,11 @@ class AddFolderCard(ClickableWindow):
             22, 22, Qt.KeepAspectRatio, Qt.SmoothTransformation)
 
     def paintEvent(self, e):
-        """ 绘制card """
+        """绘制卡片
+        
+        Args:
+            e: 绘制事件
+        """
         super().paintEvent(e)
         painter = QPainter(self)
         w = self.width()

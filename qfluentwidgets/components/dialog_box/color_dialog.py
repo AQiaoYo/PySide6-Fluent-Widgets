@@ -11,7 +11,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class HuePanel(QWidget):
-    """ Hue 面板 """
+    """Hue 面板"""
 
     colorChanged = Signal(QColor)
 
@@ -28,7 +28,11 @@ class HuePanel(QWidget):
         self.setPickerPosition(e.pos())
 
     def setPickerPosition(self, pos):
-        """ 设置 位置 of  """
+        """设置拾取器位置
+        
+            Args:
+                pos: 位置
+        """
         self.pickerPos = pos
         self.color.setHsv(
             int(max(0, min(1, pos.x() / self.width())) * 359),
@@ -39,7 +43,11 @@ class HuePanel(QWidget):
         self.colorChanged.emit(self.color)
 
     def setColor(self, color):
-        """ 设置颜色 """
+        """设置颜色
+        
+            Args:
+                color: 颜色
+        """
         self.color = QColor(color)
         self.color.setHsv(self.color.hue(), self.color.saturation(), 255)
         self.pickerPos = QPoint(
@@ -79,7 +87,7 @@ class HuePanel(QWidget):
 
 
 class BrightnessSlider(ClickableSlider):
-    """ 亮度 slider """
+    """亮度滑动条"""
 
     colorChanged = Signal(QColor)
 
@@ -91,7 +99,11 @@ class BrightnessSlider(ClickableSlider):
         self.valueChanged.connect(self.__onValueChanged)
 
     def setColor(self, color):
-        """ 设置颜色 """
+        """设置颜色
+        
+            Args:
+                color: 颜色
+        """
         self.color = QColor(color)
         self.setValue(self.color.value())
         qss = FluentStyleSheet.COLOR_DIALOG.content()
@@ -100,14 +112,18 @@ class BrightnessSlider(ClickableSlider):
         self.setStyleSheet(qss)
 
     def __onValueChanged(self, value):
-        """ slider 值 changed 槽函数 """
+        """滑动条值改变槽函数
+        
+            Args:
+                value: 值
+        """
         self.color.setHsv(self.color.hue(), self.color.saturation(), value, self.color.alpha())
         self.setColor(self.color)
         self.colorChanged.emit(self.color)
 
 
 class ColorCard(QWidget):
-    """ 颜色 card """
+    """颜色卡片"""
 
     def __init__(self, color, parent=None, enableAlpha=False):
         super().__init__(parent)
@@ -129,7 +145,11 @@ class ColorCard(QWidget):
         return pixmap
 
     def setColor(self, color):
-        """ 设置card的颜色 """
+        """设置卡片颜色
+        
+            Args:
+                color: 颜色
+        """
         self.color = QColor(color)
         self.update()
 
@@ -150,7 +170,7 @@ class ColorCard(QWidget):
 
 
 class ColorLineEdit(LineEdit):
-    """ 颜色 行编辑器 """
+    """颜色行编辑器"""
 
     valueChanged = Signal(str)
 
@@ -164,14 +184,18 @@ class ColorLineEdit(LineEdit):
         self.textEdited.connect(self._onTextEdited)
 
     def _onTextEdited(self, text):
-        """ 文本 edited 槽函数 """
+        """文本编辑槽函数
+        
+            Args:
+                text: 文本
+        """
         state = self.validator().validate(text, 0)[0]
         if state == QIntValidator.Acceptable:
             self.valueChanged.emit(text)
 
 
 class HexColorLineEdit(ColorLineEdit):
-    """ Hex 颜色 行编辑器 """
+    """Hex 颜色行编辑器"""
 
     def __init__(self, color, parent=None, enableAlpha=False):
         self.colorFormat = QColor.HexArgb if enableAlpha else QColor.HexRgb
@@ -188,12 +212,16 @@ class HexColorLineEdit(ColorLineEdit):
         self.prefixLabel.setObjectName('prefixLabel')
 
     def setColor(self, color):
-        """ 设置颜色 """
+        """设置颜色
+        
+            Args:
+                color: 颜色
+        """
         self.setText(color.name(self.colorFormat)[1:])
 
 
 class OpacityLineEdit(ColorLineEdit):
-    """ Opacity 行编辑器 """
+    """不透明度行编辑器"""
 
     def __init__(self, value, parent=None, enableAlpha=False):
         super().__init__(int(value/255*100), parent)
@@ -213,25 +241,18 @@ class OpacityLineEdit(ColorLineEdit):
 
 
 class ColorDialog(MaskDialogBase):
-    """ 颜色 对话框 """
+    """颜色对话框"""
 
     colorChanged = Signal(QColor)
 
     def __init__(self, color, title: str, parent=None, enableAlpha=False):
-        """
-        参数
-        ----------
-        color: `QColor` | `GlobalColor` | str
-            initial 颜色
-
-        title: str
-            对话框标题.
-
-        parent: QWidget
-            父部件.
-
-        enableAlpha: bool
-            是否启用透明通道.
+        """初始化颜色对话框
+        
+            Args:
+                color (QColor | GlobalColor | str): 初始颜色
+                title (str): 对话框标题
+                parent (QWidget): 父部件
+                enableAlpha (bool): 是否启用透明通道
         """
         super().__init__(parent)
         self.enableAlpha = enableAlpha
@@ -331,7 +352,12 @@ class ColorDialog(MaskDialogBase):
         self.editLabel.adjustSize()
 
     def setColor(self, color, movePicker=True):
-        """ 设置颜色 """
+        """设置颜色
+        
+            Args:
+                color: 颜色
+                movePicker: 是否移动拾取器
+        """
         self.color = QColor(color)
         self.brightSlider.setColor(color)
         self.newColorCard.setColor(color)
@@ -343,50 +369,78 @@ class ColorDialog(MaskDialogBase):
             self.huePanel.setColor(color)
 
     def __onHueChanged(self, color):
-        """ hue changed 槽函数 """
+        """色调改变槽函数
+        
+            Args:
+                color: 颜色
+        """
         self.color.setHsv(
             color.hue(), color.saturation(), self.color.value(), self.color.alpha())
         self.setColor(self.color)
 
     def __onBrightnessChanged(self, color):
-        """ 亮度 changed 槽函数 """
+        """亮度改变槽函数
+        
+            Args:
+                color: 颜色
+        """
         self.color.setHsv(
             self.color.hue(), self.color.saturation(), color.value(), color.alpha())
         self.setColor(self.color, False)
 
     def __onRedChanged(self, red):
-        """ red channel changed 槽函数 """
+        """红色通道改变槽函数
+        
+            Args:
+                red: 红色值
+        """
         self.color.setRed(int(red))
         self.setColor(self.color)
 
     def __onBlueChanged(self, blue):
-        """ blue channel changed 槽函数 """
+        """蓝色通道改变槽函数
+        
+            Args:
+                blue: 蓝色值
+        """
         self.color.setBlue(int(blue))
         self.setColor(self.color)
 
     def __onGreenChanged(self, green):
-        """ green channel changed 槽函数 """
+        """绿色通道改变槽函数
+        
+            Args:
+                green: 绿色值
+        """
         self.color.setGreen(int(green))
         self.setColor(self.color)
 
     def __onOpacityChanged(self, opacity):
-        """ opacity channel changed 槽函数 """
+        """不透明度通道改变槽函数
+        
+            Args:
+                opacity: 不透明度值
+        """
         self.color.setAlpha(int(int(opacity)/100*255))
         self.setColor(self.color)
 
     def __onHexColorChanged(self, color):
-        """ hex 颜色 changed 槽函数 """
+        """Hex 颜色改变槽函数
+        
+            Args:
+                color: 颜色
+        """
         self.color.setNamedColor("#" + color)
         self.setColor(self.color)
 
     def __onYesButtonClicked(self):
-        """ yes 按钮 clicked 槽函数 """
+        """Yes 按钮点击槽函数"""
         self.accept()
         if self.color != self.oldColor:
             self.colorChanged.emit(self.color)
 
     def updateStyle(self):
-        """更新样式表."""
+        """更新样式表"""
         self.setStyle(QApplication.style())
         self.titleLabel.adjustSize()
         self.editLabel.adjustSize()

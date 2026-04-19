@@ -12,7 +12,7 @@ from .button import ToolButton
 
 
 class Indicator(ToolButton):
-    """ 指示器 的 开关按钮 """
+    """开关按钮的指示器"""
 
     checkedChanged = Signal(bool)
 
@@ -30,7 +30,11 @@ class Indicator(ToolButton):
         self.toggled.connect(self._toggleSlider)
 
     def mouseReleaseEvent(self, e):
-        """ 切换选中 state 当 mouse release"""
+        """鼠标释放时切换选中状态
+        
+        Args:
+            e: 鼠标事件
+        """
         super().mouseReleaseEvent(e)
         self.checkedChanged.emit(self.isChecked())
 
@@ -55,7 +59,11 @@ class Indicator(ToolButton):
         self.update()
 
     def paintEvent(self, e):
-        """ 绘制指示器 """
+        """绘制指示器
+        
+        Args:
+            e: 绘制事件
+        """
         painter = QPainter(self)
         painter.setRenderHints(QPainter.Antialiasing)
         self._drawBackground(painter)
@@ -131,32 +139,26 @@ class Indicator(ToolButton):
 
 
 class IndicatorPosition(Enum):
-    """ 指示器 位置 """
+    """指示器位置"""
     LEFT = 0
     RIGHT = 1
 
 
 class SwitchButton(QWidget):
-    """ 开关按钮 类
-
-    构造函数
-    ------------
-    * SwitchButton(`父部件`: QWidget = None)
-    * SwitchButton(`文本`: str = "Off", `父部件`: QWidget = None, `indicatorPos`=IndicatorPosition.LEFT)
+    """开关按钮类
+    
+    构造函数重载:
+        * SwitchButton(parent: QWidget = None)
+        * SwitchButton(text: str = "Off", parent: QWidget = None, indicatorPos=IndicatorPosition.LEFT)
     """
 
     checkedChanged = Signal(bool)
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None, indicatorPos=IndicatorPosition.LEFT):
-        """
-        参数
-        ----------
-        parent: QWidget
-            父部件.
-
-        indicatorPosition: IndicatorPosition
-            指示器位置.
+        """Args:
+            parent (QWidget): 父部件
+            indicatorPos (IndicatorPosition): 指示器位置
         """
         super().__init__(parent=parent)
         self._text = self.tr('Off')
@@ -175,17 +177,10 @@ class SwitchButton(QWidget):
 
     @__init__.register
     def _(self, text: str = 'Off', parent: QWidget = None, indicatorPos=IndicatorPosition.LEFT):
-        """
-        参数
-        ----------
-        text: str
-            开关按钮文本.
-
-        parent: QWidget
-            父部件.
-
-        indicatorPosition: IndicatorPosition
-            位置 的 指示器
+        """Args:
+            text (str): 开关按钮文本
+            parent (QWidget): 父部件
+            indicatorPos (IndicatorPosition): 指示器位置
         """
         self.__init__(parent, indicatorPos)
         self._offText = text
@@ -236,17 +231,20 @@ class SwitchButton(QWidget):
         return self.indicator.isChecked()
 
     def setChecked(self, isChecked):
-        """ 设置 选中 state """
+        """设置选中状态
+        
+        Args:
+            isChecked: 选中状态
+        """
         self._updateText()
         self.indicator.setChecked(isChecked)
 
     def setTextColor(self, light, dark):
-        """ 设置文本的颜色
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            文本颜色 中的 亮色/暗色主题模式
+        """设置文本颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的文本颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的文本颜色
         """
         self.lightTextColor = QColor(light)
         self.darkTextColor = QColor(dark)
@@ -258,17 +256,16 @@ class SwitchButton(QWidget):
         )
 
     def setCheckedIndicatorColor(self, light, dark):
-        """ 设置指示器 中的 选中 状态的颜色
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            边框颜色 中的 亮色/暗色主题模式
+        """设置选中状态下指示器的颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的指示器颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的指示器颜色
         """
         self.indicator.setCheckedColor(light, dark)
 
     def toggleChecked(self):
-        """ 切换选中 state """
+        """切换选中状态"""
         self.indicator.setChecked(not self.indicator.isChecked())
 
     def _updateText(self):

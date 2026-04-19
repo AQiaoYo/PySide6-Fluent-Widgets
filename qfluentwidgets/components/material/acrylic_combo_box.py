@@ -33,43 +33,32 @@ class AcrylicComboBoxMenu(AcrylicMenuBase, RoundMenu):
 
 
 class AcrylicComboBox(ComboBox):
-    """ 亚克力组合框 """
+    """亚克力组合框"""
 
     def _createComboMenu(self):
         return AcrylicComboBoxMenu(self)
 
 
 class AcrylicEditableComboBox(AcrylicLineEditBase, EditableComboBox):
-    """ 亚克力组合框 """
+    """亚克力可编辑组合框"""
 
     def _createComboMenu(self):
         return AcrylicComboBoxMenu(self)
 
 
 class AcrylicComboBoxSettingCard(SettingCard):
-    """使用组合框的设置卡片."""
+    """使用组合框的设置卡片"""
 
     def __init__(self, configItem: OptionsConfigItem, icon, title, content=None, texts=None, parent=None):
-        """
-        参数
-        ----------
-        configItem: OptionsConfigItem
-            由卡片操作的配置项.
-
-        icon: str | QIcon | FluentIconBase
-            要绘制的图标.
-
-        title: str
-            卡片标题.
-
-        content: str
-            卡片内容.
-
-        texts: 列表[str]
-            选项文本列表.
-
-        parent: QWidget
-            父部件.
+        """初始化 AcrylicComboBoxSettingCard
+        
+        Args:
+            configItem (OptionsConfigItem): 由卡片操作的配置项
+            icon (str | QIcon | FluentIconBase): 要绘制的图标
+            title (str): 卡片标题
+            content (str): 卡片内容
+            texts (list[str]): 选项文本列表
+            parent (QWidget): 父部件
         """
         super().__init__(icon, title, content, parent)
         self.configItem = configItem

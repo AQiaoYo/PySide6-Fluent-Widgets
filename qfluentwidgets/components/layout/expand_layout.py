@@ -1,11 +1,13 @@
 # coding: utf-8
+"""展开布局"""
+
 from PySide6.QtCore import QSize, QPoint, Qt, QEvent, QRect
 from PySide6.QtGui import QResizeEvent
 from PySide6.QtWidgets import QLayout, QWidget
 
 
 class ExpandLayout(QLayout):
-    """ 展开布局 """
+    """展开布局"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -45,7 +47,14 @@ class ExpandLayout(QLayout):
         return True
 
     def heightForWidth(self, width):
-        """ 获取 minimal 高度 根据 宽度 """
+        """根据宽度计算最小高度
+
+        Args:
+            width: 布局宽度
+
+        Returns:
+            对应的最小高度
+        """
         return self.__doLayout(QRect(0, 0, width, 0), False)
 
     def setGeometry(self, rect):
@@ -67,7 +76,15 @@ class ExpandLayout(QLayout):
         return size
 
     def __doLayout(self, rect, move):
-        """ 调整部件 位置 根据 窗口 大小 """
+        """根据窗口大小调整部件位置
+
+        Args:
+            rect: 布局矩形
+            move: 是否移动部件
+
+        Returns:
+            布局总高度
+        """
         margin = self.contentsMargins()
         x = rect.x() + margin.left()
         y = rect.y() + margin.top()

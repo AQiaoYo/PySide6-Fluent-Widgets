@@ -10,7 +10,7 @@ from ...common.overload import singledispatchmethod
 
 
 class SliderHandle(QWidget):
-    """ Slider 处理 """
+    """滑块手柄控件"""
 
     pressed = Signal()
     released = Signal()
@@ -76,12 +76,11 @@ class SliderHandle(QWidget):
 
 
 class Slider(QSlider):
-    """ slider can be clicked
-
-    构造函数
-    ------------
-    * Slider(`父部件`: QWidget = None)
-    * Slider(`orient`: Qt.Orientation, `父部件`: QWidget = None)
+    """可点击的滑块
+    
+    构造函数重载:
+        * Slider(parent: QWidget = None)
+        * Slider(orient: Qt.Orientation, parent: QWidget = None)
     """
 
     clicked = Signal(int)
@@ -196,7 +195,7 @@ class Slider(QSlider):
 
 
 class ClickableSlider(QSlider):
-    """ slider can be clicked """
+    """可点击的滑块"""
 
     clicked = Signal(int)
 
@@ -215,14 +214,13 @@ class ClickableSlider(QSlider):
 
 
 class HollowHandleStyle(QProxyStyle):
-    """ Hollow 处理 style """
+    """空心手柄样式"""
 
     def __init__(self, config: dict = None):
-        """
-        参数
-        ----------
-        config: dict
-            style 配置
+        """初始化
+        
+        Args:
+            config: 样式配置
         """
         super().__init__()
         self.config = {
@@ -243,7 +241,14 @@ class HollowHandleStyle(QProxyStyle):
         self.config["handle.size"] = QSize(2*w, 2*w)
 
     def subControlRect(self, cc: QStyle.ComplexControl, opt: QStyleOptionSlider, sc: QStyle.SubControl, widget: QSlider):
-        """ 获取 rectangular area occupied by sub control """
+        """获取子控件所占的矩形区域
+        
+        Args:
+            cc: 复杂控件类型
+            opt: 滑动条选项
+            sc: 子控件类型
+            widget: 滑动条控件
+        """
         if cc != self.ComplexControl.CC_Slider or widget.orientation() != Qt.Horizontal \
                 or sc == self.SubControl.SC_SliderTickmarks:
             return super().subControlRect(cc, opt, sc, widget)
@@ -266,7 +271,14 @@ class HollowHandleStyle(QProxyStyle):
             return sliderRect.toRect()
 
     def drawComplexControl(self, cc: QStyle.ComplexControl, opt: QStyleOptionSlider, painter: QPainter, widget: QSlider):
-        """ 绘制sub control """
+        """绘制子控件
+        
+        Args:
+            cc: 复杂控件类型
+            opt: 滑动条选项
+            painter: 绘制器
+            widget: 滑动条控件
+        """
         if cc != self.ComplexControl.CC_Slider or widget.orientation() != Qt.Horizontal:
             return super().drawComplexControl(cc, opt, painter, widget)
 

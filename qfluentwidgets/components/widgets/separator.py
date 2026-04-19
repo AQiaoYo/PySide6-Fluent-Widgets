@@ -6,7 +6,7 @@ from ...common.style_sheet import isDarkTheme
 
 
 class HorizontalSeparator(QWidget):
-    """ Horizontal 分隔符 """
+    """水平分隔符"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -25,7 +25,7 @@ class HorizontalSeparator(QWidget):
 
 
 class VerticalSeparator(QWidget):
-    """ Vertical 分隔符 """
+    """垂直分隔符"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)

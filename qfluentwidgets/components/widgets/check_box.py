@@ -1,4 +1,5 @@
 # coding: utf-8
+"""复选框组件"""
 from enum import Enum
 
 from PySide6.QtCore import Qt
@@ -13,7 +14,7 @@ from ...common.font import setFont
 
 
 class CheckBoxIcon(FluentIconBase, Enum):
-    """ CheckBoxIcon """
+    """复选框图标"""
 
     ACCEPT = "Accept"
     PARTIAL_ACCEPT = "PartialAccept"
@@ -24,7 +25,7 @@ class CheckBoxIcon(FluentIconBase, Enum):
 
 
 class CheckBoxState(Enum):
-    """ 复选框 state """
+    """复选框状态"""
 
     NORMAL = 0
     HOVER = 1
@@ -37,12 +38,11 @@ class CheckBoxState(Enum):
 
 
 class CheckBox(QCheckBox):
-    """ 复选框
+    """复选框
 
-    构造函数
-    ------------
-    * CheckBox(`父部件`: QWidget = None)
-    * CheckBox(`文本`: str, `父部件`: QWidget = None)
+    构造函数重载:
+    * CheckBox(parent: QWidget = None)
+    * CheckBox(text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
@@ -81,24 +81,22 @@ class CheckBox(QCheckBox):
         self.update()
 
     def setCheckedColor(self, light, dark):
-        """ 设置指示器 中的 选中 状态的颜色
+        """设置指示器选中状态的颜色
 
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            指示器 颜色 中的 亮色/暗色主题模式
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的指示器颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的指示器颜色
         """
         self.lightCheckedColor = QColor(light)
         self.darkCheckedColor = QColor(dark)
         self.update()
 
     def setTextColor(self, light, dark):
-        """ 设置文本的颜色
+        """设置文本颜色
 
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            文本颜色 中的 亮色/暗色主题模式
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的文本颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的文本颜色
         """
         self.lightTextColor = QColor(light)
         self.darkTextColor = QColor(dark)

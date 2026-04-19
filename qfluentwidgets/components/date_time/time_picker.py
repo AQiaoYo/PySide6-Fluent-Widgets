@@ -5,7 +5,7 @@ from .picker_base import PickerBase, PickerColumnFormatter, DigitFormatter
 
 
 class TimePickerBase(PickerBase):
-    """ 时间选择器 基类 """
+    """时间选择器基类"""
 
     timeChanged = Signal(QTime)
 
@@ -18,12 +18,10 @@ class TimePickerBase(PickerBase):
         return self._time
 
     def setTime(self, time: QTime):
-        """ 设置 当前 时间
-
-        参数
-        ----------
-        time: QTime
-            当前 时间
+        """设置当前时间
+        
+        Args:
+            time (QTime): 当前时间
         """
         raise NotImplementedError
 
@@ -31,19 +29,23 @@ class TimePickerBase(PickerBase):
         return self._isSecondVisible
 
     def setSecondVisible(self, isVisible: bool):
-        """ 设置seconds 列的可见性 """
+        """设置 seconds 列的可见性
+        
+        Args:
+            isVisible: 是否显示 seconds 列
+        """
         raise NotImplementedError
 
 
 class MiniuteFormatter(DigitFormatter):
-    """ 分钟 formatter """
+    """分钟 formatter"""
 
     def encode(self, minute):
         return str(minute).zfill(2)
 
 
 class AMHourFormatter(DigitFormatter):
-    """ AM/PM 小时 formatter """
+    """AM/PM 小时 formatter"""
 
     def encode(self, hour):
         hour = int(hour)
@@ -54,7 +56,7 @@ class AMHourFormatter(DigitFormatter):
 
 
 class AMPMFormatter(PickerColumnFormatter):
-    """ AM/PM formatter """
+    """AM/PM formatter"""
 
     def __init__(self):
         super().__init__()
@@ -70,7 +72,7 @@ class AMPMFormatter(PickerColumnFormatter):
 
 
 class TimePicker(TimePickerBase):
-    """ 24 hours 时间选择器 """
+    """24 hours 时间选择器"""
 
     def __init__(self, parent=None, showSeconds=False):
         super().__init__(parent, showSeconds)
@@ -139,7 +141,7 @@ class TimePicker(TimePickerBase):
 
 
 class AMTimePicker(TimePickerBase):
-    """ AM/PM 时间选择器 """
+    """AM/PM 时间选择器"""
 
     def __init__(self, parent=None, showSeconds=False):
         super().__init__(parent, showSeconds)

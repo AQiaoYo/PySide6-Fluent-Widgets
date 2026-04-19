@@ -110,7 +110,7 @@ class SpinFlyoutView(FlyoutViewBase):
 
 
 class SpinBoxBase:
-    """ 微调框 ui """
+    """微调框基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -134,7 +134,11 @@ class SpinBoxBase:
         return self._isError
 
     def setError(self, isError: bool):
-        """ 设置 错误状态 """
+        """设置错误状态
+        
+        Args:
+            isError: 是否为错误状态
+        """
         if isError == self.isError():
             return
 
@@ -146,17 +150,20 @@ class SpinBoxBase:
         self.setSymbolVisible(not isReadOnly)
 
     def setSymbolVisible(self, isVisible: bool):
-        """ 设置 是否 spin symbol is 可见 """
+        """设置 symbol 是否可见
+        
+        Args:
+            isVisible: symbol 是否可见
+        """
         self.setProperty("symbolVisible", isVisible)
         self.setStyle(QApplication.style())
 
     def setCustomFocusedBorderColor(self, light, dark):
-        """ 设置 边框颜色 中的 聚焦状态
-
-        参数
-        ----------
-        亮色, dark: str | QColor | Qt.GlobalColor
-            边框颜色 中的 亮色/暗色主题模式
+        """设置自定义聚焦边框颜色
+        
+        Args:
+            light (str | QColor | Qt.GlobalColor): 亮色主题下的边框颜色
+            dark (str | QColor | Qt.GlobalColor): 暗色主题下的边框颜色
         """
         self.lightFocusedBorderColor = QColor(light)
         self.darkFocusedBorderColor = QColor(dark)
@@ -196,7 +203,7 @@ class SpinBoxBase:
 
 
 class InlineSpinBoxBase(SpinBoxBase):
-    """内联微调框基类."""
+    """内联微调框基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -224,7 +231,7 @@ class InlineSpinBoxBase(SpinBoxBase):
 
 
 class CompactSpinBoxBase(SpinBoxBase):
-    """紧凑微调框基类."""
+    """紧凑微调框基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -278,7 +285,7 @@ class DoubleSpinBox(InlineSpinBoxBase, QDoubleSpinBox):
 
 
 class CompactDoubleSpinBox(CompactSpinBoxBase, QDoubleSpinBox):
-    """ 紧凑 double 微调框 """
+    """紧凑 Double 微调框"""
 
 
 class TimeEdit(InlineSpinBoxBase, QTimeEdit):

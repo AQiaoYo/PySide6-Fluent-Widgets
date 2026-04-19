@@ -1,4 +1,6 @@
 # coding: utf-8
+"""分段控件"""
+
 from typing import Union
 from PySide6.QtCore import Qt, Signal, QRectF
 from PySide6.QtGui import QPainter, QIcon, QColor
@@ -14,7 +16,7 @@ from .pivot import Pivot, PivotItem
 
 
 class SegmentedItem(PivotItem):
-    """ Segmented 项 """
+    """Segmented 项"""
 
     def _postInit(self):
         super()._postInit()
@@ -22,7 +24,7 @@ class SegmentedItem(PivotItem):
 
 
 class SegmentedToolItem(ToolButton):
-    """ Pivot 项 """
+    """Segmented tool 项"""
 
     itemClicked = Signal(bool)
 
@@ -71,7 +73,7 @@ class SegmentedToggleToolItem(TransparentToolButton):
 
 
 class SegmentedWidget(Pivot):
-    """ Segmented 部件 """
+    """Segmented 部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -123,25 +125,19 @@ class SegmentedWidget(Pivot):
 
 
 class SegmentedToolWidget(SegmentedWidget):
-    """ Segmented tool 部件 """
+    """Segmented tool 部件"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground)
 
     def addItem(self, routeKey: str, icon: Union[str, QIcon, FluentIconBase], onClick=None):
-        """ 添加 项
+        """添加项
 
-        参数
-        ----------
-        routeKey: str
-            unique name 的 项
-
-        icon: str | QIcon | FluentIconBase
-            导航项图标.
-
-        onClick: callable
-            连接到点击信号的槽函数.
+        Args:
+            routeKey: 项的唯一标识名
+            icon: 导航项图标
+            onClick: 点击信号触发的回调函数
         """
         return self.insertItem(-1, routeKey, icon, onClick)
 
@@ -158,7 +154,7 @@ class SegmentedToolWidget(SegmentedWidget):
 
 
 class SegmentedToggleToolWidget(SegmentedToolWidget):
-    """ Segmented 切换 tool 部件 """
+    """Segmented toggle tool 部件"""
 
     def _createItem(self, icon):
         return SegmentedToggleToolItem(icon)

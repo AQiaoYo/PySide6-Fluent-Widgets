@@ -11,7 +11,7 @@ from .acrylic_widget import AcrylicWidget
 
 
 class AcrylicFlyoutViewBase(AcrylicWidget, FlyoutViewBase):
-    """ 亚克力 浮出层 视图 base """
+    """亚克力浮出层视图基类"""
 
     def acrylicClipPath(self):
         path = QPainterPath()
@@ -31,7 +31,7 @@ class AcrylicFlyoutViewBase(AcrylicWidget, FlyoutViewBase):
 
 
 class AcrylicFlyoutView(AcrylicWidget, FlyoutView):
-    """ 亚克力 浮出层 视图 """
+    """亚克力浮出层视图"""
 
     def acrylicClipPath(self):
         path = QPainterPath()
@@ -51,42 +51,24 @@ class AcrylicFlyoutView(AcrylicWidget, FlyoutView):
 
 
 class AcrylicFlyout(Flyout):
-    """ 亚克力 浮出层 """
+    """亚克力浮出层"""
 
     @classmethod
     def create(cls, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                image: Union[str, QPixmap, QImage] = None, isClosable=False, target: Union[QWidget, QPoint] = None,
                parent=None, aniType=FlyoutAnimationType.PULL_UP, isDeleteOnClose=True):
-        """ 创建and 显示 浮出层 using default 视图
-
-        参数
-        ----------
-        title: str
-            标题 的 教学提示
-
-        content: str
-            浮出层内容.
-
-        icon: InfoBarIcon | FluentIconBase | QIcon | str
-            浮出层图标.
-
-        image: str | QPixmap | QImage
-            浮出层图片.
-
-        isClosable: bool
-            是否显示关闭按钮.
-
-        target: QWidget | QPoint
-            要显示浮出层的目标部件或位置.
-
-        parent: QWidget
-            父部件 窗口
-
-        aniType: FlyoutAnimationType
-            浮出层 动画 type
-
-        isDeleteOnClose: bool
-            是否 delete 浮出层 automatically 当 浮出层 is closed
+        """使用默认视图创建并显示浮出层
+        
+        Args:
+            title: 提示标题
+            content: 提示内容
+            icon: 图标
+            image: 图片
+            isClosable (bool): 是否显示关闭按钮
+            target: 目标控件或位置
+            parent (QWidget): 父控件
+            aniType (FlyoutAnimationType): 动画类型
+            isDeleteOnClose (bool): 关闭时是否自动删除
         """
         view = AcrylicFlyoutView(title, content, icon, image, isClosable)
         w = cls.make(view, target, parent, aniType, isDeleteOnClose)
@@ -94,7 +76,12 @@ class AcrylicFlyout(Flyout):
         return w
 
     def exec(self, pos: QPoint, aniType=FlyoutAnimationType.PULL_UP):
-        """ 显示日历视图 """
+        """在指定位置显示浮出层
+        
+        Args:
+            pos: 显示位置
+            aniType (FlyoutAnimationType): 动画类型
+        """
         self.aniManager = FlyoutAnimationManager.make(aniType, self)
 
         if isinstance(self.view, AcrylicWidget):

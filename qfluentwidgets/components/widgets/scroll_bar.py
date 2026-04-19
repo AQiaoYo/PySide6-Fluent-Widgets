@@ -120,7 +120,7 @@ class ScrollBarGroove(QWidget):
 
 
 class ScrollBarHandle(QWidget):
-    """ 滚动条 处理 """
+    """滚动条 handle"""
 
     def __init__(self, orient: Qt.Orientation, parent=None):
         super().__init__(parent)
@@ -177,7 +177,7 @@ class ScrollBarHandle(QWidget):
 
 
 class ScrollBarHandleDisplayMode(Enum):
-    """滚动条 处理 display 模式"""
+    """滚动条 handle 显示模式"""
 
     ALWAYS = 0
     ON_HOVER = 1
@@ -329,23 +329,21 @@ class ScrollBar(QWidget):
             self.sliderReleased.emit()
 
     def setHandleColor(self, light, dark):
-        """设置处理的颜色
-
-        参数
-        ----------
-        亮色, dark: QColor | str | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置 handle 的颜色
+        
+        Args:
+            light (QColor | str | Qt.GlobalColor): 亮色主题下的颜色
+            dark (QColor | str | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.handle.setLightColor(light)
         self.handle.setDarkColor(dark)
 
     def setArrowColor(self, light, dark):
-        """设置arrow 按钮的颜色
-
-        参数
-        ----------
-        亮色, dark: QColor | str | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置 arrow 的颜色
+        
+        Args:
+            light (QColor | str | Qt.GlobalColor): 亮色主题下的颜色
+            dark (QColor | str | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.groove.upButton.setLightColor(light)
         self.groove.upButton.setDarkColor(dark)
@@ -353,18 +351,21 @@ class ScrollBar(QWidget):
         self.groove.downButton.setDarkColor(dark)
 
     def setGrooveColor(self, light, dark):
-        """设置groove的颜色
-
-        参数
-        ----------
-        亮色, dark: QColor | str | Qt.GlobalColor
-            颜色 中的 亮色/暗色主题模式
+        """设置 groove 的颜色
+        
+        Args:
+            light (QColor | str | Qt.GlobalColor): 亮色主题下的颜色
+            dark (QColor | str | Qt.GlobalColor): 暗色主题下的颜色
         """
         self.groove.setLightBackgroundColor(light)
         self.groove.setDarkBackgroundColor(dark)
 
     def setHandleDisplayMode(self, mode: ScrollBarHandleDisplayMode):
-        """设置处理的display 模式"""
+        """设置 handle 的显示模式
+        
+        Args:
+            mode (ScrollBarHandleDisplayMode): 显示模式
+        """
         if mode == self.handleDisplayMode:
             return
 
@@ -375,7 +376,7 @@ class ScrollBar(QWidget):
             self.handle.fadeIn()
 
     def expand(self):
-        """ 展开滚动 栏 """
+        """展开滚动条"""
         if self._isExpanded or not self._isEnter:
             return
 
@@ -384,7 +385,7 @@ class ScrollBar(QWidget):
         self.handle.fadeIn()
 
     def collapse(self):
-        """ 折叠滚动 栏 """
+        """折叠滚动条"""
         if not self._isExpanded or self._isEnter:
             return
 
@@ -513,7 +514,11 @@ class ScrollBar(QWidget):
         self._adjustHandlePos()
 
     def setForceHidden(self, isHidden: bool):
-        """设置是否强制隐藏滚动条."""
+        """设置是否强制隐藏滚动条
+        
+        Args:
+            isHidden: 是否强制隐藏
+        """
         self._isForceHidden = isHidden
         self.setVisible(self.maximum() > 0 and not isHidden)
 
@@ -558,14 +563,24 @@ class SmoothScrollBar(ScrollBar):
         self.ani.start()
 
     def scrollValue(self, value, useAni=True):
-        """ 滚动 specified distance """
+        """滚动指定距离
+        
+        Args:
+            value: 滚动距离
+            useAni: 是否使用动画
+        """
         self.__value += value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
         self.setValue(self.__value, useAni)
 
     def scrollTo(self, value, useAni=True):
-        """ 滚动 到 specified 位置 """
+        """滚动到指定位置
+        
+        Args:
+            value: 目标位置
+            useAni: 是否使用动画
+        """
         self.__value = value
         self.__value = max(self.minimum(), self.__value)
         self.__value = min(self.maximum(), self.__value)
@@ -585,15 +600,11 @@ class SmoothScrollBar(ScrollBar):
         self.__value = self.value()
 
     def setScrollAnimation(self, duration, easing=QEasingCurve.OutCubic):
-        """ 设置 滚动 动画
-
-        参数
-        ----------
-        duration: int
-            滚动 持续时间
-
-        easing: QEasingCurve
-            动画 type
+        """设置滚动动画
+        
+        Args:
+            duration (int): 滚动动画持续时间
+            easing (QEasingCurve): 动画缓动曲线
         """
         self.duration = duration
         self.ani.setDuration(duration)
@@ -601,17 +612,14 @@ class SmoothScrollBar(ScrollBar):
 
 
 class SmoothScrollDelegate(QObject):
-    """ Smooth 滚动 委托 """
+    """Smooth 滚动委托"""
 
     def __init__(self, parent: QAbstractScrollArea, useAni=False):
-        """
-        参数
-        ----------
-        parent: QAbstractScrollArea
-            被代理的滚动区域.
-
-        useAni: bool
-            是否使用 `QPropertyAnimation` 实现平滑滚动.
+        """初始化平滑滚动委托
+        
+        Args:
+            parent (QAbstractScrollArea): 被代理的滚动区域
+            useAni (bool): 是否使用 QPropertyAnimation 实现平滑滚动
         """
         super().__init__(parent)
         self.useAni = useAni

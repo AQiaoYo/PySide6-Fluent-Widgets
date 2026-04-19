@@ -1,4 +1,6 @@
 # coding: utf-8
+"""选项设置卡片"""
+
 from typing import Union
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QIcon
@@ -11,31 +13,20 @@ from .expand_setting_card import ExpandSettingCard
 
 
 class OptionsSettingCard(ExpandSettingCard):
-    """ setting card 使用 分组 的 options """
+    """选项设置卡片"""
 
     optionChanged = Signal(OptionsConfigItem)
 
     def __init__(self, configItem, icon: Union[str, QIcon, FluentIconBase], title, content=None, texts=None, parent=None):
-        """
-        参数
-        ----------
-        configItem: OptionsConfigItem
-            options 配置项
+        """初始化选项设置卡片
 
-        icon: str | QIcon | FluentIconBase
-            图标 到 be drawn
-
-        title: str
-            标题 的 setting card
-
-        content: str
-            内容 的 setting card
-
-        texts: 列表[str]
-            texts 的 radio 按钮
-
-        parent: QWidget
-            父部件 窗口
+        Args:
+            configItem: options 配置项
+            icon: 图标
+            title: 标题
+            content: 内容，默认为 None
+            texts: 单选按钮文本列表，默认为 None
+            parent: 父组件，默认为 None
         """
         super().__init__(icon, title, content, parent)
         self.texts = texts or []
@@ -62,7 +53,11 @@ class OptionsSettingCard(ExpandSettingCard):
         self.buttonGroup.buttonClicked.connect(self.__onButtonClicked)
 
     def __onButtonClicked(self, button: RadioButton):
-        """ 按钮 clicked 槽函数 """
+        """处理按钮点击事件
+
+        Args:
+            button: 被点击的按钮
+        """
         if button.text() == self.choiceLabel.text():
             return
 
@@ -74,7 +69,11 @@ class OptionsSettingCard(ExpandSettingCard):
         self.optionChanged.emit(self.configItem)
 
     def setValue(self, value):
-        """ select 按钮 根据 值 """
+        """根据值选中对应按钮
+
+        Args:
+            value: 要设置的值
+        """
         qconfig.set(self.configItem, value)
 
         for button in self.buttonGroup.buttons():

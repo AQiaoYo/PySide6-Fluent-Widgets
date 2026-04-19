@@ -1,4 +1,6 @@
 # coding: utf-8
+"""日历视图组件"""
+
 from math import ceil
 from collections import defaultdict, Counter
 from typing import Tuple, Type
@@ -19,7 +21,7 @@ from ..widgets.scroll_bar import SmoothScrollBar
 
 
 class ScrollButton(TransparentToolButton):
-    """ 滚动按钮 """
+    """滚动按钮"""
 
     def _drawIcon(self, icon, painter: QPainter, rect: QRectF):
         pass
@@ -122,21 +124,21 @@ class ScrollItemDelegate(QStyledItemDelegate):
 
 
 class YearScrollItemDelegate(ScrollItemDelegate):
-    """ 年份 滚动 项 委托 """
+    """年份滚动项委托"""
 
     def _itemMargin(self):
         return 8
 
 
 class DayScrollItemDelegate(ScrollItemDelegate):
-    """ 日期 滚动 项 委托 """
+    """日期滚动项委托"""
 
     def _itemMargin(self):
         return 3
 
 
 class ScrollViewBase(QListWidget):
-    """ 滚动视图基类 """
+    """滚动视图基类"""
 
     pageChanged = Signal(int)
 
@@ -236,7 +238,7 @@ class ScrollViewBase(QListWidget):
 
 
 class CalendarViewBase(QFrame):
-    """ 日历视图 基类 """
+    """日历视图基类"""
 
     resetted = Signal()
     titleClicked = Signal()
@@ -321,7 +323,7 @@ class CalendarViewBase(QFrame):
 
 
 class YearScrollView(ScrollViewBase):
-    """ 年份 滚动视图 """
+    """年份滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(YearScrollItemDelegate, parent)
@@ -355,7 +357,7 @@ class YearScrollView(ScrollViewBase):
 
 
 class YearCalendarView(CalendarViewBase):
-    """ 年份 日历视图 """
+    """年份日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -368,7 +370,7 @@ class YearCalendarView(CalendarViewBase):
 
 
 class MonthScrollView(ScrollViewBase):
-    """ 月份 滚动视图 """
+    """月份滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(YearScrollItemDelegate, parent)
@@ -402,7 +404,7 @@ class MonthScrollView(ScrollViewBase):
 
 
 class MonthCalendarView(CalendarViewBase):
-    """ 月份 日历视图 """
+    """月份日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -420,7 +422,7 @@ class MonthCalendarView(CalendarViewBase):
 
 
 class DayScrollView(ScrollViewBase):
-    """ 日期 滚动视图 """
+    """日期滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(DayScrollItemDelegate, parent)
@@ -520,7 +522,7 @@ class DayScrollView(ScrollViewBase):
 
 
 class DayCalendarView(CalendarViewBase):
-    """ 日期 日历视图 """
+    """日期日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -541,7 +543,7 @@ class DayCalendarView(CalendarViewBase):
 
 
 class CalendarView(QWidget):
-    """ 日历视图 """
+    """日历视图"""
 
     resetted = Signal()
     dateChanged = Signal(QDate)
@@ -594,7 +596,13 @@ class CalendarView(QWidget):
         self.dayView.resetted.connect(self._onResetted)
 
     def setShadowEffect(self, blurRadius=30, offset=(0, 8), color=QColor(0, 0, 0, 30)):
-        """ 将shadow添加到对话框 """
+        """添加阴影效果
+
+        Args:
+            blurRadius: 模糊半径
+            offset: 阴影偏移量
+            color: 阴影颜色
+        """
         self.shadowEffect = QGraphicsDropShadowEffect(self.stackedWidget)
         self.shadowEffect.setBlurRadius(blurRadius)
         self.shadowEffect.setOffset(*offset)
@@ -606,7 +614,11 @@ class CalendarView(QWidget):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ 设置reset 按钮的可见性 """
+        """设置 reset 按钮的可见性
+
+        Args:
+            isEnabled: 是否显示 reset 按钮
+        """
         self._isResetEnabled = isEnabled
         self.yearView.setResetEnabled(isEnabled)
         self.monthView.setResetEnabled(isEnabled)
@@ -639,12 +651,24 @@ class CalendarView(QWidget):
             self.dateChanged.emit(date)
 
     def setDate(self, date: QDate):
-        """ 设置 选中日期 """
+        """设置选中日期
+
+        Args:
+            date: 要选中的日期
+        """
         self.dayView.setDate(date)
         self.date = date
 
     def exec(self, pos: QPoint, ani=True):
-        """ 显示日历视图 """
+        """显示日历视图
+
+        Args:
+            pos: 显示位置
+            ani: 是否使用动画效果
+
+        Returns:
+            None
+        """
         if self.isVisible():
             return
 

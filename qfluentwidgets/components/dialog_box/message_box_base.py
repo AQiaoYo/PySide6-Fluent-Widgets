@@ -10,7 +10,7 @@ from .mask_dialog_base import MaskDialogBase
 
 
 class MessageBoxBase(MaskDialogBase):
-    """消息框基类."""
+    """消息框基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -61,12 +61,10 @@ class MessageBoxBase(MaskDialogBase):
         self.buttonLayout.addWidget(self.cancelButton, 1, Qt.AlignVCenter)
 
     def validate(self) -> bool:
-        """ validate 数据 的 form before closing 对话框
-
-        返回
-        -------
-        isValid: bool
-            是否 数据 的 form is 合法
+        """关闭对话框前验证表单数据
+        
+                Returns:
+                    bool: 数据是否合法
         """
         return True
 

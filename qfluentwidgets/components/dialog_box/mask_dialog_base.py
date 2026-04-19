@@ -8,7 +8,7 @@ from ...common.config import isDarkTheme
 
 
 class MaskDialogBase(QDialog):
-    """ 对话框 box 基类 使用 遮罩 """
+    """使用遮罩的对话框基类"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -35,7 +35,13 @@ class MaskDialogBase(QDialog):
         self.widget.installEventFilter(self)
 
     def setShadowEffect(self, blurRadius=60, offset=(0, 10), color=QColor(0, 0, 0, 100)):
-        """ 将shadow添加到对话框 """
+        """为对话框添加阴影效果
+        
+        Args:
+            blurRadius: 阴影模糊半径
+            offset: 阴影偏移量
+            color: 阴影颜色
+        """
         shadowEffect = QGraphicsDropShadowEffect(self.widget)
         shadowEffect.setBlurRadius(blurRadius)
         shadowEffect.setOffset(*offset)
@@ -44,13 +50,21 @@ class MaskDialogBase(QDialog):
         self.widget.setGraphicsEffect(shadowEffect)
 
     def setMaskColor(self, color: QColor):
-        """ 设置遮罩的颜色 """
+        """设置遮罩颜色
+        
+        Args:
+            color: 遮罩颜色
+        """
         self.windowMask.setStyleSheet(f"""
             background: rgba({color.red()}, {color.green()}, {color.blue()}, {color.alpha()})
         """)
 
     def showEvent(self, e):
-        """ fade in """
+        """淡入
+        
+        Args:
+            e: 显示事件
+        """
         opacityEffect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(opacityEffect)
         opacityAni = QPropertyAnimation(opacityEffect, b'opacity', self)
@@ -63,7 +77,11 @@ class MaskDialogBase(QDialog):
         super().showEvent(e)
 
     def done(self, code):
-        """ 淡出 """
+        """淡出
+        
+        Args:
+            code: 结果代码
+        """
         self.widget.setGraphicsEffect(None)
         opacityEffect = QGraphicsOpacityEffect(self)
         self.setGraphicsEffect(opacityEffect)

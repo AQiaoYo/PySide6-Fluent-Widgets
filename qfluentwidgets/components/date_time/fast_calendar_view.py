@@ -1,4 +1,6 @@
 # coding: utf-8
+"""快速日历视图组件"""
+
 from math import ceil
 from collections import defaultdict, Counter
 from typing import Type
@@ -16,7 +18,7 @@ from .calendar_view import (ScrollItemDelegate, ScrollViewBase,
 
 
 class FastScrollItemDelegate(ScrollItemDelegate):
-    """ Fast 滚动 项 委托 """
+    """Fast 滚动项委托"""
 
     def __init__(self, min, max):
         super().__init__(min, max)
@@ -85,14 +87,14 @@ class FastScrollItemDelegate(ScrollItemDelegate):
 
 
 class FastYearScrollItemDelegate(FastScrollItemDelegate):
-    """ 年份 滚动 项 委托 """
+    """年份滚动项委托"""
 
     def _itemMargin(self):
         return 8
 
 
 class FastDayScrollItemDelegate(FastScrollItemDelegate):
-    """ Fast 日期 滚动 项 委托 """
+    """日期滚动项委托"""
 
     def _itemMargin(self):
         return 3
@@ -100,7 +102,7 @@ class FastDayScrollItemDelegate(FastScrollItemDelegate):
 
 
 class FastScrollViewBase(ScrollViewBase):
-    """ 滚动视图基类 """
+    """滚动视图基类"""
 
     pageChanged = Signal(int)
 
@@ -122,7 +124,7 @@ class FastScrollViewBase(ScrollViewBase):
         pass
 
     def _updateItems(self):
-        """ 更新the 项 的 当前 页面 """
+        """更新当前页面的项"""
         pass
 
     def pageCount(self):
@@ -137,7 +139,7 @@ class FastScrollViewBase(ScrollViewBase):
 
 
 class FastYearScrollView(FastScrollViewBase):
-    """ 年份 滚动视图 """
+    """年份滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(FastYearScrollItemDelegate, parent)
@@ -182,7 +184,7 @@ class FastYearScrollView(FastScrollViewBase):
 
 
 class FastMonthScrollView(FastScrollViewBase):
-    """ 月份 滚动视图 """
+    """月份滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(FastYearScrollItemDelegate, parent)
@@ -229,7 +231,7 @@ class FastMonthScrollView(FastScrollViewBase):
 
 
 class FastDayScrollView(FastScrollViewBase):
-    """ 日期 滚动视图 """
+    """日期滚动视图"""
 
     def __init__(self, parent=None):
         super().__init__(FastDayScrollItemDelegate, parent)
@@ -343,7 +345,7 @@ class FastDayScrollView(FastScrollViewBase):
 
 
 class FastYearCalendarView(CalendarViewBase):
-    """ 年份 日历视图 """
+    """年份日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -356,7 +358,7 @@ class FastYearCalendarView(CalendarViewBase):
 
 
 class FastMonthCalendarView(CalendarViewBase):
-    """ 月份 日历视图 """
+    """月份日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -374,7 +376,7 @@ class FastMonthCalendarView(CalendarViewBase):
 
 
 class FastDayCalendarView(CalendarViewBase):
-    """ 日期 日历视图 """
+    """日期日历视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -395,6 +397,7 @@ class FastDayCalendarView(CalendarViewBase):
 
 
 class FastCalendarView(FlyoutViewBase):
+    """快速日历视图"""
 
     dateChanged = Signal(QDate)
     resetted = Signal()
@@ -437,7 +440,11 @@ class FastCalendarView(FlyoutViewBase):
         return self._isResetEnabled
 
     def setResetEnabled(self, isEnabled: bool):
-        """ 设置reset 按钮的可见性 """
+        """设置 reset 按钮的可见性
+
+        Args:
+            isEnabled: 是否启用重置按钮
+        """
         self._isResetEnabled = isEnabled
         self.yearView.setResetEnabled(isEnabled)
         self.monthView.setResetEnabled(isEnabled)
@@ -470,7 +477,11 @@ class FastCalendarView(FlyoutViewBase):
             self.dateChanged.emit(date)
 
     def setDate(self, date: QDate):
-        """ 设置 选中日期 """
+        """设置选中的日期
+
+        Args:
+            date: 要选中的日期
+        """
         self.dayView.setDate(date)
         self.date = date
 

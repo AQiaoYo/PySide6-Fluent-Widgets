@@ -10,7 +10,7 @@ from ...common.animation import FluentAnimation
 
 
 class OpacityAniStackedWidget(QStackedWidget):
-    """ Stacked 部件 使用 fade 中的 和 fade out 动画 """
+    """使用淡入淡出动画的 StackedWidget"""
 
     def __init__(self, parent=None):
         super().__init__(parent=parent)
@@ -57,7 +57,7 @@ class OpacityAniStackedWidget(QStackedWidget):
 
 
 class PopUpAniInfo:
-    """ Pop up ani info """
+    """弹出动画信息类"""
 
     def __init__(self, widget: QWidget, deltaX: int, deltaY: int, effect: QGraphicsOpacityEffect):
         self.widget = widget
@@ -67,7 +67,7 @@ class PopUpAniInfo:
 
 
 class PopUpAniStackedWidget(QStackedWidget):
-    """ Stacked 部件 使用 pop up 动画 """
+    """使用弹出动画的 StackedWidget"""
 
     aniFinished = Signal()
     aniStart = Signal()
@@ -81,18 +81,12 @@ class PopUpAniStackedWidget(QStackedWidget):
         self._ani = None
 
     def addWidget(self, widget, deltaX=0, deltaY=76):
-        """ 将部件添加到窗口
-
-        参数
-        -----------
-        widget:
-            部件 到 be added
-
-        deltaX: int
-            x-axis offset 从 beginning 到 end 的 动画
-
-        deltaY: int
-            y-axis offset 从 beginning 到 end 的 动画
+        """将部件添加到窗口
+        
+        Args:
+            widget: 要添加的部件
+            deltaX: x轴方向动画偏移量
+            deltaY: y轴方向动画偏移量
         """
         super().addWidget(widget)
 
@@ -116,29 +110,23 @@ class PopUpAniStackedWidget(QStackedWidget):
         super().removeWidget(widget)
 
     def setAnimationEnabled(self, isEnabled: bool):
-        """设置 是否 pop 动画 is 已启用"""
+        """设置动画是否启用
+        
+        Args:
+            isEnabled (bool): 是否启用弹出动画
+        """
         self.isAnimationEnabled = isEnabled
 
     def setCurrentIndex(self, index: int, needPopOut: bool = False, showNextWidgetDirectly: bool = True,
                         duration: int = 250, easingCurve=QEasingCurve.OutQuad):
-        """ 设置 当前 窗口 到 display
-
-        参数
-        ----------
-        index: int
-            要显示的部件索引.
-
-        isNeedPopOut: bool
-            是否需要弹出动画.
-
-        showNextWidgetDirectly: bool
-            动画开始时是否直接显示下一个部件.
-
-        duration: int
-            动画持续时间.
-
-        easingCurve: QEasingCurve
-            动画的缓动曲线.
+        """设置当前显示的窗口索引
+        
+        Args:
+            index (int): 要显示的部件索引
+            needPopOut (bool): 是否需要弹出动画
+            showNextWidgetDirectly (bool): 动画开始时是否直接显示下一个部件
+            duration (int): 动画持续时间
+            easingCurve: 动画的缓动曲线
         """
         if index < 0 or index >= self.count():
             raise Exception(f'The index `{index}` is illegal')
@@ -186,24 +174,14 @@ class PopUpAniStackedWidget(QStackedWidget):
 
     def setCurrentWidget(self, widget, needPopOut: bool = False, showNextWidgetDirectly: bool = True,
                          duration: int = 250, easingCurve=QEasingCurve.OutQuad):
-        """设置当前部件.
-
-        参数
-        ----------
-        widget:
-            要显示的部件.
-
-        isNeedPopOut: bool
-            是否需要弹出动画.
-
-        showNextWidgetDirectly: bool
-            动画开始时是否直接显示下一个部件.
-
-        duration: int
-            动画持续时间.
-
-        easingCurve: QEasingCurve
-            动画的缓动曲线.
+        """设置当前显示的部件
+        
+        Args:
+            widget: 要显示的部件
+            needPopOut (bool): 是否需要弹出动画
+            showNextWidgetDirectly (bool): 动画开始时是否直接显示下一个部件
+            duration (int): 动画持续时间
+            easingCurve: 动画的缓动曲线
         """
         self.setCurrentIndex(
             self.indexOf(widget), needPopOut, showNextWidgetDirectly, duration, easingCurve)
@@ -264,7 +242,7 @@ class PopUpAniStackedWidget(QStackedWidget):
         aniInfo.widget.resize(self.size())
 
     def __onAniFinished(self):
-        """ 动画 finished 槽函数 """
+        """动画结束槽函数"""
         if self._ani:
             try:
                 self._ani.finished.disconnect(self.__onAniFinished)
@@ -296,11 +274,19 @@ class TransitionStackedWidget(QStackedWidget):
         self._aniGroup.finished.connect(self._onAniFinished)
 
     def setAnimationEnabled(self, isEnabled: bool):
-        """ 设置 是否 transition 动画 is 已启用 """
+        """设置转场动画是否启用
+        
+        Args:
+            isEnabled (bool): 是否启用转场动画
+        """
         self._isAnimationEnabled = isEnabled
 
     def isAnimationEnabled(self) -> bool:
-        """ 返回 是否 transition 动画 is 已启用 """
+        """返回转场动画是否启用
+        
+        Returns:
+            转场动画是否启用
+        """
         return self._isAnimationEnabled
 
     def addWidget(self, w):
@@ -312,34 +298,22 @@ class TransitionStackedWidget(QStackedWidget):
         return super().insertWidget(index, w)
 
     def setCurrentWidget(self, widget: QWidget, duration: int = None, isBack: bool = False):
-        """ 设置 当前 页面 部件 使用 transition 动画
-
-        参数
-        ----------
-        widget: QWidget
-            目标 部件 到 display
-
-        duration: int
-            动画 持续时间 中的 milliseconds, None 用于 default
-
-        isBack: bool
-            是否 this is back navigation
+        """使用转场动画设置当前页面部件
+        
+        Args:
+            widget (QWidget): 目标部件
+            duration (int): 动画持续时间（毫秒），None 表示使用默认值
+            isBack (bool): 是否为返回导航
         """
         self.setCurrentIndex(self.indexOf(widget), duration, isBack)
 
     def setCurrentIndex(self, index: int, duration: int = None, isBack: bool = False):
-        """ 设置 当前 页面 索引 使用 transition 动画
-
-        参数
-        ----------
-        index: int
-            页面 索引
-
-        duration: int
-            动画 持续时间 中的 milliseconds, None 用于 default
-
-        isBack: bool
-            是否 this is back navigation
+        """使用转场动画设置当前页面索引
+        
+        Args:
+            index (int): 页面索引
+            duration (int): 动画持续时间（毫秒），None 表示使用默认值
+            isBack (bool): 是否为返回导航
         """
         if index < 0 or index >= self.count():
             return
@@ -362,11 +336,17 @@ class TransitionStackedWidget(QStackedWidget):
         self.aniStart.emit()
 
     def _setUpTransitionAnimation(self, nextIndex: int, duration: int, isBack: bool):
-        """ 设置 up transition 动画 """
+        """设置转场动画
+        
+        Args:
+            nextIndex (int): 下一个窗口索引
+            duration (int): 动画持续时间
+            isBack (bool): 是否为返回导航
+        """
         raise NotImplementedError
 
     def _stopAnimation(self):
-        """ 停止running 动画 """
+        """停止正在运行的动画"""
         if self._aniGroup.state() != QAbstractAnimation.State.Running:
             return
 
