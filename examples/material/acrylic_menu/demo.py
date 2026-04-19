@@ -3,10 +3,10 @@
 AcrylicMenu 演示
 
 展示内容：
-- 亚克力右键菜单（AcrylicMenu）
+- AcrylicMenu 亚克力右键菜单
 - 子菜单嵌套
 - 可勾选菜单项
-- 系统托盘菜单（AcrylicSystemTrayMenu）
+- AcrylicSystemTrayMenu 亚克力系统托盘菜单
 """
 import sys
 
@@ -31,21 +31,15 @@ class SystemTrayIcon(QSystemTrayIcon):
 
         self.menu = AcrylicSystemTrayMenu(parent=parent)
         self.menu.addActions([
-            Action('唱'),
-            Action('跳'),
-            Action('RAP'),
-            Action('篮球', triggered=self.ikun),
+            Action('显示窗口', triggered=parent.show),
+            Action('隐藏窗口', triggered=parent.hide),
+            Action('退出', triggered=self.onExit),
         ])
         self.setContextMenu(self.menu)
 
-    def ikun(self):
-        """托盘菜单点击响应"""
-        w = MessageBox(
-            title='提示',
-            content='系统托盘菜单项被点击',
-            parent=self.parent()
-        )
-        w.exec()
+    def onExit(self):
+        """退出应用"""
+        QApplication.quit()
 
 
 class Demo(ImageLabel):
@@ -56,8 +50,11 @@ class Demo(ImageLabel):
         self.setWindowTitle('AcrylicMenu - 演示')
         self.setImage('resource/chidanta.jpg')
         self.scaledToWidth(500)
-
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
+
+        # 创建并显示托盘图标
+        self.systemTrayIcon = SystemTrayIcon(self)
+        self.systemTrayIcon.show()
 
     def contextMenuEvent(self, e):
         """右键显示亚克力菜单"""
@@ -97,6 +94,7 @@ class Demo(ImageLabel):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     w = Demo()
     w.show()
     app.exec()

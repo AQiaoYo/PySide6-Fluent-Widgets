@@ -1,32 +1,41 @@
 # coding:utf-8
+"""
+AcrylicWidgetMenu 演示
+
+展示内容：
+- AcrylicMenu 亚克力圆角菜单
+- 自定义 ProfileCard 卡片组件
+- 菜单中嵌入自定义控件
+- 账户管理菜单示例
+"""
 import sys
-from PySide6 import QtGui
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QColor
-from PySide6.QtWidgets import QApplication, QWidget, QLabel, QHBoxLayout
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout
 
-from qfluentwidgets import (RoundMenu, FluentIcon, Action, AvatarWidget, BodyLabel,
-                            HyperlinkButton, CaptionLabel, setFont, setTheme, Theme, isDarkTheme)
+from qfluentwidgets import (
+    FluentIcon, Action, AvatarWidget, BodyLabel,
+    HyperlinkButton, CaptionLabel, setFont, setTheme, Theme, isDarkTheme,
+)
 from qfluentwidgets.components.material import AcrylicMenu
 
 
 class ProfileCard(QWidget):
-    """ Profile card """
+    """个人信息卡片"""
 
     def __init__(self, avatarPath: str, name: str, email: str, parent=None):
         super().__init__(parent=parent)
         self.avatar = AvatarWidget(avatarPath, self)
         self.nameLabel = BodyLabel(name, self)
         self.emailLabel = CaptionLabel(email, self)
-        self.logoutButton = HyperlinkButton(
-            'https://qfluentwidgets.com', '注销', self)
+        self.logoutButton = HyperlinkButton('https://qfluentwidgets.com', '注销', self)
 
         color = QColor(206, 206, 206) if isDarkTheme() else QColor(96, 96, 96)
-        self.emailLabel.setStyleSheet('QLabel{color: '+color.name()+'}')
+        self.emailLabel.setStyleSheet('QLabel{color: ' + color.name() + '}')
 
         color = QColor(255, 255, 255) if isDarkTheme() else QColor(0, 0, 0)
-        self.nameLabel.setStyleSheet('QLabel{color: '+color.name()+'}')
+        self.nameLabel.setStyleSheet('QLabel{color: ' + color.name() + '}')
         setFont(self.logoutButton, 13)
 
         self.setFixedSize(307, 82)
@@ -38,28 +47,34 @@ class ProfileCard(QWidget):
 
 
 class Demo(QWidget):
+    """AcrylicWidgetMenu 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
-        # self.setStyleSheet('Demo{background: rgb(32, 32, 32)}')
-        self.setStyleSheet('Demo{background: white}')
-        self.setLayout(QHBoxLayout())
+        self.setWindowTitle('AcrylicWidgetMenu - 演示')
+        self.resize(400, 400)
+        self.initWidgets()
+        self.initLayout()
 
-        self.label = BodyLabel('Right-click your mouse', self)
+    def initWidgets(self):
+        """初始化组件"""
+        self.label = BodyLabel('在此区域点击鼠标右键', self)
         self.label.setAlignment(Qt.AlignCenter)
         setFont(self.label, 18)
 
-        self.layout().addWidget(self.label)
-        self.resize(400, 400)
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QHBoxLayout(self)
+        mainLayout.addWidget(self.label)
+        self.setStyleSheet('Demo{background: white}')
 
     def contextMenuEvent(self, e) -> None:
+        """右键显示亚克力菜单"""
         menu = AcrylicMenu(parent=self)
 
-        # add custom widget
-        card = ProfileCard('resource/shoko.png', '硝子酱', 'shokokawaii@outlook.com', menu)
+        # 自定义卡片
+        card = ProfileCard('resource/shoko.png', '用户名称', 'user@example.com', menu)
         menu.addWidget(card, selectable=False)
-        # menu.addWidget(card, selectable=True, onClick=lambda: print('666'))
 
         menu.addSeparator()
         menu.addActions([
