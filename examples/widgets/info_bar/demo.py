@@ -1,24 +1,34 @@
 # coding:utf-8
+"""
+InfoBar 演示
+
+展示内容：
+- InfoBar 信息提示条（信息/成功/警告/错误）
+- 自定义 InfoBar（图标、背景色）
+- 桌面右下角通知
+- 自定义 InfoBarManager 位置管理器
+"""
 import sys
+
 from PySide6.QtCore import QPoint, Qt
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout
 
-from qfluentwidgets import InfoBarIcon, InfoBar, PushButton, setTheme, Theme, FluentIcon, InfoBarPosition, InfoBarManager
+from qfluentwidgets import (
+    InfoBarIcon, InfoBar, PushButton, FluentIcon,
+    InfoBarPosition, InfoBarManager, setTheme, Theme,
+)
 
 
 @InfoBarManager.register('Custom')
 class CustomInfoBarManager(InfoBarManager):
-    """ Custom info bar manager """
+    """自定义 InfoBar 位置管理器 — 居中显示"""
 
     def _pos(self, infoBar: InfoBar, parentSize=None):
         p = infoBar.parent()
         parentSize = parentSize or p.size()
-
-        # the position of first info bar
         x = (parentSize.width() - infoBar.width()) // 2
         y = (parentSize.height() - infoBar.height()) // 2
 
-        # get the position of current info bar
         index = self.infoBars[p].index(infoBar)
         for bar in self.infoBars[p][0:index]:
             y += (bar.height() + self.spacing)
@@ -30,93 +40,98 @@ class CustomInfoBarManager(InfoBarManager):
         return QPoint(pos.x(), pos.y() - 16)
 
 
-
 class Demo(QWidget):
+    """InfoBar 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
+        self.setWindowTitle('InfoBar - 演示')
+        self.resize(700, 500)
+        self.initWidgets()
+        self.initLayout()
 
-        self.hBoxLayout = QHBoxLayout(self)
-        self.button1 = PushButton('Information', self)
-        self.button2 = PushButton('Success', self)
-        self.button3 = PushButton('Warning', self)
-        self.button4 = PushButton('Error', self)
-        self.button5 = PushButton('Custom', self)
-        self.button6 = PushButton('Desktop', self)
+    def initWidgets(self):
+        """初始化按钮"""
+        self.button1 = PushButton('信息', self)
+        self.button2 = PushButton('成功', self)
+        self.button3 = PushButton('警告', self)
+        self.button4 = PushButton('错误', self)
+        self.button5 = PushButton('自定义', self)
+        self.button6 = PushButton('桌面通知', self)
 
         self.button1.clicked.connect(self.createInfoInfoBar)
         self.button2.clicked.connect(self.createSuccessInfoBar)
         self.button3.clicked.connect(self.createWarningInfoBar)
         self.button4.clicked.connect(self.createErrorInfoBar)
         self.button5.clicked.connect(self.createCustomInfoBar)
-        self.button6.clicked.connect(self.createDeskTopBottomRightInfoBar)
+        self.button6.clicked.connect(self.createDesktopInfoBar)
 
-        self.hBoxLayout.addWidget(self.button1)
-        self.hBoxLayout.addWidget(self.button2)
-        self.hBoxLayout.addWidget(self.button3)
-        self.hBoxLayout.addWidget(self.button4)
-        self.hBoxLayout.addWidget(self.button5)
-        self.hBoxLayout.addWidget(self.button6)
-        self.hBoxLayout.setContentsMargins(30, 0, 30, 0)
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QHBoxLayout(self)
+        mainLayout.setSpacing(12)
+        mainLayout.setContentsMargins(30, 30, 30, 30)
 
-        self.resize(700, 700)
+        for btn in [self.button1, self.button2, self.button3, self.button4, self.button5, self.button6]:
+            mainLayout.addWidget(btn)
 
     def createInfoInfoBar(self):
-        content = "My name is kira yoshikake, 33 years old. Living in the villa area northeast of duwangting, unmarried. I work in Guiyou chain store. Every day I have to work overtime until 8 p.m. to go home. I don't smoke. The wine is only for a taste. Sleep at 11 p.m. for 8 hours a day. Before I go to bed, I must drink a cup of warm milk, then do 20 minutes of soft exercise, get on the bed, and immediately fall asleep. Never leave fatigue and stress until the next day. Doctors say I'm normal."
+        """信息提示"""
         w = InfoBar(
             icon=InfoBarIcon.INFORMATION,
-            title='Title',
-            content=content,
-            orient=Qt.Vertical,    # vertical layout
+            title='提示',
+            content='这是一条信息提示，会在 2 秒后自动消失。',
+            orient=Qt.Vertical,
             isClosable=True,
             position=InfoBarPosition.TOP_RIGHT,
             duration=2000,
             parent=self
         )
-        w.addWidget(PushButton('Action'))
+        w.addWidget(PushButton('操作'))
         w.show()
 
     def createSuccessInfoBar(self):
-        # convenient class mothod
+        """成功提示"""
         InfoBar.success(
-            title='Lesson 4',
-            content="With respect, let's advance towards a new stage of the spin.",
+            title='操作成功',
+            content='数据已成功保存到服务器。',
             orient=Qt.Horizontal,
             isClosable=True,
             position=InfoBarPosition.TOP,
-            # position='Custom',   # NOTE: use custom info bar manager
             duration=2000,
             parent=self
         )
 
     def createWarningInfoBar(self):
+        """警告提示"""
         InfoBar.warning(
-            title='Lesson 3',
-            content="Believe in the spin, just keep believing!",
+            title='注意',
+            content='当前网络连接不稳定，请检查网络设置。',
             orient=Qt.Horizontal,
-            isClosable=False,   # disable close button
+            isClosable=False,
             position=InfoBarPosition.TOP_LEFT,
             duration=2000,
             parent=self
         )
 
     def createErrorInfoBar(self):
+        """错误提示"""
         InfoBar.error(
-            title='Lesson 5',
-            content="迂回路を行けば最短ルート。",
+            title='操作失败',
+            content='无法连接到服务器，请稍后重试。',
             orient=Qt.Horizontal,
             isClosable=True,
             position=InfoBarPosition.BOTTOM_RIGHT,
-            duration=-1,    # won't disappear automatically
+            duration=-1,
             parent=self
         )
 
     def createCustomInfoBar(self):
+        """自定义提示"""
         w = InfoBar.new(
             icon=FluentIcon.GITHUB,
-            title='Zeppeli',
-            content="人間讃歌は「勇気」の讃歌ッ！！ 人間のすばらしさは勇気のすばらしさ！！",
+            title='自定义样式',
+            content='使用 new() 方法创建自定义样式的 InfoBar。',
             orient=Qt.Horizontal,
             isClosable=True,
             position=InfoBarPosition.BOTTOM,
@@ -125,10 +140,11 @@ class Demo(QWidget):
         )
         w.setCustomBackgroundColor('white', '#202020')
 
-    def createDeskTopBottomRightInfoBar(self):
+    def createDesktopInfoBar(self):
+        """桌面通知"""
         InfoBar.warning(
-            title='Plugged Out Notify',
-            content="Battery is 64%",
+            title='电源通知',
+            content="当前电量为 64%",
             orient=Qt.Vertical,
             position=InfoBarPosition.BOTTOM_RIGHT,
             parent=InfoBar.desktopView()

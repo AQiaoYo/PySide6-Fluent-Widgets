@@ -1,21 +1,32 @@
 # coding:utf-8
+"""
+TeachingTip 演示
+
+展示内容：
+- TeachingTip 教学提示（顶部/底部弹出）
+- TeachingTipView 带图片的教学提示
+- PopupTeachingTip 自定义内容教学提示
+- CustomFlyoutView 完全自定义视图
+"""
 import sys
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout
 
-from qfluentwidgets import (PushButton, TeachingTip, TeachingTipTailPosition, InfoBarIcon, setTheme, Theme,
-                            TeachingTipView, FlyoutViewBase, BodyLabel, PrimaryPushButton, PopupTeachingTip)
+from qfluentwidgets import (
+    PushButton, TeachingTip, TeachingTipTailPosition, InfoBarIcon,
+    TeachingTipView, FlyoutViewBase, BodyLabel, PrimaryPushButton, PopupTeachingTip,
+)
 
 
 class CustomFlyoutView(FlyoutViewBase):
+    """自定义教学提示视图"""
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self.vBoxLayout = QVBoxLayout(self)
-        self.label = BodyLabel(
-            '这是一场「试炼」，我认为这就是一场为了战胜过去的「试炼」，\n只有战胜了那些幼稚的过去，人才能有所成长。')
-        self.button = PrimaryPushButton('Action')
+        self.label = BodyLabel('这是一个自定义的教学提示视图，\n可以展示任何您想要的内容。')
+        self.button = PrimaryPushButton('我知道了')
 
         self.button.setFixedWidth(140)
         self.vBoxLayout.setSpacing(12)
@@ -28,42 +39,49 @@ class CustomFlyoutView(FlyoutViewBase):
 
 
 class Demo(QWidget):
+    """TeachingTip 演示窗口"""
 
     def __init__(self):
         super().__init__()
-        # setTheme(Theme.DARK)
-        # self.setStyleSheet("Demo{background: rgb(32, 32, 32)}")
-
-        self.hBoxLayout = QHBoxLayout(self)
-        self.button1 = PushButton('Top', self)
-        self.button2 = PushButton('Bottom', self)
-        self.button3 = PushButton('Custom', self)
-
+        self.setWindowTitle('TeachingTip - 演示')
         self.resize(700, 500)
+        self.initWidgets()
+        self.initLayout()
+
+    def initWidgets(self):
+        """初始化按钮"""
+        self.button1 = PushButton('顶部提示', self)
+        self.button2 = PushButton('底部提示', self)
+        self.button3 = PushButton('自定义视图', self)
+
         self.button1.setFixedWidth(150)
         self.button2.setFixedWidth(150)
         self.button3.setFixedWidth(150)
-        self.hBoxLayout.addWidget(self.button2, 0, Qt.AlignHCenter)
-        self.hBoxLayout.addWidget(self.button1, 0, Qt.AlignHCenter)
-        self.hBoxLayout.addWidget(self.button3, 0, Qt.AlignHCenter)
+
         self.button1.clicked.connect(self.showTopTip)
         self.button2.clicked.connect(self.showBottomTip)
         self.button3.clicked.connect(self.showCustomTip)
 
+    def initLayout(self):
+        """初始化布局"""
+        mainLayout = QHBoxLayout(self)
+        mainLayout.addWidget(self.button2, 0, Qt.AlignHCenter)
+        mainLayout.addWidget(self.button1, 0, Qt.AlignHCenter)
+        mainLayout.addWidget(self.button3, 0, Qt.AlignHCenter)
+
     def showTopTip(self):
+        """顶部教学提示"""
         position = TeachingTipTailPosition.BOTTOM
         view = TeachingTipView(
             icon=None,
-            title='Lesson 5',
-            content="最短的捷径就是绕远路，绕远路才是我的最短捷径。",
+            title='新功能介绍',
+            content="我们新增了暗色主题支持，您可以在设置中切换主题模式。",
             image='resource/Gyro.jpg',
-            # image='resource/boqi.gif',
             isClosable=True,
             tailPosition=position,
         )
 
-        # add widget to view
-        button = PushButton('Action')
+        button = PushButton('立即体验')
         button.setFixedWidth(120)
         view.addWidget(button, align=Qt.AlignRight)
 
@@ -77,11 +95,12 @@ class Demo(QWidget):
         view.closed.connect(w.close)
 
     def showBottomTip(self):
+        """底部教学提示"""
         TeachingTip.create(
             target=self.button2,
             icon=InfoBarIcon.SUCCESS,
-            title='Lesson 4',
-            content="表达敬意吧，表达出敬意，然后迈向回旋的另一个全新阶段！",
+            title='设置已保存',
+            content="您的偏好设置已成功保存，将在下次启动时生效。",
             isClosable=True,
             tailPosition=TeachingTipTailPosition.TOP,
             duration=2000,
@@ -89,7 +108,7 @@ class Demo(QWidget):
         )
 
     def showCustomTip(self):
-        # TeachingTip.make(
+        """自定义视图教学提示"""
         PopupTeachingTip.make(
             target=self.button3,
             view=CustomFlyoutView(),
