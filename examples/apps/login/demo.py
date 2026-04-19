@@ -1,3 +1,13 @@
+# coding:utf-8
+"""
+Login 演示
+
+展示内容：
+- FluentWidget 无标题栏登录窗口
+- 自定义主题色
+- 背景图片自适应缩放
+- 国际化支持
+"""
 import sys
 
 from PySide6.QtCore import Qt, QTranslator, QLocale, QRect
@@ -22,7 +32,7 @@ class LoginWindow(FluentWidget, Ui_Form):
 
         self.label.setScaledContents(False)
 
-        self.setWindowTitle('PyQt-Fluent-Widget')
+        self.setWindowTitle('Login - 演示')
         self.setWindowIcon(QIcon(":/images/logo.png"))
         self.resize(1000, 650)
 

@@ -1,4 +1,13 @@
 # coding:utf-8
+"""
+WebEngine 演示
+
+展示内容：
+- SplitFluentWindow 多页面窗口
+- FramelessWebEngineView 无边框网页视图
+- 网页加载与导航
+- Mica 效果
+"""
 import sys
 
 from PySide6.QtCore import Qt, QUrl
@@ -35,7 +44,7 @@ class Window(SplitFluentWindow):
         self.initWindow()
 
     def initNavigation(self):
-        self.addSubInterface(self.homeInterface, FIF.HOME, "Home")
+        self.addSubInterface(self.homeInterface, FIF.HOME, "主页")
 
         # NOTE: enable acrylic effect
         # self.navigationInterface.setAcrylicEnabled(True)
@@ -43,7 +52,7 @@ class Window(SplitFluentWindow):
     def initWindow(self):
         self.resize(900, 700)
         self.setWindowIcon(QIcon(':/qfluentwidgets/images/logo.png'))
-        self.setWindowTitle('PyQt-Fluent-Widgets')
+        self.setWindowTitle('WebEngine - 演示')
 
         desktop = QApplication.screens()[0].availableGeometry()
         w, h = desktop.width(), desktop.height()

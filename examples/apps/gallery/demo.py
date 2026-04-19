@@ -1,4 +1,13 @@
 # coding:utf-8
+"""
+Gallery 演示
+
+展示内容：
+- Gallery 完整应用示例
+- 多页面导航与组件展示
+- 国际化支持
+- DPI 缩放适配
+"""
 import os
 import sys
 

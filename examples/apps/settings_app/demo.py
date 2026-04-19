@@ -1,4 +1,14 @@
 # coding:utf-8
+"""
+Settings 演示
+
+展示内容：
+- FramelessWindow 无边框设置窗口
+- SettingInterface 设置面板
+- 主题切换与样式表加载
+- 国际化支持
+- DPI 缩放适配
+"""
 import os
 import sys
 from PySide6.QtCore import Qt, QLocale, QTranslator
@@ -24,7 +34,7 @@ class Window(FramelessWindow):
         self.hBoxLayout.addWidget(self.settingInterface)
 
         self.setWindowIcon(QIcon(":/qfluentwidgets/images/logo.png"))
-        self.setWindowTitle("PySide6-Fluent-Widgets")
+        self.setWindowTitle("Settings - 演示")
 
         self.resize(1080, 784)
         desktop = QApplication.primaryScreen().size()
