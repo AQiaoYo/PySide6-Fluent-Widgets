@@ -1,5 +1,9 @@
 # coding: utf-8
-"""列表视图组件"""
+"""提供列表视图相关组件，包括 ListView、ListWidget 及其基类和项委托
+
+这些组件适用于需要以单列形式展示数据并支持用户选择的场景，
+内置 Fluent Design 风格的悬停高亮、圆角和选中动效，可无缝融入现代界面
+"""
 
 from typing import List, Union
 
@@ -14,9 +18,18 @@ from ...common.color import autoFallbackThemeColor
 
 
 class ListItemDelegate(TableItemDelegate):
-    """列表项委托"""
+    """负责列表项绘制与外观定制的委托类
+    
+    该类通过重载绘制方法为列表项提供 Fluent Design 风格的视觉效果，
+    包括悬停高亮、选中态指示器及圆角裁剪，通常由 ListView 或 ListWidget 内部自动创建与绑定
+    """
 
     def __init__(self, parent: QListView):
+        """初始化委托实例
+        
+        Args:
+            parent: 父对象实例，通常为 QListView 或 QListWidget，负责该委托的生命周期管理
+        """
         super().__init__(parent)
 
     def _drawBackground(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
@@ -30,8 +43,19 @@ class ListItemDelegate(TableItemDelegate):
 
 
 class ListBase:
+    """列表组件的抽象基类，为 ListWidget 和 ListView 提供通用行为与样式支持
+    
+    该类封装了列表视图的公共交互逻辑和视觉配置，包括滚动条样式、项高亮策略及背景绘制，
+    一般不由用户直接实例化，如需扩展自定义列表组件可继承此类并重写相关方法
+    """
 
     def __init__(self, *args, **kwargs):
+        """初始化列表基类实例
+        
+        Args:
+            *args: 可变位置参数，透传至父类构造方法以支持多种构造方式
+            **kwargs: 可变关键字参数，透传至父类构造方法以支持属性配置
+        """
         super().__init__(*args, **kwargs)
         self.delegate = ListItemDelegate(self)
         self.scrollDelegate = SmoothScrollDelegate(self)
@@ -119,9 +143,18 @@ class ListBase:
 
 
 class ListWidget(ListBase, QListWidget):
-    """列表部件"""
+    """基于 QListWidget 的 Fluent Design 风格列表部件
+    
+    ListWidget 适用于项数量相对固定、需要直接通过 QListWidgetItem 进行增删改查的场景，
+    支持图标、文本及自定义部件嵌入，并自动应用悬停高亮与选中动效
+    """
 
     def __init__(self, parent=None):
+        """初始化列表部件
+        
+        Args:
+            parent: 父级窗口或部件，默认为 None。传入非 None 值后，该列表将随父对象一起释放
+        """
         super().__init__(parent)
 
     def setCurrentItem(self, item, command=None):
@@ -145,9 +178,18 @@ class ListWidget(ListBase, QListWidget):
 
 
 class ListView(ListBase, QListView):
-    """列表视图"""
+    """基于 QListView 的 Fluent Design 风格列表视图
+    
+    ListView 采用 Model/View 架构，适用于数据层与表现层需要分离的场景，
+    支持绑定自定义 QAbstractItemModel 实现海量数据的高效展示，并内置 Fluent 风格的项高亮与选中效果
+    """
 
     def __init__(self, parent=None):
+        """初始化列表视图
+        
+        Args:
+            parent: 父级窗口或部件，默认为 None。传入非 None 值后，该视图将随父对象一起释放
+        """
         super().__init__(parent)
 
     def isSelectRightClickedRow(self):

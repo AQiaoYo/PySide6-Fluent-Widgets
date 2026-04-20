@@ -1,5 +1,7 @@
 # coding: utf-8
-"""平滑滚动模块"""
+"""为 PyQt/PySide 控件提供平滑滚动能力，通过动画引擎将滚轮事件转换为渐进式位移
+该模块包含多种滚动引擎实现，可直接应用于 QListWidget、QScrollArea 等需要改善滚动体验的场景
+"""
 
 from collections import deque
 from enum import Enum
@@ -11,7 +13,10 @@ from PySide6.QtWidgets import QApplication, QScrollArea, QAbstractScrollArea
 
 
 class SmoothScroll:
-    """平滑滚动控制器"""
+    """平滑滚动控制器，负责拦截目标控件的滚轮事件并驱动滚动动画
+    适用于需要统一接管滚轮行为、提供丝滑滚动体验的自定义控件或窗口
+    可通过 setSmoothMode 切换不同的滚动曲线和动画策略
+    """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical, dynamicEngineEnabled=True):
         """初始化平滑滚动控制器
@@ -73,7 +78,10 @@ class SmoothScroll:
 
 
 class SmoothMode(Enum):
-    """平滑模式"""
+    """平滑滚动模式类，封装滚动动画的插值类型与速度曲线
+    用于配置 SmoothScroll 或引擎的滚动风格，如线性、匀减速、NO_DELAY 等模式
+    不同模式会影响滚动的流畅度、响应速度和停止方式
+    """
     NO_SMOOTH = 0
     CONSTANT = 1
     LINEAR = 2
@@ -82,9 +90,16 @@ class SmoothMode(Enum):
 
 
 class SmoothScrollEngineBase(QObject):
-    """平滑滚动引擎基类"""
+    """平滑滚动引擎基类，定义滚动动画的公共接口与事件处理流程
+    子类需实现具体的步长计算与动画逻辑，通过 widget 和 orient 确定作用目标与方向
+    """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
+        """初始化平滑滚动引擎
+        Args:
+            widget (QWidget): 需要绑定平滑滚动的目标控件
+            orient (Qt.Orientation): 滚动方向，取值为 Qt.Horizontal 或 Qt.Vertical
+        """
         super().__init__(widget)
         self.widget = widget
         self.orient = orient
@@ -153,7 +168,10 @@ class SmoothScrollEngineBase(QObject):
 
 
 class FixedStepSmoothScrollEngine(SmoothScrollEngineBase):
-    """固定步长平滑滚动引擎"""
+    """固定步长平滑滚动引擎，每次滚轮事件驱动固定距离的渐进式滚动
+    适用于希望滚动距离稳定可控、避免加速或惯性过冲的界面组件
+    继承自 SmoothScrollEngineBase，通过固定步幅实现一致的滚动体验
+    """
 
     def wheelEvent(self, e: QWheelEvent, delta: int):
         # 将当前时间压入队列.
@@ -236,6 +254,11 @@ class AdaptiveSmoothScrollEngine(SmoothScrollEngineBase):
     """
 
     def __init__(self, widget: QScrollArea, orient=Qt.Vertical):
+        """初始化固定步长平滑滚动引擎
+        Args:
+            widget (QWidget): 需要绑定平滑滚动的目标控件
+            orient (Qt.Orientation): 滚动方向，取值为 Qt.Horizontal 或 Qt.Vertical
+        """
         super().__init__(widget, orient)
         self.elapsedTimer = QElapsedTimer()
         self.maxQueueSize = 3

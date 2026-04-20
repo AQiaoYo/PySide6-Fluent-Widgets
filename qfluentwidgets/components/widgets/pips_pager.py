@@ -1,5 +1,9 @@
 # coding: utf-8
-"""Pips 分页导航组件"""
+"""Pips 分页导航组件模块
+
+提供基于圆点（Pips）的分页导航控件集合，常用于图片轮播、多页向导、滑动视图等场景
+通过圆点的高亮状态直观展示当前页码与总页数，支持水平与垂直两种布局方向
+"""
 
 from enum import Enum
 from PySide6.QtCore import Qt, Signal, QModelIndex, QPoint, Property, QSize, QRectF
@@ -16,14 +20,22 @@ from .scroll_bar import SmoothScrollBar
 
 
 class PipsScrollButtonDisplayMode(Enum):
-    """PipsPager 滚动按钮的显示模式"""
+    """PipsPager 滚动按钮的显示模式
+    
+    用于控制分页导航器两侧滚动按钮的显隐策略，可根据页面数量或容器尺寸自动调整
+    通常在页面总数超出可视区域时启用，帮助用户快速跳转到相邻分页
+    """
     ALWAYS = 0
     ON_HOVER = 1
     NEVER = 2
 
 
 class ScrollButton(ToolButton):
-    """PipsPager 的滚动按钮"""
+    """PipsPager 的滚动按钮
+    
+    提供圆点分页器两侧的方向按钮，用于在页面较多时逐页滚动浏览
+    按钮会在鼠标悬停或特定显示模式下出现，点击后切换到相邻页面
+    """
 
     def _postInit(self):
         self.setFixedSize(12, 12)
@@ -49,9 +61,18 @@ class ScrollButton(ToolButton):
 
 
 class PipsDelegate(QStyledItemDelegate):
-    """PipsPager 的列表项委托"""
+    """PipsPager 的列表项委托
+    
+    负责绘制圆点指示器的视觉样式，包括选中状态、悬停状态及尺寸计算
+    通过委托模式将视图逻辑与绘制逻辑分离，便于自定义圆点外观
+    """
 
     def __init__(self, parent=None):
+        """初始化委托
+        
+        Args:
+            parent (QWidget): 父对象，通常由 PipsPager 传入。默认为 None
+        """
         super().__init__(parent=parent)
         self.hoveredRow = -1
         self.pressedRow = -1
@@ -100,7 +121,10 @@ class PipsDelegate(QStyledItemDelegate):
 
 class PipsPager(QListWidget):
     """Pips 分页导航控件
-
+    
+    用于在多个页面或内容块之间进行切换，以圆点形式展示当前所在位置
+    支持自定义圆点间距、按钮显示策略以及方向布局，适用于轮播图、引导页等场景
+    
     构造函数重载:
         * PipsPager(parent: QWidget = None)
         * PipsPager(orientation: Qt.Orientation, parent: QWidget = None)
@@ -110,6 +134,11 @@ class PipsPager(QListWidget):
 
     @singledispatchmethod
     def __init__(self, parent=None):
+        """初始化分页导航控件
+        
+        Args:
+            parent (QWidget): 父控件，默认为 None。传入后该分页器将被嵌入到父控件的布局中
+        """
         super().__init__(parent=parent)
         self.orientation = Qt.Horizontal
         self._postInit()
@@ -348,14 +377,32 @@ class PipsPager(QListWidget):
 
 
 class HorizontalPipsPager(PipsPager):
-    """水平方向 Pips 分页导航控件"""
+    """水平方向 Pips 分页导航控件
+    
+    圆点沿水平方向排列，适用于横向轮播图、步骤条等场景
+    作为 PipsPager 的便捷子类，默认使用水平布局，无需手动指定方向参数
+    """
 
     def __init__(self, parent=None):
+        """初始化水平分页导航控件
+        
+        Args:
+            parent (QWidget): 父控件，默认为 None。传入后该分页器将以水平布局嵌入父控件
+        """
         super().__init__(Qt.Horizontal, parent)
 
 
 class VerticalPipsPager(PipsPager):
-    """垂直方向 Pips 分页导航控件"""
+    """垂直方向 Pips 分页导航控件
+    
+    圆点沿垂直方向排列，适用于纵向滚动视图、侧边步骤导航等场景
+    作为 PipsPager 的便捷子类，默认使用垂直布局，无需手动指定方向参数
+    """
 
     def __init__(self, parent=None):
+        """初始化垂直分页导航控件
+        
+        Args:
+            parent (QWidget): 父控件，默认为 None。传入后该分页器将以垂直布局嵌入父控件
+        """
         super().__init__(Qt.Vertical, parent)

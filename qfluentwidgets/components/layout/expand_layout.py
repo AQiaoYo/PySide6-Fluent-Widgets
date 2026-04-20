@@ -1,5 +1,8 @@
 # coding: utf-8
-"""展开布局"""
+"""提供可展开折叠的自定义布局类
+
+该模块包含 ExpandLayout，用于垂直管理一组可展开控件，根据子控件的展开状态动态调整整体尺寸，常用于设置面板、分组列表等场景
+"""
 
 from PySide6.QtCore import QSize, QPoint, Qt, QEvent, QRect
 from PySide6.QtGui import QResizeEvent
@@ -7,9 +10,17 @@ from PySide6.QtWidgets import QLayout, QWidget
 
 
 class ExpandLayout(QLayout):
-    """展开布局"""
+    """垂直可展开布局
+    
+    用于排列支持展开/折叠的子控件，并根据各控件的展开状态自动计算总高度，适用于需要动态展示或隐藏详细内容的设置面板、折叠列表等界面，一般与 ExpandGroupSettingCard 配合使用
+    """
 
     def __init__(self, parent=None):
+        """初始化布局
+        
+        Args:
+            parent (QWidget | None): 父控件，默认为 None，若指定了父控件，布局将自动安装到该控件上并跟随其尺寸变化
+        """
         super().__init__(parent)
         self.__items = []
         self.__widgets = []

@@ -1,5 +1,7 @@
 # coding: utf-8
-"""浮出层组件"""
+"""浮出层组件，提供轻量级的弹出式信息提示与交互能力
+适用于显示操作确认、消息通知、附加选项等场景，支持多种弹出方向和动画效果
+"""
 
 from enum import Enum
 import sys
@@ -19,7 +21,9 @@ from .label import ImageLabel
 
 
 class FlyoutAnimationType(Enum):
-    """浮出层动画类型"""
+    """浮出层动画类型枚举
+    定义了浮出层显示和隐藏时可使用的动画效果，可根据目标控件相对位置选择合适的动画类型
+    """
     PULL_UP = 0
     DROP_DOWN = 1
     SLIDE_LEFT = 2
@@ -29,8 +33,17 @@ class FlyoutAnimationType(Enum):
 
 
 class IconWidget(QWidget):
+    """浮出层图标控件
+    用于在 FlyoutView 中展示图标，支持 FluentIconBase 与 QIcon，可通过图标直观传达信息类型
+    """
 
     def __init__(self, icon, parent=None):
+        """创建图标控件实例
+        
+        Args:
+            icon: 图标，支持 FluentIconBase 与 QIcon 类型
+            parent: 父控件，通常为 FlyoutView 实例
+        """
         super().__init__(parent=parent)
         self.setFixedSize(36, 54)
         self.icon = icon
@@ -48,9 +61,16 @@ class IconWidget(QWidget):
 
 
 class FlyoutViewBase(QWidget):
-    """浮出视图基类"""
+    """浮出视图基类
+    定义了浮出内容的基本接口与布局规范，自定义浮出视图时应继承此类并实现相关接口
+    """
 
     def __init__(self, parent=None):
+        """初始化浮出视图基类
+        
+        Args:
+            parent: 父控件，用于指定该视图的父级容器
+        """
         super().__init__(parent=parent)
 
     def addWidget(self, widget: QWidget, stretch=0, align=Qt.AlignLeft):
@@ -74,12 +94,24 @@ class FlyoutViewBase(QWidget):
 
 
 class FlyoutView(FlyoutViewBase):
-    """浮出视图"""
+    """标准浮出视图
+    内置标题、内容文本、图标和可选的关闭按钮，适用于大多数信息提示与轻量级交互场景
+    """
 
     closed = Signal()
 
     def __init__(self, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                  image: Union[str, QPixmap, QImage] = None, isClosable=False, parent=None):
+        """初始化标准浮出视图
+        
+        Args:
+            title: 标题文本，显示在浮出层顶部
+            content: 内容文本，显示在标题下方，支持富文本格式
+            icon: 图标实例，显示在左侧，传 None 时不显示图标
+            image: 图片实例，显示在内容下方，传 None 时不显示图片
+            isClosable: 是否显示关闭按钮，为 True 时允许用户手动关闭浮出层
+            parent: 父控件，用于指定该视图的父级容器
+        """
         super().__init__(parent=parent)
         """浮出视图构造函数
 
@@ -201,11 +233,24 @@ class FlyoutView(FlyoutViewBase):
 
 
 class Flyout(QWidget):
-    """浮出层"""
+    """浮出层容器控件
+    负责承载 FlyoutView 并附加到目标控件旁，自动计算显示位置并播放动画
+    构造函数重载:
+        make: 基于目标控件创建浮出层并自动定位
+        show: 基于全局坐标创建浮出层并显示
+    """
 
     closed = Signal()
 
     def __init__(self, view: FlyoutViewBase, parent=None, isDeleteOnClose=True, isMacInputMethodEnabled=False):
+        """初始化浮出层容器
+        
+        Args:
+            view: 浮出视图实例，必须是 FlyoutViewBase 的子类实例
+            parent: 父窗口或控件，用于确定浮出层的显示层级
+            isDeleteOnClose: 关闭时是否自动删除实例，为 True 可避免内存泄漏，适用于一次性浮出层
+            isMacInputMethodEnabled: 是否启用 Mac 输入法支持，仅在 macOS 平台下生效
+        """
         super().__init__(parent=parent)
         self.view = view
         self.hBoxLayout = QHBoxLayout(self)
@@ -339,11 +384,18 @@ class Flyout(QWidget):
 
 
 class FlyoutAnimationManager(QObject):
-    """浮出层动画管理器"""
+    """浮出层动画管理器基类
+    负责根据目标控件位置自动选择并执行合适的动画类型，管理浮出层的显示和隐藏动画流程
+    """
 
     managers = {}
 
     def __init__(self, flyout: Flyout):
+        """初始化动画管理器
+        
+        Args:
+            flyout: 浮出层实例，必须是 Flyout 类型，动画将应用在该实例上
+        """
         super().__init__()
         self.flyout = flyout
         self.aniGroup = QParallelAnimationGroup(self)
@@ -427,7 +479,9 @@ class FlyoutAnimationManager(QObject):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.PULL_UP)
 class PullUpFlyoutAnimationManager(FlyoutAnimationManager):
-    """向上弹出动画管理器"""
+    """向上弹出动画管理器
+    当目标控件位于触发点下方时，浮出层从下方向上滑入显示，适用于底部触发场景
+    """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -445,7 +499,9 @@ class PullUpFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.DROP_DOWN)
 class DropDownFlyoutAnimationManager(FlyoutAnimationManager):
-    """向下弹出动画管理器"""
+    """向下弹出动画管理器
+    当目标控件位于触发点上方时，浮出层从上方向下滑入显示，适用于顶部触发场景
+    """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -463,7 +519,9 @@ class DropDownFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.SLIDE_LEFT)
 class SlideLeftFlyoutAnimationManager(FlyoutAnimationManager):
-    """向左滑入动画管理器"""
+    """向左滑入动画管理器
+    当目标控件位于触发点右侧时，浮出层从右侧向左滑入显示，适用于右侧触发场景
+    """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -482,7 +540,9 @@ class SlideLeftFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.SLIDE_RIGHT)
 class SlideRightFlyoutAnimationManager(FlyoutAnimationManager):
-    """向右滑入动画管理器"""
+    """向右滑入动画管理器
+    当目标控件位于触发点左侧时，浮出层从左侧向右滑入显示，适用于左侧触发场景
+    """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -501,7 +561,9 @@ class SlideRightFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.FADE_IN)
 class FadeInFlyoutAnimationManager(FlyoutAnimationManager):
-    """淡入动画管理器"""
+    """淡入动画管理器
+    浮出层以透明度渐变的方式显示和隐藏，不依赖具体方位，适用于所有触发位置
+    """
 
     def position(self, target: QWidget):
         w = self.flyout
@@ -519,7 +581,9 @@ class FadeInFlyoutAnimationManager(FlyoutAnimationManager):
 
 @FlyoutAnimationManager.register(FlyoutAnimationType.NONE)
 class DummyFlyoutAnimationManager(FlyoutAnimationManager):
-    """无动画管理器"""
+    """无动画管理器
+    直接显示和隐藏浮出层而不播放任何过渡动画，适用于性能敏感或需要即时响应的场景
+    """
 
     def exec(self, pos: QPoint):
         """执行显示

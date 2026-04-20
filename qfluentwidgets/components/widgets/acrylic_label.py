@@ -1,5 +1,7 @@
 # coding: utf-8
-"""亚克力标签组件"""
+"""提供实现亚克力（Acrylic）材质效果的标签组件与相关工具类
+包含用于创建 Fluent Design 风格毛玻璃背景的各种控件和辅助线程，适用于需要现代模糊透明视觉效果的界面场景
+"""
 
 import warnings
 from  typing import Union
@@ -30,7 +32,9 @@ def checkAcrylicAvailability():
 
 
 class BlurCoverThread(QThread):
-    """模糊专辑封面线程"""
+    """在后台线程中对图像进行高斯模糊处理的线程
+    适用于需要避免在主线程执行耗时模糊运算的场景，通过信号将处理后的模糊图像传回主界面进行展示
+    """
 
     blurFinished = Signal(QPixmap)
 
@@ -67,7 +71,9 @@ class BlurCoverThread(QThread):
 
 
 class AcrylicTextureLabel(QLabel):
-    """亚克力纹理标签"""
+    """用于渲染亚克力材质纹理层的标签控件
+    通常作为 AcrylicLabel 的底层纹理实现，负责叠加噪声纹理与模糊背景以模拟真实的亚克力物理质感
+    """
 
     def __init__(self, tintColor: QColor, luminosityColor: QColor, noiseOpacity=0.03, parent=None):
         """
@@ -113,7 +119,9 @@ class AcrylicTextureLabel(QLabel):
 
 
 class AcrylicLabel(QLabel):
-    """亚克力标签"""
+    """具有亚克力（Acrylic）材质效果的标签控件
+    通过叠加模糊背景、色调层和噪声纹理实现 Fluent Design 风格的毛玻璃效果，适合用作卡片背景、侧边栏或弹窗的底层容器
+    """
 
     def __init__(self, blurRadius: int, tintColor: QColor, luminosityColor=QColor(255, 255, 255, 0),
                  maxBlurSize: tuple = None, parent=None):
@@ -166,7 +174,9 @@ class AcrylicLabel(QLabel):
 
 
 class AcrylicBrush:
-    """亚克力画笔"""
+    """用于绘制亚克力材质效果的画笔类
+    负责管理模糊图像的生成、色调叠加和性能优化，通常与 AcrylicLabel 配合使用以实现可复用的亚克力背景绘制逻辑
+    """
 
     def __init__(self, device: QWidget, blurRadius: int, tintColor=QColor(242, 242, 242, 150),
                  luminosityColor=QColor(255, 255, 255, 10), noiseOpacity=0.03):

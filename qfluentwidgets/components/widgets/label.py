@@ -1,6 +1,9 @@
 # coding: utf-8
 
-""" 标签组件 """
+"""标签组件模块，提供文本标签、图像标签、超链接标签和头像等常用显示控件
+包含从 Caption 到 Display 多种层级的文本标签，以及支持高 DPI 显示的图像标签
+适用于构建 Fluent Design 风格的界面信息展示层
+"""
 
 from typing import List, Union
 
@@ -19,9 +22,16 @@ from .menu import LabelContextMenu
 
 
 class PixmapLabel(QLabel):
-    """ 用于显示高 DPI 图像的标签 """
+    """用于显示高 DPI 图像的标签
+    通过自动识别设备像素比来缩放 QPixmap，确保在高分屏上图像依然清晰锐利
+    适合用于展示图标、插图、照片等需要保持视觉质量的静态图像
+    """
 
     def __init__(self, parent=None):
+        """初始化标签
+        Args:
+            parent: 父级 QWidget，默认为 None。指定父窗口后标签会随父窗口生命周期自动管理并跟随布局
+        """
         super().__init__(parent)
         self.__pixmap = QPixmap()
 
@@ -45,15 +55,22 @@ class PixmapLabel(QLabel):
 
 
 class FluentLabelBase(QLabel):
-    """ Fluent 标签基类
-
+    """Fluent 标签基类
+    定义了 Fluent Design 风格文本标签的基础样式与行为，提供统一的主题色切换和字体管理能力
+    其子类涵盖 Caption、Body、Title 等多种文本层级，可直接用于界面文本展示
+    通常不应直接实例化此类，而应使用具体层级的子类
+    
     构造函数重载:
-    * FluentLabelBase(parent: QWidget = None)
-    * FluentLabelBase(text: str, parent: QWidget = None)
+        * FluentLabelBase(parent: QWidget = None)
+        * FluentLabelBase(text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化标签基类
+        Args:
+            parent: 父级 QWidget，默认为 None。提供父窗口时标签会被纳入父窗口的控件树和布局体系
+        """
         super().__init__(parent)
         self._init()
 
@@ -145,11 +162,13 @@ class FluentLabelBase(QLabel):
 
 
 class CaptionLabel(FluentLabelBase):
-    """ Caption 文本标签
-
+    """Caption 文本标签
+    用于展示说明性、辅助性的小字号文本，如图片注释、表单提示、次要信息
+    字体尺寸较小，视觉权重低，适合在需要弱化信息层级的场景中使用
+    
     构造函数重载:
-    * CaptionLabel(parent: QWidget = None)
-    * CaptionLabel(text: str, parent: QWidget = None)
+        * CaptionLabel(parent: QWidget = None)
+        * CaptionLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -157,11 +176,13 @@ class CaptionLabel(FluentLabelBase):
 
 
 class BodyLabel(FluentLabelBase):
-    """ Body 文本标签
-
+    """Body 文本标签
+    用于展示正文或常规段落内容，是界面中最常用的标准文本层级
+    适合用于说明文字、列表内容、对话消息等需要长时间阅读的场景
+    
     构造函数重载:
-    * BodyLabel(parent: QWidget = None)
-    * BodyLabel(text: str, parent: QWidget = None)
+        * BodyLabel(parent: QWidget = None)
+        * BodyLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -169,11 +190,13 @@ class BodyLabel(FluentLabelBase):
 
 
 class StrongBodyLabel(FluentLabelBase):
-    """ Strong body 文本标签
-
+    """Strong body 文本标签
+    在 Body 文本基础上加粗显示，用于突出正文中的关键段落或强调性内容
+    适合用作列表标题、摘要、选中项文本等需要吸引视觉注意的常规信息
+    
     构造函数重载:
-    * StrongBodyLabel(parent: QWidget = None)
-    * StrongBodyLabel(text: str, parent: QWidget = None)
+        * StrongBodyLabel(parent: QWidget = None)
+        * StrongBodyLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -181,11 +204,13 @@ class StrongBodyLabel(FluentLabelBase):
 
 
 class SubtitleLabel(FluentLabelBase):
-    """ Subtitle 文本标签
-
+    """Subtitle 文本标签
+    用于展示区块副标题或卡片标题，字号介于 Body 与 Title 之间
+    适合划分页面内的内容模块，帮助用户快速定位信息段落
+    
     构造函数重载:
-    * SubtitleLabel(parent: QWidget = None)
-    * SubtitleLabel(text: str, parent: QWidget = None)
+        * SubtitleLabel(parent: QWidget = None)
+        * SubtitleLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -193,11 +218,13 @@ class SubtitleLabel(FluentLabelBase):
 
 
 class TitleLabel(FluentLabelBase):
-    """ 标题文本标签
-
+    """标题文本标签
+    用于展示页面标题或主要区域标题，具有较大的字号和视觉权重
+    通常放在页面顶部或对话框头部，作为当前视图的核心信息标识
+    
     构造函数重载:
-    * TitleLabel(parent: QWidget = None)
-    * TitleLabel(text: str, parent: QWidget = None)
+        * TitleLabel(parent: QWidget = None)
+        * TitleLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -205,11 +232,13 @@ class TitleLabel(FluentLabelBase):
 
 
 class LargeTitleLabel(FluentLabelBase):
-    """ Large 标题文本标签
-
+    """Large 标题文本标签
+    提供比 Title 更大的字号，用于首页大标题、欢迎页核心标语等强视觉场景
+    由于字号极大，应避免在常规弹窗或紧凑布局中使用，防止占用过多空间
+    
     构造函数重载:
-    * LargeTitleLabel(parent: QWidget = None)
-    * LargeTitleLabel(text: str, parent: QWidget = None)
+        * LargeTitleLabel(parent: QWidget = None)
+        * LargeTitleLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -217,11 +246,13 @@ class LargeTitleLabel(FluentLabelBase):
 
 
 class DisplayLabel(FluentLabelBase):
-    """ Display 文本标签
-
+    """Display 文本标签
+    用于展示超大号强调文本，如数据仪表中的核心指标、计数、状态码等
+    字号最大，视觉冲击力最强，适合在需要第一时间抓取用户注意力的场景使用
+    
     构造函数重载:
-    * DisplayLabel(parent: QWidget = None)
-    * DisplayLabel(text: str, parent: QWidget = None)
+        * DisplayLabel(parent: QWidget = None)
+        * DisplayLabel(text: str, parent: QWidget = None)
     """
 
     def getFont(self):
@@ -229,17 +260,23 @@ class DisplayLabel(FluentLabelBase):
 
 
 class ImageLabel(QLabel):
-    """ 图像标签
-
+    """图像标签
+    支持从文件路径、QImage 或 QPixmap 加载并展示图像，可自动适应高 DPI 显示
+    常用于用户头像、商品图片、预览缩略图等需要直接展示图像内容的场景
+    
     构造函数重载:
-    * ImageLabel(parent: QWidget = None)
-    * ImageLabel(image: str | QImage | QPixmap, parent: QWidget = None)
+        * ImageLabel(parent: QWidget = None)
+        * ImageLabel(image: str | QImage | QPixmap, parent: QWidget = None)
     """
 
     clicked = Signal()
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化图像标签
+        Args:
+            parent: 父级 QWidget，默认为 None。设置父窗口后图像标签将跟随父窗口进行内存管理和界面布局
+        """
         super().__init__(parent)
         self.image = QImage()
         self.setBorderRadius(0, 0, 0, 0)
@@ -432,11 +469,13 @@ class ImageLabel(QLabel):
 
 
 class AvatarWidget(ImageLabel):
-    """ 头像部件
-
+    """头像部件
+    专门用于展示用户头像的圆形裁剪图像控件，支持从文件路径、QImage 或 QPixmap 加载
+    广泛应用于用户信息卡片、评论区、聊天列表、设置页等需要标识用户身份的位置
+    
     构造函数重载:
-    * AvatarWidget(parent: QWidget = None)
-    * AvatarWidget(image: str | QImage | QPixmap, parent: QWidget = None)
+        * AvatarWidget(parent: QWidget = None)
+        * AvatarWidget(image: str | QImage | QPixmap, parent: QWidget = None)
     """
 
     def _postInit(self):
@@ -505,16 +544,22 @@ class AvatarWidget(ImageLabel):
 
 
 class HyperlinkLabel(QPushButton):
-    """ 超链接标签
-
+    """超链接标签
+    展示可点击的外部链接文本，点击后会调用系统默认浏览器打开目标网址
+    适合用于关于页面、授权信息、帮助文档等需要引导用户访问外部网页的场景
+    
     构造函数重载:
-    * HyperlinkLabel(parent: QWidget = None)
-    * HyperlinkLabel(text: str, parent: QWidget = None)
-    * HyperlinkLabel(url: QUrl, text: str, parent: QWidget = None)
+        * HyperlinkLabel(parent: QWidget = None)
+        * HyperlinkLabel(text: str, parent: QWidget = None)
+        * HyperlinkLabel(url: QUrl, text: str, parent: QWidget = None)
     """
 
     @singledispatchmethod
     def __init__(self, parent=None):
+        """初始化超链接标签
+        Args:
+            parent: 父级 QWidget，默认为 None。指定父窗口后超链接标签会被纳入父控件的布局与事件分发体系
+        """
         super().__init__(parent=parent)
         self._url = QUrl()
 

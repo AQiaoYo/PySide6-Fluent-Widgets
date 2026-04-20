@@ -1,5 +1,9 @@
 # coding: utf-8
-"""复选框组件"""
+"""提供 Fluent Design 风格的复选框组件及相关辅助类
+
+该模块包含 CheckBox 控件及其内部使用的图标绘制类 CheckBoxIcon 和状态枚举 CheckBoxState，
+用于在应用程序中构建支持多选、三态切换的现代化复选框界面
+"""
 from enum import Enum
 
 from PySide6.QtCore import Qt
@@ -14,7 +18,11 @@ from ...common.font import setFont
 
 
 class CheckBoxIcon(FluentIconBase, Enum):
-    """复选框图标"""
+    """复选框图标绘制控件
+    
+    负责根据 CheckBox 的当前状态绘制勾选、未勾选或部分勾选的图标效果，
+    通常由 CheckBox 内部自动创建和管理，无需单独实例化使用
+    """
 
     ACCEPT = "Accept"
     PARTIAL_ACCEPT = "PartialAccept"
@@ -25,7 +33,11 @@ class CheckBoxIcon(FluentIconBase, Enum):
 
 
 class CheckBoxState(Enum):
-    """复选框状态"""
+    """复选框状态枚举
+    
+    定义复选框可选中的状态类型，包括未选中、选中和部分选中三种状态，
+    常用于需要支持三态逻辑的业务场景，如树形控件中的级联选择
+    """
 
     NORMAL = 0
     HOVER = 1
@@ -38,8 +50,11 @@ class CheckBoxState(Enum):
 
 
 class CheckBox(QCheckBox):
-    """复选框
-
+    """Fluent Design 风格的复选框控件
+    
+    支持显示文本标签和三种勾选状态，适用于表单、设置面板等需要用户进行多项选择的场景，
+    可响应点击事件并自动切换选中状态，同时提供状态变化信号供外部监听
+    
     构造函数重载:
     * CheckBox(parent: QWidget = None)
     * CheckBox(text: str, parent: QWidget = None)
@@ -47,6 +62,11 @@ class CheckBox(QCheckBox):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化图标控件
+        
+        Args:
+            parent (QWidget): 父控件实例，用于管理该图标控件的显示层级和生命周期；传 None 时图标将作为独立窗口显示，通常应传入所属的 CheckBox 实例
+        """
         super().__init__(parent)
         setFont(self)
         FluentStyleSheet.CHECK_BOX.apply(self)

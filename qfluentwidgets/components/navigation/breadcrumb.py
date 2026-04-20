@@ -1,5 +1,9 @@
 # coding: utf-8
-"""面包屑导航组件"""
+"""面包屑导航组件
+
+提供 BreadcrumbBar、BreadcrumbItem 和 ElideButton 等控件，用于构建层级路径导航界面
+常在需要展示页面层级结构、文件路径或目录深度的场景中使用
+"""
 
 import math
 
@@ -15,11 +19,20 @@ from ...components.widgets.menu import RoundMenu, MenuAnimationType
 
 
 class BreadcrumbWidget(QWidget):
-    """面包屑部件"""
+    """面包屑部件基类
+    
+    封装面包屑项的基础样式与交互行为，作为 BreadcrumbItem 和 ElideButton 的公共父类
+    通常不直接实例化，而是由 BreadcrumbBar 在添加节点时自动创建和管理
+    """
 
     clicked = Signal()
 
     def __init__(self, parent=None):
+        """初始化面包屑部件
+        
+        Args:
+            parent (QWidget): 父级窗口部件，传入后该对象将随父对象自动销毁并参与布局，传 None 时则作为独立顶层窗口
+        """
         super().__init__(parent=parent)
         self.isHover = False
         self.isPressed = False
@@ -43,9 +56,18 @@ class BreadcrumbWidget(QWidget):
 
 
 class ElideButton(BreadcrumbWidget):
-    """省略号按钮"""
+    """省略号按钮
+    
+    在面包屑路径过长或容器宽度不足时显示，用于折叠中间层级的节点以节省空间
+    点击后通常会展开被省略的路径项或弹出菜单供用户选择
+    """
 
     def __init__(self, parent=None):
+        """初始化省略号按钮
+        
+        Args:
+            parent (QWidget): 父级窗口部件，传入后该对象将随父对象自动销毁并参与布局，传 None 时则作为独立顶层窗口
+        """
         super().__init__(parent)
         self.setFixedSize(16, 16)
 
@@ -69,9 +91,21 @@ class ElideButton(BreadcrumbWidget):
 
 
 class BreadcrumbItem(BreadcrumbWidget):
-    """面包屑项"""
+    """面包屑导航项
+    
+    表示层级路径中的一个节点，负责显示文本并响应点击事件以触发路由切换
+    一般通过 BreadcrumbBar.addItem 添加到导航栏中，由导航栏统一控制其布局与激活状态
+    """
 
     def __init__(self, routeKey: str, text: str, index: int, parent=None):
+        """初始化面包屑项
+        
+        Args:
+            routeKey (str): 路由键，用于唯一标识该节点并在点击时定位到对应页面或层级
+            text (str): 节点显示的文本内容
+            index (int): 节点在面包屑路径中的索引位置，决定其排列顺序
+            parent (QWidget): 父级窗口部件，通常为所属的 BreadcrumbBar，传入后由导航栏统一管理布局与生命周期，传 None 时则作为独立顶层窗口
+        """
         super().__init__(parent=parent)
         self.text = text
         self.routeKey = routeKey
@@ -144,12 +178,21 @@ class BreadcrumbItem(BreadcrumbWidget):
 
 
 class BreadcrumbBar(QWidget):
-    """面包屑导航栏"""
+    """面包屑导航栏
+    
+    在内容区域顶部横向展示当前页面的层级路径，支持动态添加、移除节点以及自动省略溢出部分
+    适用于多级页面导航、文件路径展示或需要快速返回上级目录的场景
+    """
 
     currentItemChanged = Signal(str)
     currentIndexChanged = Signal(int)
 
     def __init__(self, parent=None):
+        """初始化面包屑导航栏
+        
+        Args:
+            parent (QWidget): 父级窗口部件，传入后该对象将随父对象自动销毁并参与布局，传 None 时则作为独立顶层窗口
+        """
         super().__init__(parent=parent)
         self.itemMap = {}       # type: Dict[BreadcrumbItem]
         self.items = []         # type: 列表[BreadcrumbItem]

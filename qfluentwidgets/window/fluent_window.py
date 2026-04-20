@@ -22,9 +22,17 @@ if TYPE_CHECKING:
 
 
 class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
-    """ Fluent 部件 """
+    """支持 Fluent 设计系统的自定义部件基类，提供主题感知背景和亚克力/云母材质渲染能力
+    
+    通常作为需要跟随系统主题自动切换背景色的可视化组件的基类使用，一般由框架内部派生，不建议直接实例化
+    """
 
     def __init__(self, parent=None):
+        """初始化 Fluent 部件
+        
+        Args:
+            parent: 父部件，默认为 None。指定父部件时该部件将随父部件一同销毁并内嵌显示
+        """
         self._isMicaEnabled = False
         self._lightBackgroundColor = QColor(240, 244, 249)
         self._darkBackgroundColor = QColor(32, 32, 32)
@@ -119,9 +127,17 @@ class FluentWidget(BackgroundAnimationWidget, FramelessWindow):
 
 
 class FluentWindowBase(FluentWidget):
-    """ Fluent 窗口基类 """
+    """所有 Fluent 风格窗口的抽象基类，封装了导航视图、堆叠窗口和自定义标题栏的通用交互逻辑
+    
+    继承该类可快速构建具有 Fluent 设计特征的自定义主窗口，建议优先使用 FluentWindow、MSFluentWindow 或 SplitFluentWindow 等具体子类
+    """
 
     def __init__(self, parent=None):
+        """初始化窗口基类
+        
+        Args:
+            parent: 父窗口，默认为 None。作为主窗口时不应指定父部件
+        """
         super().__init__(parent=parent)
         self.hBoxLayout = QHBoxLayout(self)
         self.stackedWidget = StackedWidget(self)
@@ -185,9 +201,18 @@ class FluentWindowBase(FluentWidget):
 
 
 class FluentTitleBarButton(TitleBarButton):
-    """ Fluent 标题栏按钮 """
+    """Fluent 风格标题栏上的窗口控制按钮，用于实现最小化、最大化/还原和关闭操作
+    
+    按钮内置悬浮高亮和按下反馈动画，仅作为 FluentTitleBar 及其子类的内部组件使用
+    """
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None):
+        """初始化标题栏按钮
+        
+        Args:
+            icon: 按钮显示的图标，类型为 QIcon
+            parent: 父部件，通常为标题栏实例
+        """
         super().__init__(parent)
         self.setIcon(icon)
 
@@ -218,9 +243,17 @@ class FluentTitleBarButton(TitleBarButton):
 
 
 class FluentTitleBar(TitleBar):
-    """ Fluent 标题栏"""
+    """Fluent 风格窗口的标准标题栏，包含窗口标题、图标以及最小化、最大化和关闭按钮
+    
+    支持响应式布局与按钮自定义，适用于 FluentWindow 等标准单栏窗口
+    """
 
     def __init__(self, parent):
+        """初始化标题栏
+        
+        Args:
+            parent: 父窗口，默认为 None。必须为有效窗口以便标题栏控制按钮能正确操作窗口状态
+        """
         super().__init__(parent)
         self.setFixedHeight(48)
         self.hBoxLayout.removeWidget(self.minBtn)
@@ -264,9 +297,17 @@ class FluentTitleBar(TitleBar):
 
 
 class FluentWindow(FluentWindowBase):
-    """ Fluent 窗口 """
+    """标准 Fluent 风格的主窗口，集成左侧可折叠导航栏、堆叠内容区和自定义标题栏
+    
+    适用于需要多页面导航的桌面应用程序，通过 addSubInterface 方法添加子界面并自动生成导航项
+    """
 
     def __init__(self, parent=None):
+        """初始化主窗口
+        
+        Args:
+            parent: 父窗口，默认为 None。作为主窗口使用时通常不指定父部件
+        """
         super().__init__(parent)
         from ..components.navigation import NavigationInterface
 
@@ -350,16 +391,34 @@ class FluentWindow(FluentWindowBase):
 
 
 class MSFluentTitleBar(FluentTitleBar):
+    """Microsoft Store 风格的标题栏，在标准标题栏基础上集成返回按钮与更紧凑的布局
+    
+    适用于 MSFluentWindow，用于构建具有层级导航回退能力的现代应用界面
+    """
 
     def __init__(self, parent):
+        """初始化 Microsoft Store 风格标题栏
+        
+        Args:
+            parent: 父窗口，默认为 None
+        """
         super().__init__(parent)
         self.hBoxLayout.insertSpacing(0, 20)
         self.hBoxLayout.insertSpacing(2, 2)
 
 
 class FluentWidgetTitleBar(FluentTitleBar):
+    """用于内嵌部件或对话框场景的标题栏，提供标题文本展示和关闭控制功能
+    
+    适用于需要在非顶层窗口（如卡片、弹窗）中模拟标题栏的自定义容器
+    """
 
     def __init__(self, parent):
+        """初始化部件标题栏
+        
+        Args:
+            parent: 父部件，默认为 None
+        """
         super().__init__(parent)
 
         if sys.platform == "darwin":
@@ -376,9 +435,17 @@ class FluentWidgetTitleBar(FluentTitleBar):
 
 
 class MSFluentWindow(FluentWindowBase):
-    """ Microsoft Store 风格的 Fluent 窗口 """
+    """Microsoft Store 风格的 Fluent 主窗口，采用左侧导航与顶部返回按钮的组合布局
+    
+    适用于具有明确层级结构、需要频繁向前向后导航的现代桌面应用，视觉上更接近微软官方商店的设计语言
+    """
 
     def __init__(self, parent=None):
+        """初始化主窗口
+        
+        Args:
+            parent: 父窗口，默认为 None。作为主窗口使用时通常不指定父部件
+        """
         super().__init__(parent)
         from ..components.navigation import NavigationBar
 
@@ -446,8 +513,17 @@ class MSFluentWindow(FluentWindowBase):
 
 
 class SplitTitleBar(TitleBar):
+    """分栏式 Fluent 窗口的专用标题栏，支持在标题区域整合导航指示器与窗口控制按钮
+    
+    通常与 SplitFluentWindow 配合使用，为左右分栏布局提供统一的顶部视觉控制区域
+    """
 
     def __init__(self, parent):
+        """初始化分栏标题栏
+        
+        Args:
+            parent: 父窗口，默认为 None
+        """
         super().__init__(parent)
         # 添加窗口图标.
         self.iconLabel = QLabel(self)
@@ -473,9 +549,17 @@ class SplitTitleBar(TitleBar):
 
 
 class SplitFluentWindow(FluentWindow):
-    """分栏风格的 Fluent 窗口"""
+    """分栏式 Fluent 风格主窗口，具有可折叠的左侧导航栏与右侧内容区，类似 Windows 11 文件资源管理器布局
+    
+    适用于需要同时展示导航树与详细内容的场景，如文件管理器、设置中心或邮件客户端
+    """
 
     def __init__(self, parent=None):
+        """初始化主窗口
+        
+        Args:
+            parent: 父窗口，默认为 None。作为主窗口使用时通常不指定父部件
+        """
         super().__init__(parent)
         self.setTitleBar(SplitTitleBar(self))
 
@@ -489,6 +573,9 @@ class SplitFluentWindow(FluentWindow):
 
 
 class FluentBackgroundTheme:
-    """Fluent 背景主题"""
+    """Fluent 窗口背景主题枚举，定义自动、亮色、深色以及亚克力、云母等材质背景选项
+    
+    用于控制 FluentWindowBase 系列窗口的背景渲染效果，可在构造时传入或通过主题切换接口动态调整
+    """
     DEFAULT = (QColor(243, 243, 243), QColor(32, 32, 32))   # 亮色, 暗色
     DEFAULT_BLUE = (QColor(240, 244, 249), QColor(25, 33, 42))

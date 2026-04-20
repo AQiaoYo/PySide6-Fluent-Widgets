@@ -1,5 +1,9 @@
 # coding: utf-8
-"""命令栏组件"""
+"""命令栏组件
+
+提供用于构建命令栏（CommandBar）的一系列控件，包括命令按钮、分隔符和溢出菜单等
+通常用于窗口标题栏下方或工具区域，承载页面级的快捷操作入口
+"""
 
 from typing import Iterable, List, Tuple, Union
 
@@ -17,8 +21,11 @@ from .flyout import FlyoutViewBase, Flyout
 
 
 class CommandButton(TransparentToggleToolButton):
-    """Command 按钮
-
+    """命令按钮
+    
+    在命令栏中显示带图标和文本的操作按钮，支持点击触发命令和自定义工具提示
+    适用于将常用操作以直观方式平铺展示的场景，是 CommandBar 的核心组成元素
+    
     构造函数重载:
         * CommandButton(parent: QWidget = None)
         * CommandButton(icon: QIcon | str | FluentIconBase = None, parent: QWidget = None)
@@ -136,14 +143,22 @@ class CommandButton(TransparentToggleToolButton):
 
 
 class CommandToolTipFilter(ToolTipFilter):
-    """Command 工具提示 filter"""
+    """命令按钮工具提示过滤器
+    
+    为 CommandButton 提供增强的工具提示行为，当按钮文本被截断时自动显示完整内容
+    一般在按钮文本长度超出显示区域时触发，避免用户无法识别被省略的命令名称
+    """
 
     def _canShowToolTip(self) -> bool:
         return super()._canShowToolTip() and self.parent().isIconOnly()
 
 
 class MoreActionsButton(CommandButton):
-    """More action 按钮"""
+    """更多操作按钮
+    
+    当命令栏空间不足时，用于展开被折叠命令的溢出菜单按钮
+    通常由 CommandBar 内部自动创建和管理，无需手动添加到界面中
+    """
 
     def _postInit(self):
         super()._postInit()
@@ -159,9 +174,18 @@ class MoreActionsButton(CommandButton):
 
 
 class CommandSeparator(QWidget):
-    """Command 分隔符"""
+    """命令分隔符
+    
+    在命令栏中用于视觉上分隔不同功能分组的竖线或横线
+    适合将同类命令聚合并与其他组区隔，提升命令栏的可读性和结构层次
+    """
 
     def __init__(self, parent=None):
+        """初始化命令分隔符
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__(parent)
         self.setFixedSize(9, 34)
 
@@ -173,9 +197,18 @@ class CommandSeparator(QWidget):
 
 
 class CommandMenu(RoundMenu):
-    """Command 菜单"""
+    """命令菜单按钮
+    
+    在命令栏中显示带下拉箭头的按钮，点击后弹出选项菜单以承载二级命令
+    适合命令数量较多或需要分组展示的场景，可作为 CommandButton 的补充形式
+    """
 
     def __init__(self, parent=None):
+        """初始化命令菜单
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__("", parent)
         self.setItemHeight(32)
         self.view.setIconSize(QSize(16, 16))
@@ -185,9 +218,18 @@ class CommandMenu(RoundMenu):
 
 
 class CommandBar(QFrame):
-    """命令栏"""
+    """命令栏
+    
+    水平排列命令按钮和分隔符的容器控件，支持根据可用宽度自动折叠溢出命令到更多菜单
+    常用于窗口顶部、工具面板或标题栏区域，为页面提供一组高频操作的快捷入口
+    """
 
     def __init__(self, parent=None):
+        """初始化命令栏
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__(parent=parent)
         self._widgets = []  # type: 列表[QWidget]
         self._hiddenWidgets = []  # type: 列表[QWidget]
@@ -487,9 +529,18 @@ class CommandBar(QFrame):
 
 
 class CommandViewMenu(CommandMenu):
-    """Command 视图菜单"""
+    """命令视图菜单
+    
+    在命令栏视图（CommandBarView）中使用的下拉菜单，用于展示被折叠或收起的命令项
+    一般与 CommandViewBar 配合使用，实现弹出层内的命令分组展示
+    """
 
     def __init__(self, parent=None):
+        """初始化命令视图菜单
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__(parent)
         self.view.setObjectName('commandListWidget')
 
@@ -503,9 +554,18 @@ class CommandViewMenu(CommandMenu):
 
 
 class CommandViewBar(CommandBar):
-    """Command 视图栏"""
+    """命令视图栏
+    
+    命令栏弹出视图中的水平命令容器，用于在 Flyout 或弹层中承载一组操作按钮
+    适合在右键菜单、悬浮面板等临时视图中快速嵌入命令操作区域
+    """
 
     def __init__(self, parent=None):
+        """初始化命令视图栏
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__(parent)
         self.setMenuDropDown(True)
 
@@ -562,9 +622,18 @@ class CommandViewBar(CommandBar):
 
 
 class CommandBarView(FlyoutViewBase):
-    """命令栏视图"""
+    """命令栏视图
+    
+    以弹出层形式展示的命令栏容器，可在任意位置悬浮显示一组命令按钮
+    常用于右键上下文菜单、详情页操作浮层等需要临时展示操作入口的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化命令栏视图
+        
+        Args:
+            parent: 父级 QWidget，默认为 None
+        """
         super().__init__(parent=parent)
         self.bar = CommandViewBar(self)
         self.hBoxLayout = QHBoxLayout(self)

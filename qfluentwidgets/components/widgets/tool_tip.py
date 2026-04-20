@@ -13,7 +13,11 @@ from ...common.screen import getCurrentScreenGeometry
 
 
 class ToolTipPosition(Enum):
-    """工具提示位置"""
+    """定义工具提示相对于目标部件的显示方位
+    
+     通过枚举值指定 ToolTip 的弹出位置，配合 ToolTipPositionManager 子类实现精准定位
+     常用于 ToolTipFilter 和各类视图委托中控制提示气泡的朝向
+    """
 
     TOP = 0
     BOTTOM = 1
@@ -26,14 +30,22 @@ class ToolTipPosition(Enum):
 
 
 class ItemViewToolTipType(Enum):
-    """项视图工具提示类型"""
+    """定义项视图工具提示的内容展示策略
+    
+     用于区分项视图中工具提示应显示完整数据、富文本还是仅当文本截断时显示
+     配合 ItemViewToolTipDelegate 决定 QListView、QTableView 等控件的提示行为
+    """
 
     LIST = 0
     TABLE = 1
 
 
 class ToolTip(QFrame):
-    """工具提示"""
+    """自定义工具提示窗口，支持富文本、阴影与圆角边框
+    
+     替代原生 QToolTip，提供更美观的视觉效果和更灵活的布局控制
+     通常由 ToolTipFilter 或视图委托触发显示，不建议在业务代码中直接实例化
+    """
 
     def __init__(self, text='', parent=None):
         """初始化工具提示
@@ -182,7 +194,11 @@ class ToolTip(QFrame):
 
 
 class ToolTipPositionManager:
-    """工具提示位置管理器"""
+    """计算工具提示窗口显示坐标的抽象基类
+    
+     根据目标部件几何信息和工具提示尺寸，推算出不超出屏幕且避让鼠标的最佳位置
+     子类需实现 position() 方法以提供具体方位策略
+    """
 
     def position(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = self._pos(tooltip, parent)
@@ -218,7 +234,10 @@ class ToolTipPositionManager:
 
 
 class TopToolTipManager(ToolTipPositionManager):
-    """顶部工具提示位置管理器"""
+    """将工具提示显示在目标部件上方的位置策略
+    
+     当垂直空间充足时优先置于目标顶部，若顶部空间不足则自动回退到其他方位
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget):
         pos = parent.mapToGlobal(QPoint())
@@ -228,7 +247,10 @@ class TopToolTipManager(ToolTipPositionManager):
 
 
 class BottomToolTipManager(ToolTipPositionManager):
-    """底部工具提示位置管理器"""
+    """将工具提示显示在目标部件下方的位置策略
+    
+     适用于目标上方空间受限或希望提示向下延展的场景，会自动检测底部边界
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -238,7 +260,10 @@ class BottomToolTipManager(ToolTipPositionManager):
 
 
 class LeftToolTipManager(ToolTipPositionManager):
-    """左侧工具提示位置管理器"""
+    """将工具提示显示在目标部件左侧的位置策略
+    
+     适用于横向空间充裕且目标右侧有重要内容需要避让的界面布局
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -248,7 +273,10 @@ class LeftToolTipManager(ToolTipPositionManager):
 
 
 class RightToolTipManager(ToolTipPositionManager):
-    """右侧工具提示位置管理器"""
+    """将工具提示显示在目标部件右侧的位置策略
+    
+     为默认的横向弹出策略，适合阅读顺序从左到右的提示内容展示
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -258,7 +286,10 @@ class RightToolTipManager(ToolTipPositionManager):
 
 
 class TopRightToolTipManager(ToolTipPositionManager):
-    """右上工具提示位置管理器"""
+    """将工具提示显示在目标部件右上方的位置策略
+    
+     兼顾顶部与右侧空间，适用于目标左下角存在关联控件或需跟随鼠标偏右的场景
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -269,7 +300,10 @@ class TopRightToolTipManager(ToolTipPositionManager):
 
 
 class TopLeftToolTipManager(ToolTipPositionManager):
-    """左上工具提示位置管理器"""
+    """将工具提示显示在目标部件左上方的位置策略
+    
+     适用于目标右侧被其他面板占据，或希望提示与目标左边缘对齐的界面布局
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -279,7 +313,10 @@ class TopLeftToolTipManager(ToolTipPositionManager):
 
 
 class BottomRightToolTipManager(ToolTipPositionManager):
-    """右下工具提示位置管理器"""
+    """将工具提示显示在目标部件右下方的位置策略
+    
+     当目标上方及左侧空间均受限时，可将提示置于右下角以充分利用剩余视口
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -290,7 +327,10 @@ class BottomRightToolTipManager(ToolTipPositionManager):
 
 
 class BottomLeftToolTipManager(ToolTipPositionManager):
-    """左下工具提示位置管理器"""
+    """将工具提示显示在目标部件左下方的位置策略
+    
+     适合目标上方空间不足且右侧存在重要交互区域时的提示定位
+    """
 
     def _pos(self, tooltip: ToolTip, parent: QWidget) -> QPoint:
         pos = parent.mapToGlobal(QPoint())
@@ -300,9 +340,18 @@ class BottomLeftToolTipManager(ToolTipPositionManager):
 
 
 class ItemViewToolTipManager(ToolTipPositionManager):
-    """项视图工具提示位置管理器"""
+    """为 QListView、QTableView 等项视图定制的工具提示位置管理器
+    
+     根据单元格或列表项的矩形区域计算提示位置，确保提示与目标项精准对齐
+     支持在视图滚动时动态更新坐标，避免提示偏离对应数据项
+    """
 
     def __init__(self, itemRect=QRect()):
+        """初始化项视图工具提示位置管理器
+        
+         Args:
+             itemRect: 目标项在视图中的矩形区域，用于计算提示基准坐标
+        """
         super().__init__()
         self.itemRect = itemRect
 
@@ -332,7 +381,11 @@ class ItemViewToolTipManager(ToolTipPositionManager):
 
 
 class TableItemToolTipManager(ItemViewToolTipManager):
-    """表格项工具提示位置管理器"""
+    """为 QTableWidget 单元格定制的工具提示位置管理器
+    
+     继承自 ItemViewToolTipManager，针对表格行列特性优化了边界检测逻辑
+     在单元格文本被截断时自动计算最佳提示位置，避免遮挡相邻编辑单元格
+    """
 
     def _pos(self, tooltip: ToolTip, view: QTableView) -> QPoint:
         pos = view.mapToGlobal(self.itemRect.topLeft())
@@ -343,7 +396,11 @@ class TableItemToolTipManager(ItemViewToolTipManager):
 
 
 class ToolTipFilter(QObject):
-    """为部件提供工具提示过滤器"""
+    """为任意 QWidget 提供悬停显示自定义 ToolTip 的事件过滤器
+    
+     安装到目标部件后，自动拦截 enter、leave 和 mouse move 事件来控制提示的显隐与时序
+     支持通过 showDelay、hideDelay 等参数精细化控制提示的弹出与消失行为
+    """
 
     def __init__(self, parent: QWidget, showDelay=300, position=ToolTipPosition.TOP):
         """初始化工具提示过滤器
@@ -414,7 +471,11 @@ class ToolTipFilter(QObject):
 
 
 class ItemViewToolTip(ToolTip):
-    """项视图工具提示"""
+    """用于项视图控件的富文本工具提示窗口
+    
+     在 QListView、QTreeView 等控件中替代系统默认提示，支持显示样式化的多行文本
+     通常由 ItemViewToolTipDelegate 创建和管理，跟随当前数据项移动
+    """
 
     def adjustPos(self, view: QAbstractItemView, itemRect: QRect, tooltipType: ItemViewToolTipType):
         manager = ItemViewToolTipManager.make(tooltipType, itemRect)
@@ -423,9 +484,20 @@ class ItemViewToolTip(ToolTip):
 
 
 class ItemViewToolTipDelegate(ToolTipFilter):
-    """项视图工具提示委托"""
+    """为项视图提供自定义工具提示支持的委托基类
+    
+     继承自 QStyledItemDelegate，在保持原有绘制逻辑的同时增强提示能力
+     支持根据 ItemViewToolTipType 策略决定何时以及如何展示 ItemViewToolTip
+    """
 
     def __init__(self, parent: QAbstractItemView, showDelay=300, tooltipType=ItemViewToolTipType.TABLE):
+        """初始化项视图工具提示委托
+        
+         Args:
+             parent: 委托的父对象，通常为对应的项视图控件
+             showDelay: 鼠标悬停后延迟显示的毫秒数，控制提示响应灵敏度
+             tooltipType: 工具提示类型，决定提示内容的生成策略与展示方式
+        """
         super().__init__(parent, showDelay, ToolTipPosition.TOP)
         self.text = ""
         self.currentIndex = None

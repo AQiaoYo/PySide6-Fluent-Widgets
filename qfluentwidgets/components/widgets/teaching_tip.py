@@ -13,7 +13,10 @@ from .flyout import FlyoutView, FlyoutViewBase
 
 
 class TeachingTipTailPosition(Enum):
-    """教学提示尾部位置"""
+    """教学提示尾部位置
+    用于指定 TeachingTip 气泡框尾部箭头相对于内容区域的方位，
+    与 TeachingTipManager 配合使用时决定提示框的弹出方向
+    """
     TOP = 0
     BOTTOM = 1
     LEFT = 2
@@ -30,6 +33,10 @@ class TeachingTipTailPosition(Enum):
 
 
 class ImagePosition(Enum):
+    """图片在提示框中的显示位置
+    用于控制 TeachingTipView 中配图相对于文本内容的布局方式，
+    支持设置图片位于文本上方、下方或左右两侧以适应不同内容结构
+    """
     TOP = 0
     BOTTOM = 1
     LEFT = 2
@@ -37,11 +44,23 @@ class ImagePosition(Enum):
 
 
 class TeachingTipView(FlyoutView):
-    """教学提示视图"""
+    """教学提示视图
+    负责构建提示框的内部布局，支持标题、正文、图标、配图及操作按钮的组合展示，
+    可通过 addWidget 等方法向底部按钮区域追加自定义控件以扩展交互能力
+    """
 
     def __init__(self, title: str, content: str, icon: Union[FluentIconBase, QIcon, str] = None,
                  image: Union[str, QPixmap, QImage] = None, isClosable=True, tailPosition=TeachingTipTailPosition.BOTTOM,
                  parent=None):
+        """Args:
+            title (str): 提示标题，显示在内容区顶部
+            content (str): 提示正文，支持富文本格式
+            icon (QIcon | None): 标题左侧的图标，None 时不显示图标
+            image (str | QPixmap | None): 提示配图的路径或像素图，None 时不显示配图
+            isClosable (bool): 是否显示关闭按钮，True 时允许用户手动关闭提示
+            tailPosition (TeachingTipTailPosition): 尾部箭头方位，影响内容区与气泡边框的间距
+            parent (QWidget | None): 父控件
+        """
         self.manager = TeachingTipManager.make(tailPosition)
         self.hBoxLayout = QHBoxLayout()
         self.hBoxLayout.setContentsMargins(0, 0, 0, 0)
@@ -84,9 +103,17 @@ class TeachingTipView(FlyoutView):
 
 
 class TeachTipBubble(QWidget):
-    """教学提示气泡"""
+    """教学提示气泡
+    承载 TeachingTipView 的圆角气泡窗口，负责绘制背景、边框和尾部箭头，
+    通常不应直接使用，而是通过 TeachingTip 或 PopupTeachingTip 进行创建与管理
+    """
 
     def __init__(self, view: FlyoutViewBase, tailPosition=TeachingTipTailPosition.BOTTOM, parent=None):
+        """Args:
+            view (TeachingTipView): 气泡内部需要展示的教学提示视图
+            tailPosition (TeachingTipTailPosition): 尾部箭头方位，决定气泡形状与留白
+            parent (QWidget | None): 父控件
+        """
         super().__init__(parent=parent)
         self.manager = TeachingTipManager.make(tailPosition)
         self.hBoxLayout = QHBoxLayout(self)
@@ -114,7 +141,10 @@ class TeachTipBubble(QWidget):
 
 
 class TeachingTip(QWidget):
-    """ 教学提示 """
+    """非弹出式教学提示
+    直接嵌入到界面布局中的提示组件，不依赖目标控件定位，
+    适用于需要常驻显示或跟随界面滚动的引导场景，与 PopupTeachingTip 的临时弹出特性形成互补
+    """
 
     def __init__(self, view: FlyoutViewBase, target: QWidget, duration=1000,
                  tailPosition=TeachingTipTailPosition.BOTTOM, parent=None, isDeleteOnClose=True):
@@ -258,18 +288,36 @@ class TeachingTip(QWidget):
 
 
 class PopupTeachingTip(TeachingTip):
-    """弹出式教学提示"""
+    """弹出式教学提示
+    以气泡形式附着在目标控件旁边的临时提示，支持自动关闭计时，
+    适用于新手引导、功能介绍等需要精准指向目标区域且无需常驻的场景
+    """
 
     def __init__(self, view: FlyoutViewBase, target: QWidget, duration=1000,
                  tailPosition=TeachingTipTailPosition.BOTTOM, parent=None, isDeleteOnClose=True):
+        """Args:
+            view (TeachingTipView): 教学提示视图，定义气泡内部展示内容
+            target (QWidget): 气泡箭头指向的目标控件
+            duration (int): 自动关闭延迟，单位毫秒，-1 表示不自动关闭
+            tailPosition (TeachingTipTailPosition): 尾部箭头方位，影响气泡弹出位置
+            parent (QWidget | None): 父控件
+            isDeleteOnClose (bool): 关闭时是否销毁实例，True 可避免内存泄漏
+        """
         super().__init__(view, target, duration, tailPosition, parent, isDeleteOnClose)
         self.setWindowFlags(Qt.Popup | Qt.FramelessWindowHint | Qt.NoDropShadowWindowHint)
 
 
 class TeachingTipManager(QObject):
-    """教学提示管理器"""
+    """教学提示位置管理器
+    负责根据目标控件的几何信息与尾部方位，计算气泡应弹出的屏幕坐标，
+    子类通过重写 position 方法实现不同的定位策略，通常与 PopupTeachingTip 配合使用以完成精准定位
+    """
 
     def __init__(self):
+        """初始化教学提示位置管理器
+        Args:
+            无
+        """
         super().__init__()
 
     def doLayout(self, tip: TeachTipBubble):
@@ -345,7 +393,10 @@ class TeachingTipManager(QObject):
 
 
 class TopTailTeachingTipManager(TeachingTipManager):
-    """顶部尾部教学提示管理器"""
+    """顶部尾部教学提示管理器
+    气泡尾部箭头位于目标控件上方，提示框整体显示在目标下方，
+    适用于目标控件上方空间不足，需要在下方展示引导信息的场景
+    """
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 8, 0, 0)
@@ -373,7 +424,10 @@ class TopTailTeachingTipManager(TeachingTipManager):
 
 
 class BottomTailTeachingTipManager(TeachingTipManager):
-    """底部尾部教学提示管理器"""
+    """底部尾部教学提示管理器
+    气泡尾部箭头位于目标控件下方，提示框整体显示在目标上方，
+    适用于目标控件下方空间不足，需要在上方展示引导信息的场景
+    """
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 0, 0, 8)
@@ -398,7 +452,10 @@ class BottomTailTeachingTipManager(TeachingTipManager):
 
 
 class LeftTailTeachingTipManager(TeachingTipManager):
-    """左侧尾部教学提示管理器"""
+    """左侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件左侧，提示框整体显示在目标右侧，
+    适用于目标控件左侧有遮挡或需要在右侧展示引导信息的场景
+    """
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(8, 0, 0, 0)
@@ -427,7 +484,10 @@ class LeftTailTeachingTipManager(TeachingTipManager):
 
 
 class RightTailTeachingTipManager(TeachingTipManager):
-    """右侧尾部教学提示管理器"""
+    """右侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件右侧，提示框整体显示在目标左侧，
+    适用于目标控件右侧有遮挡或需要在左侧展示引导信息的场景
+    """
 
     def doLayout(self, tip):
         tip.hBoxLayout.setContentsMargins(0, 0, 8, 0)
@@ -456,7 +516,10 @@ class RightTailTeachingTipManager(TeachingTipManager):
 
 
 class TopLeftTailTeachingTipManager(TopTailTeachingTipManager):
-    """顶部左侧尾部教学提示管理器"""
+    """顶部左侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件顶部的左侧区域，提示框向下展开，
+    适用于需要在目标控件下方偏左位置精准定位提示的场景
+    """
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -478,7 +541,10 @@ class TopLeftTailTeachingTipManager(TopTailTeachingTipManager):
 
 
 class TopRightTailTeachingTipManager(TopTailTeachingTipManager):
-    """顶部右侧尾部教学提示管理器"""
+    """顶部右侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件顶部的右侧区域，提示框向下展开，
+    适用于需要在目标控件下方偏右位置精准定位提示的场景
+    """
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -500,7 +566,10 @@ class TopRightTailTeachingTipManager(TopTailTeachingTipManager):
 
 
 class BottomLeftTailTeachingTipManager(BottomTailTeachingTipManager):
-    """底部左侧尾部教学提示管理器"""
+    """底部左侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件底部的左侧区域，提示框向上展开，
+    适用于需要在目标控件上方偏左位置精准定位提示的场景
+    """
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -522,7 +591,10 @@ class BottomLeftTailTeachingTipManager(BottomTailTeachingTipManager):
 
 
 class BottomRightTailTeachingTipManager(BottomTailTeachingTipManager):
-    """底部右侧尾部教学提示管理器"""
+    """底部右侧尾部教学提示管理器
+    气泡尾部箭头位于目标控件底部的右侧区域，提示框向上展开，
+    适用于需要在目标控件上方偏右位置精准定位提示的场景
+    """
 
     def draw(self, tip, painter):
         w, h = tip.width(), tip.height()
@@ -544,7 +616,10 @@ class BottomRightTailTeachingTipManager(BottomTailTeachingTipManager):
 
 
 class LeftTopTailTeachingTipManager(LeftTailTeachingTipManager):
-    """左侧顶部尾部教学提示管理器"""
+    """左侧顶部尾部教学提示管理器
+    气泡尾部箭头位于目标控件左侧的顶部区域，提示框向右展开，
+    适用于需要在目标控件右侧偏上位置精准定位提示的场景
+    """
 
     def imagePosition(self):
         return ImagePosition.BOTTOM
@@ -570,7 +645,10 @@ class LeftTopTailTeachingTipManager(LeftTailTeachingTipManager):
 
 
 class LeftBottomTailTeachingTipManager(LeftTailTeachingTipManager):
-    """左侧底部尾部教学提示管理器"""
+    """左侧底部尾部教学提示管理器
+    气泡尾部箭头位于目标控件左侧的底部区域，提示框向右展开，
+    适用于需要在目标控件右侧偏下位置精准定位提示的场景
+    """
 
     def imagePosition(self):
         return ImagePosition.TOP
@@ -596,7 +674,10 @@ class LeftBottomTailTeachingTipManager(LeftTailTeachingTipManager):
 
 
 class RightTopTailTeachingTipManager(RightTailTeachingTipManager):
-    """右侧顶部尾部教学提示管理器"""
+    """右侧顶部尾部教学提示管理器
+    气泡尾部箭头位于目标控件右侧的顶部区域，提示框向左展开，
+    适用于需要在目标控件左侧偏上位置精准定位提示的场景
+    """
 
     def imagePosition(self):
         return ImagePosition.BOTTOM
@@ -622,7 +703,10 @@ class RightTopTailTeachingTipManager(RightTailTeachingTipManager):
 
 
 class RightBottomTailTeachingTipManager(RightTailTeachingTipManager):
-    """右侧底部尾部教学提示管理器"""
+    """右侧底部尾部教学提示管理器
+    气泡尾部箭头位于目标控件右侧的底部区域，提示框向左展开，
+    适用于需要在目标控件左侧偏下位置精准定位提示的场景
+    """
 
     def imagePosition(self):
         return ImagePosition.TOP

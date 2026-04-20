@@ -17,7 +17,9 @@ from .tool_tip import ToolTipFilter
 
 
 class TabCloseButtonDisplayMode(Enum):
-    """Tab 关闭按钮的显示模式"""
+    """Tab 关闭按钮的显示模式
+    该枚举用于控制标签页关闭按钮何时可见，可根据交互习惯或界面空间选择始终显示、悬停显示或始终隐藏
+    """
     ALWAYS = 0
     ON_HOVER = 1
     NEVER = 2
@@ -50,7 +52,10 @@ def checkIndex(*default):
 
 
 class TabToolButton(TransparentToolButton):
-    """Tab 工具按钮"""
+    """Tab 工具按钮
+    用于标签栏的功能性图标按钮，如关闭、新建标签等操作
+    通常嵌入 TabBar 或 TabItem 中使用，提供紧凑的点击交互区域
+    """
 
     def _postInit(self):
         self.setFixedSize(32, 24)
@@ -63,7 +68,10 @@ class TabToolButton(TransparentToolButton):
 
 
 class TabItem(PushButton):
-    """Tab 项"""
+    """Tab 项
+    表示标签栏中的一个可选项，支持显示图标、文本和关闭按钮
+    负责响应鼠标悬停、选中等交互状态，并发送对应的切换和关闭信号
+    """
 
     closed = Signal()
     doubleClicked = Signal()
@@ -337,7 +345,10 @@ class TabItem(PushButton):
 
 
 class TabBar(SingleDirectionScrollArea):
-    """Tab 栏"""
+    """Tab 栏
+    用于横向展示和管理一组 TabItem，支持添加、移除、切换和重排序标签页
+    适用于多文档或分页视图场景，常与 TabWidget 搭配使用以实现完整的多页切换功能
+    """
 
     currentChanged = Signal(int)
     tabBarClicked = Signal(int)
@@ -347,6 +358,11 @@ class TabBar(SingleDirectionScrollArea):
     tabMoved = Signal(int, int)  # (from, to)
 
     def __init__(self, parent=None):
+        """初始化 TabBar
+        
+        Args:
+            parent: 父控件。若为 None，则作为独立窗口显示；否则嵌入父控件并随其释放
+        """
         super().__init__(parent=parent, orient=Qt.Horizontal)
         self.items = []  # type: 列表[TabItem]
         self.itemMap = {} # type: Dict[str, TabItem]
@@ -895,6 +911,10 @@ class TabBar(SingleDirectionScrollArea):
 
 
 class TabWidget(QWidget):
+    """Tab 控件
+    提供包含标签栏和内容区的多页面容器，集成 TabBar 与堆叠面板实现页面切换
+    适用于需要在同一窗口内组织多个关联视图或配置页的场景，支持动态增删标签页
+    """
 
     currentChanged = Signal(int)
     tabBarClicked = Signal(int)
@@ -903,6 +923,11 @@ class TabWidget(QWidget):
     tabBarDoubleClicked = Signal(int)
 
     def __init__(self, parent=None):
+        """初始化 TabWidget
+        
+        Args:
+            parent: 父控件。若为 None，则作为独立窗口显示；否则嵌入父控件并随其释放
+        """
         super().__init__(parent)
         self.tabBar = TabBar(self)
         self.stackedWidget = QStackedWidget(self)

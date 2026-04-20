@@ -1,5 +1,10 @@
 # coding: utf-8
-"""Pivot 导航组件"""
+"""提供 Pivot 导航组件，用于在同一页面内切换不同内容面板
+
+Pivot 适用于需要在有限空间内组织多个关联视图的界面，例如设置页分类、文档章节切换等场景
+相比 SegmentedControl，Pivot 通常与堆叠面板（QStackedWidget）配合使用，导航项呈水平排列
+通过底部滑块指示当前选中项，支持鼠标点击和程序代码切换激活项
+"""
 
 from typing import Dict
 
@@ -17,7 +22,11 @@ from .navigation_types import RouteKeyError
 
 
 class PivotItem(PushButton):
-    """Pivot 导航项"""
+    """Pivot 导航项，表示单个可切换的选项标签
+    
+    每个 PivotItem 对应一个具体视图或页面，通常通过 addItem 方法添加到 Pivot 导航栏中
+    用于显示文本标签及可选图标，点击后会触发 Pivot 的当前选中项切换
+    """
 
     itemClicked = Signal(bool)
 
@@ -46,7 +55,11 @@ class PivotItem(PushButton):
 
 
 class Pivot(QWidget):
-    """Pivot 导航栏"""
+    """Pivot 导航栏，提供一组水平排列的可切换导航项
+    
+    常用于页面顶部的二级导航或内容分类切换，配合 QStackedWidget 可实现多面板内容的管理
+    支持动态添加、删除导航项，当前选中项通过底部滑块高亮显示，切换时自动播放滑动动画
+    """
 
     currentItemChanged = Signal(str)
 

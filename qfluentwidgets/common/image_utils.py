@@ -1,5 +1,7 @@
 # coding: utf-8
-"""图像处理工具模块"""
+"""提供图像处理相关的工具函数与类，支持提取图片主色调、转换图像格式等操作
+可用于根据应用壁纸或用户头像动态计算主题色、生成背景蒙版，配合各类需要动态配色的视觉组件实现沉浸式界面效果
+"""
 from math import floor
 from io import BytesIO
 from typing import Union
@@ -91,7 +93,9 @@ def fromqpixmap(im: Union[QImage, QPixmap]):
 
 
 class DominantColor:
-    """主色提取工具类"""
+    """从图片中自动提取视觉主色调，用于动态主题配色与背景适配
+    通过分析图像色彩分布计算代表性颜色，适用于需要根据用户自定义壁纸、专辑封面生成协调主题色的场景，返回结果可直接用于设置界面主题色或控件强调色
+    """
 
     @classmethod
     @exceptionHandler((24, 24, 24))

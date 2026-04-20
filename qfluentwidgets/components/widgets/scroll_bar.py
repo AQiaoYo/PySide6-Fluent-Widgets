@@ -11,9 +11,18 @@ from ...common.style_sheet import isDarkTheme
 from ...common.smooth_scroll import SmoothScroll
 
 class ArrowButton(QToolButton):
-    """ Arrow 按钮 """
+    """Arrow 按钮，用于滚动条两端控制滚动方向
+    
+    通常在 ScrollBar 内部使用，点击后会以固定步长微调滚动位置，支持上下左右四个方向
+    """
 
     def __init__(self, icon: FluentIcon, parent=None):
+        """创建 ArrowButton 实例
+        
+        Args:
+            icon: 按钮显示的箭头图标，决定按钮方向
+            parent: 父级 QWidget 实例
+        """
         super().__init__(parent=parent)
         self.setFixedSize(10, 10)
         self.lightColor = QColor(0, 0, 0, 114)
@@ -46,9 +55,18 @@ class ArrowButton(QToolButton):
 
 
 class ScrollBarGroove(QWidget):
-    """ 滚动条 groove """
+    """滚动条 groove，作为 handle 滑动的轨道背景
+    
+    负责渲染滚动条轨道的视觉区域，与 ScrollBarHandle 配合完成滚动交互，通常不需要单独使用
+    """
 
     def __init__(self, orient: Qt.Orientation, parent):
+        """创建 ScrollBarGroove 实例
+        
+        Args:
+            orient: 滚动条方向，Qt.Orientation 的 Horizontal 或 Vertical
+            parent: 父级 QWidget 实例
+        """
         super().__init__(parent=parent)
         self._opacity = 1
         self.lightBackgroundColor = QColor(252, 252, 252, 217)
@@ -120,9 +138,18 @@ class ScrollBarGroove(QWidget):
 
 
 class ScrollBarHandle(QWidget):
-    """滚动条 handle"""
+    """滚动条 handle，用户直接拖拽以改变滚动位置的滑块
+    
+    跟随鼠标拖拽在 groove 上移动，其长度通常与可视区域和总内容的比例相关，支持悬停和按下状态样式切换
+    """
 
     def __init__(self, orient: Qt.Orientation, parent=None):
+        """创建 ScrollBarHandle 实例
+        
+        Args:
+            orient: 滚动条方向，Qt.Orientation 的 Horizontal 或 Vertical
+            parent: 父级 QWidget 实例
+        """
         super().__init__(parent)
         self._opacity = 1
         self.opacityAni = QPropertyAnimation(self, b'opacity', self)
@@ -177,14 +204,20 @@ class ScrollBarHandle(QWidget):
 
 
 class ScrollBarHandleDisplayMode(Enum):
-    """滚动条 handle 显示模式"""
+    """滚动条 handle 显示模式枚举
+    
+    用于控制 handle 的可见性策略，如始终显示、仅悬停时显示等，可通过 setHandleVisibleMode 应用到 ScrollBar 上
+    """
 
     ALWAYS = 0
     ON_HOVER = 1
 
 
 class ScrollBar(QWidget):
-    """ Fluent 滚动条 """
+    """Fluent 风格滚动条，替代系统原生滚动条
+    
+    提供美观的统一视觉风格，支持自定义 handle 显示模式、动画效果以及丰富的状态样式，适用于 ListView、TableView 等需要滚动功能的组件
+    """
 
     rangeChanged = Signal(tuple)
     valueChanged = Signal(int)
@@ -193,6 +226,12 @@ class ScrollBar(QWidget):
     sliderMoved = Signal()
 
     def __init__(self, orient: Qt.Orientation, parent: QAbstractScrollArea):
+        """创建 ScrollBar 实例
+        
+        Args:
+            orient: 滚动条方向，Qt.Orientation 的 Horizontal 或 Vertical
+            parent: 父级 QWidget 实例
+        """
         super().__init__(parent)
         self.groove = ScrollBarGroove(orient, self)
         self.handle = ScrollBarHandle(orient, self)
@@ -527,9 +566,18 @@ class ScrollBar(QWidget):
 
 
 class SmoothScrollBar(ScrollBar):
-    """ Smooth 滚动条 """
+    """支持平滑动画的滚动条
+    
+    在 ScrollBar 基础上增加了动画插值，使滚动位置变化更加流畅自然，适合对滚动体验有较高要求的场景
+    """
 
     def __init__(self, orient: Qt.Orientation, parent):
+        """创建 SmoothScrollBar 实例
+        
+        Args:
+            orient: 滚动条方向，Qt.Orientation 的 Horizontal 或 Vertical
+            parent: 父级 QWidget 实例
+        """
         super().__init__(orient, parent)
         self.duration = 500
         self.ani = QPropertyAnimation()
@@ -612,7 +660,10 @@ class SmoothScrollBar(ScrollBar):
 
 
 class SmoothScrollDelegate(QObject):
-    """Smooth 滚动委托"""
+    """平滑滚动委托，为普通滚动区域注入平滑滚动能力
+    
+    通过拦截滚轮事件并委托给 SmoothScrollBar 处理，无需修改原有组件结构即可让 QScrollArea、QTextEdit 等控件获得平滑滚动效果
+    """
 
     def __init__(self, parent: QAbstractScrollArea, useAni=False):
         """初始化平滑滚动委托

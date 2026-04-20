@@ -1,5 +1,9 @@
 # coding: utf-8
-"""输入框组件"""
+"""输入框组件
+
+提供一系列符合 Fluent Design 风格的输入类控件，包括单行输入框、搜索框、密码框、富文本编辑框和纯文本编辑框等
+适用于需要用户输入或文本展示的场景，支持圆角样式、焦点动画和补全菜单等特性
+"""
 
 from typing import List, Union
 from PySide6.QtCore import QSize, Qt, QRectF, Signal, QPoint, QTimer, QEvent, QAbstractItemModel, Property, QModelIndex
@@ -19,9 +23,19 @@ from .scroll_bar import SmoothScrollDelegate
 
 
 class LineEditButton(QToolButton):
-    """LineEdit 按钮"""
+    """LineEdit 右侧功能按钮
+    
+    通常用于在输入框尾部添加图标按钮，例如清除内容、搜索或自定义操作按钮
+    支持鼠标悬停和点击态的 Fluent 风格样式渲染
+    """
 
     def __init__(self, icon: Union[str, QIcon, FluentIconBase], parent=None):
+        """初始化按钮
+        
+        Args:
+            icon: 按钮显示的图标，可以是 QIcon、FluentIcon 或 Icon 类型
+            parent: 父级窗口部件，通常为 LineEdit 实例，指定后该按钮将随父控件一同销毁
+        """
         super().__init__(parent=parent)
         self._icon = icon
         self._action = None
@@ -85,9 +99,18 @@ class LineEditButton(QToolButton):
 
 
 class LineEdit(QLineEdit):
-    """单行输入框"""
+    """单行文本输入框
+    
+    支持圆角边框、聚焦高亮动画和占位符文本，可配合 CompleterMenu 实现自动补全功能
+    适用于表单填写、关键词输入等需要单行文本的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化输入框
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent=parent)
         self._isClearButtonEnabled = False
         self._completer = None  # type: QCompleter
@@ -266,12 +289,21 @@ class LineEdit(QLineEdit):
 
 
 class CompleterMenu(RoundMenu):
-    """补全菜单"""
+    """输入补全菜单
+    
+    在 LineEdit 输入时弹出，提供匹配的候选词列表，支持键盘上下选择和回车确认
+    适用于搜索建议、历史记录补全等需要快速输入的场景
+    """
 
     activated = Signal(str)
     indexActivated = Signal(QModelIndex)
 
     def __init__(self, lineEdit: LineEdit):
+        """初始化补全菜单
+        
+        Args:
+            lineEdit: 关联的 LineEdit 实例，用于获取当前文本和插入补全结果，菜单将跟随该输入框定位
+        """
         super().__init__()
         self.items = []
         self.indexes = []
@@ -383,12 +415,21 @@ class CompleterMenu(RoundMenu):
 
 
 class SearchLineEdit(LineEdit):
-    """搜索输入框"""
+    """搜索输入框
+    
+    内置搜索图标和清除按钮，支持占位符文本和自动补全，专为搜索场景优化
+    适用于工具栏搜索、列表过滤等需要即时查询的界面
+    """
 
     searchSignal = Signal(str)
     clearSignal = Signal()
 
     def __init__(self, parent=None):
+        """初始化搜索框
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent)
         self.searchButton = LineEditButton(FIF.SEARCH, self)
 
@@ -413,9 +454,18 @@ class SearchLineEdit(LineEdit):
 
 
 class EditLayer(QWidget):
-    """编辑层"""
+    """单元格编辑层
+    
+    通常用于表格或列表的单元格就地编辑，提供覆盖于单元格之上的编辑交互层
+    支持双击进入编辑模式和焦点丢失自动提交修改
+    """
 
     def __init__(self, parent):
+        """初始化编辑层
+        
+        Args:
+            parent: 父级窗口部件，通常为表格或列表控件，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent=parent)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
         parent.installEventFilter(self)
@@ -447,9 +497,18 @@ class EditLayer(QWidget):
 
 
 class TextEdit(QTextEdit):
-    """文本编辑框"""
+    """富文本编辑框
+    
+    支持 HTML 格式、图片插入和多种文本样式设置，基于 QTextEdit 提供 Fluent 风格样式
+    适用于需要富文本排版、图文混排的内容编辑场景
+    """
 
     def __init__(self, parent=None):
+        """初始化文本编辑框
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent=parent)
         self.layer = EditLayer(self)
         self.scrollDelegate = SmoothScrollDelegate(self)
@@ -463,9 +522,18 @@ class TextEdit(QTextEdit):
 
 
 class PlainTextEdit(QPlainTextEdit):
-    """纯文本编辑框"""
+    """纯文本编辑框
+    
+    仅支持纯文本内容的编辑和显示，不支持富文本格式，基于 QPlainTextEdit 实现
+    适用于代码编辑、日志查看或大文本量处理等注重性能的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化纯文本编辑框
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent=parent)
         self.layer = EditLayer(self)
         self.scrollDelegate = SmoothScrollDelegate(self)
@@ -479,9 +547,18 @@ class PlainTextEdit(QPlainTextEdit):
 
 
 class TextBrowser(QTextBrowser):
-    """文本浏览器"""
+    """文本浏览器
+    
+    支持富文本渲染、超链接跳转和文本搜索功能，通常用于只读或轻度交互的文本展示
+    适用于帮助文档、消息记录和只读内容展示等场景
+    """
 
     def __init__(self, parent=None):
+        """初始化文本浏览器
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent)
         self.layer = EditLayer(self)
         self.scrollDelegate = SmoothScrollDelegate(self)
@@ -495,9 +572,18 @@ class TextBrowser(QTextBrowser):
 
 
 class PasswordLineEdit(LineEdit):
-    """密码输入框"""
+    """密码输入框
+    
+    提供密码掩码显示和可见性切换按钮，支持自定义掩码字符
+    适用于登录表单、敏感信息输入等需要隐私保护的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化密码输入框
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，指定后该组件将随父控件一同销毁
+        """
         super().__init__(parent)
         self.viewButton = LineEditButton(FIF.VIEW, self)
 

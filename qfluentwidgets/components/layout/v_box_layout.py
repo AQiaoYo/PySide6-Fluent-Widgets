@@ -1,5 +1,8 @@
 # coding: utf-8
-"""垂直盒式布局"""
+"""提供垂直盒式布局组件
+
+当需要纵向线性排列按钮、标签、卡片等控件时，可使用本模块中的 VBoxLayout 来简化界面构建流程
+"""
 
 from typing import List
 from PySide6.QtCore import Qt
@@ -7,7 +10,10 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 
 
 class VBoxLayout(QVBoxLayout):
-    """垂直盒式布局"""
+    """垂直盒式布局，用于纵向排列控件
+    
+    适用于需要自上而下依次放置多个控件的场景，常用于侧边栏、设置面板等纵向界面的快速搭建
+    """
 
     def __init__(self, parent):
         """初始化布局

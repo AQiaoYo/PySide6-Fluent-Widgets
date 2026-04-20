@@ -1,5 +1,8 @@
 # coding: utf-8
-"""进度环控件"""
+"""进度环控件模块
+提供 ProgressRing 和 IndeterminateProgressRing 两类环形进度控件，适用于在紧凑布局中展示任务执行状态
+ProgressRing 用于显示可量化的完成百分比，IndeterminateProgressRing 则用于表示正在进行但无法预估剩余时间的后台操作
+"""
 
 from PySide6.QtCore import (Qt, QRectF, QEasingCurve, QPropertyAnimation, QParallelAnimationGroup,
                           QSequentialAnimationGroup, Property)
@@ -12,7 +15,10 @@ from ...common.style_sheet import themeColor, isDarkTheme
 
 
 class ProgressRing(ProgressBar):
-    """进度环"""
+    """确定进度的环形进度条
+    以环形弧线长度直观展示当前任务完成百分比，相比传统水平进度条更节省横向空间，适合嵌入在按钮、列表项或弹窗中展示可量化的执行进度
+    支持通过数值接口实时更新进度，并可调整线宽与方向以适配不同尺寸的界面布局
+    """
 
     def __init__(self, parent=None, useAni=True):
         """构造函数
@@ -94,7 +100,10 @@ class ProgressRing(ProgressBar):
 
 
 class IndeterminateProgressRing(QProgressBar):
-    """不确定进度环"""
+    """不确定进度的环形进度条
+    以循环旋转的动画表示后台任务正在进行，适用于无法预估剩余时间的异步操作（如网络请求、数据查询），避免用户因缺少反馈而重复触发操作
+    控件自动播放旋转动画，无需手动更新进度值，可通过控制显隐来提示用户当前操作正在执行
+    """
 
     def __init__(self, parent=None, start=True):
         """构造函数

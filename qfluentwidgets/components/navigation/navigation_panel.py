@@ -1,5 +1,5 @@
 # coding: utf-8
-"""导航面板组件"""
+"""提供导航面板相关的组件，包括导航面板、导航项、布局管理器以及工具提示过滤器。通常用于构建具有层级结构的应用侧边导航栏，支持展开/收起、最小化等交互模式"""
 
 from typing import Dict, Union
 
@@ -19,7 +19,7 @@ from ...common.icon import FluentIconBase
 from ...common.icon import FluentIcon as FIF
 
 class NavigationToolTipFilter(ToolTipFilter):
-    """Navigation 工具提示过滤器"""
+    """Navigation 工具提示事件过滤器，用于在导航栏处于最小化或紧凑模式时，为图标项提供悬浮提示功能。当用户将鼠标悬停在仅显示图标的导航项上时，自动展示该项的完整标题提示"""
 
     def _canShowToolTip(self) -> bool:
         isVisible = super()._canShowToolTip()
@@ -28,20 +28,33 @@ class NavigationToolTipFilter(ToolTipFilter):
 
 
 class NavigationItem:
-    """Navigation 项"""
+    """Navigation 单项数据载体，用于描述导航栏中的一个节点。包含路由标识、层级关系以及关联的显示组件，支持构建扁平或层级化的导航结构。可通过 routeKey 唯一标识并在不同导航状态间保持对应关系"""
 
     def __init__(self, routeKey: str, parentRouteKey: str, widget: NavigationWidget):
+        """初始化 NavigationItem 实例
+        
+        Args:
+            routeKey (str): 当前项的唯一路由标识，用于在导航切换时定位目标页面
+            parentRouteKey (str | None): 父级项的路由标识，若为顶层项可传入 None
+            widget (QWidget): 与当前项绑定的显示组件，通常为 NavigationPushButton 或类似控件
+        """
         self.routeKey = routeKey
         self.parentRouteKey = parentRouteKey
         self.widget = widget
 
 
 class NavigationPanel(QFrame):
-    """导航面板"""
+    """应用侧边导航面板，负责管理 NavigationItem 的生命周期、布局排列以及交互行为。支持展开、收起、最小化等多种显示模式，适用于需要多级菜单或单级导航的桌面应用场景。可通过信号与槽机制与路由框架配合实现页面切换"""
 
     displayModeChanged = Signal(NavigationDisplayMode)
 
     def __init__(self, parent=None, isMinimalEnabled=False):
+        """初始化 NavigationPanel 实例
+        
+        Args:
+            parent (QWidget | None): 父级控件实例，决定导航面板的层级归属和位置关系
+            isMinimalEnabled (bool): 是否启用最小化显示模式，为 True 时导航栏可收缩为仅显示图标的窄栏
+        """
         super().__init__(parent=parent)
         self._parent = parent   # type: QWidget
         self._isMenuButtonVisible = True
@@ -751,7 +764,7 @@ class NavigationPanel(QFrame):
 
 
 class NavigationItemLayout(QVBoxLayout):
-    """导航项布局"""
+    """专为导航项设计的垂直布局管理器，负责自动调整各导航按钮的间距、边距以及尺寸策略。可与 NavigationPanel 协同工作，确保在面板展开或最小化切换时保持一致的视觉排列"""
 
     def setGeometry(self, rect: QRect):
         super().setGeometry(rect)

@@ -1,5 +1,8 @@
 # coding: utf-8
-"""分段控件"""
+"""分段控件
+
+提供一组用于在多个互斥选项中进行单选的 Segmented 控件，包括文本样式、工具样式和可切换工具样式，适用于导航栏或紧凑的工具切换场景
+"""
 
 from typing import Union
 from PySide6.QtCore import Qt, Signal, QRectF
@@ -16,7 +19,10 @@ from .pivot import Pivot, PivotItem
 
 
 class SegmentedItem(PivotItem):
-    """Segmented 项"""
+    """Segmented 项
+    
+    用于 SegmentedWidget 的选项单元，通过文本标签展示选项内容，用户点击后切换选中状态
+    """
 
     def _postInit(self):
         super()._postInit()
@@ -24,7 +30,10 @@ class SegmentedItem(PivotItem):
 
 
 class SegmentedToolItem(ToolButton):
-    """Segmented tool 项"""
+    """Segmented tool 项
+    
+    用于 SegmentedToolWidget 的选项单元，以图标形式展示选项，适用于空间受限或更强调视觉识别的场景
+    """
 
     itemClicked = Signal(bool)
 
@@ -47,6 +56,10 @@ class SegmentedToolItem(ToolButton):
 
 
 class SegmentedToggleToolItem(TransparentToolButton):
+    """Segmented toggle tool 项
+    
+    用于 SegmentedToggleToolWidget 的选项单元，支持在选中与未选中状态间切换，常用于工具栏的开关型分段选择
+    """
 
     itemClicked = Signal(bool)
 
@@ -73,9 +86,17 @@ class SegmentedToggleToolItem(TransparentToolButton):
 
 
 class SegmentedWidget(Pivot):
-    """Segmented 部件"""
+    """Segmented 部件
+    
+    以文本标签形式展示多个互斥选项，同一时间仅允许选中一项，常用于视图切换、内容分类筛选等导航场景
+    """
 
     def __init__(self, parent=None):
+        """初始化 SegmentedWidget 实例
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None，若为 None 则作为顶层窗口独立存在
+        """
         super().__init__(parent)
         self.slideAni = FluentAnimation.create(
             FluentAnimationType.POINT_TO_POINT, FluentAnimationProperty.SCALE, value=0, parent=self)
@@ -125,9 +146,17 @@ class SegmentedWidget(Pivot):
 
 
 class SegmentedToolWidget(SegmentedWidget):
-    """Segmented tool 部件"""
+    """Segmented tool 部件
+    
+    以图标形式展示多个互斥选项，外观更为紧凑，适用于工具栏或需要图标化导航的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化 SegmentedToolWidget 实例
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None，若为 None 则作为顶层窗口独立存在
+        """
         super().__init__(parent)
         self.setAttribute(Qt.WA_StyledBackground)
 
@@ -154,7 +183,10 @@ class SegmentedToolWidget(SegmentedWidget):
 
 
 class SegmentedToggleToolWidget(SegmentedToolWidget):
-    """Segmented toggle tool 部件"""
+    """Segmented toggle tool 部件
+    
+    以图标形式展示选项并支持切换状态，可用于需要在选中与未选中之间切换的工具栏场景，如开关组合或模式切换
+    """
 
     def _createItem(self, icon):
         return SegmentedToggleToolItem(icon)

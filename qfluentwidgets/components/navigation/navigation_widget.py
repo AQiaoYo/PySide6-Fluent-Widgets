@@ -1,5 +1,8 @@
 # coding: utf-8
-"""导航栏组件模块"""
+"""提供构建导航侧边栏所需的各类组件，包括按钮、树形项、分隔符、用户卡片及选中指示器等
+
+通过组合这些组件可快速搭建具有层级结构或扁平结构的应用导航界面，适用于主窗口左侧导航场景
+"""
 
 from typing import Union, List
 
@@ -21,13 +24,23 @@ from ..widgets.info_badge import InfoBadgeManager, InfoBadgePosition
 
 
 class NavigationWidget(QWidget):
-    """导航栏组件基类"""
+    """导航栏组件基类
+    
+    为所有导航项提供统一的状态管理与交互基础，包括选中状态、点击事件及布局适配等
+    一般不应直接实例化，而是通过 NavigationPushButton、NavigationTreeWidget 等子类进行使用
+    """
 
     clicked = Signal(bool)  # 是否 triggered by user
     selectedChanged = Signal(bool)
     EXPAND_WIDTH = 312
 
     def __init__(self, isSelectable: bool, parent=None):
+        """初始化导航组件
+        
+        Args:
+            isSelectable (bool): 是否允许被选中，传 False 时点击不会触发选中状态变更
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(parent)
         self.isCompacted = True
         self.isSelected = False
@@ -153,7 +166,11 @@ class NavigationWidget(QWidget):
 
 
 class NavigationPushButton(NavigationWidget):
-    """导航栏推送按钮"""
+    """导航栏推送按钮
+    
+    用于触发页面切换或执行特定操作，通常作为扁平导航项直接置于导航面板中
+    适合不需要子级菜单的单一场景，点击后会更新导航栏当前选中项状态
+    """
 
     def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool, parent=None):
         """
@@ -229,9 +246,19 @@ class NavigationPushButton(NavigationWidget):
 
 
 class NavigationToolButton(NavigationPushButton):
-    """导航栏工具按钮"""
+    """导航栏工具按钮
+    
+    以纯图标形式展示的功能按钮，相比文字按钮更节省横向空间
+    常用于导航栏顶部或底部放置设置、返回、折叠等辅助操作入口
+    """
 
     def __init__(self, icon: Union[str, QIcon, FIF], parent=None):
+        """初始化工具按钮
+        
+        Args:
+            icon (QIcon | FluentIconBase): 按钮显示的图标
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(icon, '', False, parent)
 
     def setCompacted(self, isCompacted: bool):
@@ -239,9 +266,18 @@ class NavigationToolButton(NavigationPushButton):
 
 
 class NavigationSeparator(NavigationWidget):
-    """导航栏分隔符"""
+    """导航栏分隔符
+    
+    在不同功能组之间提供视觉分割，提升导航结构的层次感和可读性
+    该组件不接受交互事件，仅作为静态装饰元素使用
+    """
 
     def __init__(self, parent=None):
+        """初始化分隔符
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(False, parent=parent)
         self.setCompacted(True)
 
@@ -263,9 +299,19 @@ class NavigationSeparator(NavigationWidget):
 
 
 class NavigationItemHeader(NavigationWidget):
-    """导航栏项标题，用于对项进行分组"""
+    """导航栏项标题
+    
+    用于对相邻的导航项进行分组标注，帮助用户快速识别功能区块
+    通常配合 NavigationSeparator 一起使用，放在分组最上方作为区域标题
+    """
 
     def __init__(self, text: str, parent=None):
+        """初始化标题项
+        
+        Args:
+            text (str): 显示的标题文本
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(False, parent=parent)
         self._text = text
         self._targetHeight = 30
@@ -368,11 +414,23 @@ class NavigationItemHeader(NavigationWidget):
 
 
 class NavigationTreeItem(NavigationPushButton):
-    """导航栏树形项组件"""
+    """导航栏树形项组件
+    
+    支持展开与折叠，可容纳子导航项以形成多级菜单结构
+    适用于功能模块较多且需要层级归类的应用场景，如文件夹树或嵌套设置项
+    """
 
     itemClicked = Signal(bool, bool)    # triggerByUser, clickArrow
 
     def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool, parent=None):
+        """初始化树形项
+        
+        Args:
+            icon (QIcon | FluentIconBase): 节点显示的图标
+            text (str): 节点显示的文本
+            isSelectable (bool): 是否允许被选中，传 False 时仅作为展开容器使用
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(icon, text, isSelectable, parent)
         self._arrowAngle = 0
         self.rotateAni = QPropertyAnimation(self, b'arrowAngle', self)
@@ -441,7 +499,11 @@ class NavigationTreeItem(NavigationPushButton):
 
 
 class NavigationTreeWidgetBase(NavigationWidget):
-    """导航栏树形组件基类"""
+    """导航栏树形组件基类
+    
+    提供子项展开/折叠动画、层级管理及选中状态联动等核心能力
+    一般作为中间基类存在，实际开发建议直接使用 NavigationTreeWidget 或其衍生类
+    """
 
     def addChild(self, child):
         """添加子节点
@@ -510,11 +572,23 @@ class NavigationTreeWidgetBase(NavigationWidget):
 
 
 class NavigationTreeWidget(NavigationTreeWidgetBase):
-    """导航栏树形组件"""
+    """导航栏树形组件
+    
+    可包含多级 NavigationTreeItem，支持展开折叠与选中状态切换
+    适用于需要层级导航的应用场景，常与 NavigationFlyoutMenu 配合在折叠模式下使用
+    """
 
     expanded = Signal()
 
     def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool, parent=None):
+        """初始化树形组件
+        
+        Args:
+            icon (QIcon | FluentIconBase): 根节点显示的图标
+            text (str): 根节点显示的文本
+            isSelectable (bool): 根节点是否允许被选中，传 False 时点击仅用于展开子项
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(isSelectable, parent)
 
         self.treeChildren = []  # type: 列表[NavigationTreeWidget]
@@ -719,9 +793,20 @@ class NavigationTreeWidget(NavigationTreeWidgetBase):
 
 
 class NavigationAvatarWidget(NavigationWidget):
-    """用户头像组件"""
+    """用户头像组件
+    
+    在导航栏中展示当前用户的头像与名称，常用于标识登录用户身份
+    通常放置在导航栏底部，可点击展开 NavigationUserCard 查看更详细的用户信息
+    """
 
     def __init__(self, name: str, avatar: Union[str, QPixmap, QImage] = None, parent=None):
+        """初始化头像组件
+        
+        Args:
+            name (str): 显示的用户名称
+            avatar (QPixmap | str): 用户头像图片，支持 QPixmap 对象或图片路径字符串
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(isSelectable=False, parent=parent)
         from ..widgets.label import AvatarWidget
 
@@ -777,7 +862,11 @@ class NavigationAvatarWidget(NavigationWidget):
 
 @InfoBadgeManager.register(InfoBadgePosition.NAVIGATION_ITEM)
 class NavigationItemInfoBadgeManager(InfoBadgeManager):
-    """导航栏项信息徽标管理器"""
+    """导航栏项信息徽标管理器
+    
+    负责为导航项附加和更新角标状态，如数字提示、红点提醒等
+    适用于需要提示未读消息、待办数量或更新状态的业务场景
+    """
 
     def eventFilter(self, obj, e: QEvent):
         if obj is self.target:
@@ -805,11 +894,21 @@ class NavigationItemInfoBadgeManager(InfoBadgeManager):
 
 
 class NavigationFlyoutMenu(ScrollArea):
-    """导航栏浮出菜单"""
+    """导航栏浮出菜单
+    
+    当导航栏处于紧凑模式时，鼠标悬停在树形项上会自动弹出该菜单以展示子级项
+    用于解决窄边栏无法直接展开树形结构的交互问题，保证导航功能在折叠后仍可用
+    """
 
     expanded = Signal()
 
     def __init__(self, tree: NavigationTreeWidget, parent=None):
+        """初始化浮出菜单
+        
+        Args:
+            tree (NavigationTreeWidget): 关联的树形组件，用于提取子项并生成对应的菜单项
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(parent)
         self.view = QWidget(self)
 
@@ -888,9 +987,18 @@ class NavigationFlyoutMenu(ScrollArea):
 
 
 class NavigationUserCard(NavigationAvatarWidget):
-    """导航栏用户卡片组件"""
+    """导航栏用户卡片组件
+    
+    提供比 NavigationAvatarWidget 更丰富的用户信息展示与操作入口
+    通常作为导航栏底部的可展开面板使用，适合放置退出登录、个人设置等快捷操作
+    """
 
     def __init__(self, parent=None):
+        """初始化用户卡片
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(name="", parent=parent)
 
         # 文本 properties
@@ -1098,11 +1206,20 @@ class NavigationUserCard(NavigationAvatarWidget):
 
 
 class NavigationIndicator(QWidget):
-    """导航栏指示器"""
+    """导航栏指示器
+    
+    以高亮背景或竖条形式标记当前选中的导航项，提供清晰的视觉定位反馈
+    随选中项变化而自动移动，通常由导航面板内部自动管理，无需手动操控
+    """
 
     aniFinished = Signal()
 
     def __init__(self, parent=None):
+        """初始化指示器
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(parent)
         self.lightColor = QColor()
         self.darkColor = QColor()

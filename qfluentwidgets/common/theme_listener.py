@@ -1,5 +1,9 @@
 # coding: utf-8
-"""系统主题监听模块"""
+"""系统主题监听模块
+
+提供检测操作系统深色/浅色模式的能力，并在系统主题切换时通知应用自动更新界面风格
+适用于需要跟随系统主题自动换肤的场景，通常与 Theme 和 setTheme 配合使用
+"""
 
 from PySide6.QtCore import QThread, Signal
 

@@ -11,9 +11,18 @@ from .scroll_area import SmoothScrollDelegate
 
 
 class TreeItemDelegate(QStyledItemDelegate):
-    """TreeItemDelegate 树形项委托"""
+    """TreeItemDelegate 树形项委托
+    
+    用于自定义树形控件中项的绘制样式，负责背景色、圆角、选中高亮等视觉效果的渲染
+    通常与 TreeViewBase 及其子类配合使用，以确保 Fluent Design 风格的一致性
+    """
 
     def __init__(self, parent: QTreeView):
+        """初始化树形项委托
+        
+        Args:
+            parent: 父对象，默认为 None，指定父对象后委托将跟随父部件自动释放
+        """
         super().__init__(parent)
         self.lightCheckedColor = QColor()
         self.darkCheckedColor = QColor()
@@ -146,7 +155,11 @@ class TreeItemDelegate(QStyledItemDelegate):
 
 
 class TreeViewBase:
-    """TreeViewBase 树视图基类"""
+    """TreeViewBase 树视图基类
+    
+    提供树形控件的基础功能与通用样式设置，支持平滑滚动、自定义选中效果等
+    作为 TreeWidget 与 TreeView 的公共基类，用于统一树形控件的行为与视觉表现
+    """
 
     def _initView(self):
         self.scrollDelagate = SmoothScrollDelegate(self)
@@ -194,9 +207,18 @@ class TreeViewBase:
 
 
 class TreeWidget(TreeViewBase, QTreeWidget):
-    """TreeWidget 树形部件"""
+    """TreeWidget 树形部件
+    
+    基于 QTreeWidget 的便捷树形控件，支持直接添加、删除和管理树形项
+    适用于数据量较小、无需复杂 Model/View 分离的简单层级数据展示场景
+    """
 
     def __init__(self, parent=None):
+        """初始化树形部件
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，传入父对象可将该控件嵌入到对应布局中
+        """
         super().__init__(parent=parent)
         self._initView()
 
@@ -231,9 +253,18 @@ class TreeWidget(TreeViewBase, QTreeWidget):
 
 
 class TreeView(TreeViewBase, QTreeView):
-    """TreeView 树视图"""
+    """TreeView 树视图
+    
+    基于 QTreeView 的 Model/View 架构树形控件，适合与自定义数据模型配合使用
+    适用于数据量较大或需要与底层数据动态同步的复杂层级结构展示场景
+    """
 
     def __init__(self, parent=None):
+        """初始化树视图
+        
+        Args:
+            parent: 父级窗口部件，默认为 None，传入父对象可将该控件嵌入到对应布局中
+        """
         super().__init__(parent=parent)
         self._initView()
 

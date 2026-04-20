@@ -1,5 +1,9 @@
 # coding: utf-8
-"""模型组合框组件"""
+"""模型组合框组件
+
+提供基于数据模型的组合框控件，支持通过自定义 model 管理下拉选项的展示与选择
+适用于选项数据结构复杂、需要动态更新列表或与其他数据视图保持同步的场景
+"""
 
 import sys
 from typing import Union, List, Iterable
@@ -19,7 +23,11 @@ from ...common.style_sheet import FluentStyleSheet
 
 
 class ModelComboBoxBase:
-    """组合框的抽象数据模型"""
+    """模型组合框的抽象基类
+    
+    定义了支持自定义数据模型的组合框基础接口与行为，提供模型绑定和数据同步的通用能力
+    子类可继承此类以扩展特定交互行为，实现下拉列表与 QAbstractItemModel 的联动更新
+    """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -27,6 +35,12 @@ class ModelComboBoxBase:
     textActivated = Signal(str)
 
     def __init__(self, parent=None, **kwargs):
+        """初始化抽象模型组合框
+        
+        Args:
+            parent (QWidget): 父控件，用于确定控件在界面中的层级关系
+            **kwargs: 额外的关键字参数，将传递给父类的初始化方法
+        """
         pass
 
     def _setUpUi(self):
@@ -461,7 +475,11 @@ class ModelComboBoxBase:
 
 
 class ModelComboBox(QPushButton, ModelComboBoxBase):
-    """组合框数据模型"""
+    """标准模型组合框
+    
+    支持绑定自定义数据模型的下拉选择控件，可通过 setModel 将数据模型与下拉列表关联
+    适用于数据与视图分离的场景，可配合 QListView、QTableView 等实现多视图数据共享
+    """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -469,6 +487,11 @@ class ModelComboBox(QPushButton, ModelComboBoxBase):
     textActivated = Signal(str)
 
     def __init__(self, parent=None):
+        """初始化模型组合框
+        
+        Args:
+            parent (QWidget): 父控件，用于确定控件在界面中的层级关系
+        """
         super().__init__(parent=parent)
         self._isIconVisible = True
         self.arrowAni = TranslateYAnimation(self)
@@ -553,7 +576,11 @@ class ModelComboBox(QPushButton, ModelComboBoxBase):
 
 
 class EditableModelComboBox(LineEdit, ModelComboBoxBase):
-    """可编辑组合框数据模型"""
+    """可编辑模型组合框
+    
+    在标准模型组合框基础上增加文本编辑功能，允许用户直接输入内容或从下拉列表选择
+    适用于既需要提供预设选项又允许自定义输入的交互场景，如搜索框或标签输入
+    """
 
     currentIndexChanged = Signal(int)
     currentTextChanged = Signal(str)
@@ -561,6 +588,11 @@ class EditableModelComboBox(LineEdit, ModelComboBoxBase):
     textActivated = Signal(str)
 
     def __init__(self, parent=None):
+        """初始化可编辑模型组合框
+        
+        Args:
+            parent (QWidget): 父控件，用于确定控件在界面中的层级关系
+        """
         super().__init__(parent=parent)
         self.dropButton = LineEditButton(FIF.ARROW_DOWN, self)
         self._setUpUi()

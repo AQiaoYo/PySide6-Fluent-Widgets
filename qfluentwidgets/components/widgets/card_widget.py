@@ -1,5 +1,8 @@
 # coding: utf-8
-"""卡片部件"""
+"""提供多种卡片式部件，用于在界面上以卡片形式组织内容和功能
+适用于需要信息分组、视觉层级区分的场景，如设置面板、信息展示页等
+卡片通常带有圆角、背景色和悬停效果，可与布局管理器配合使用
+"""
 
 from typing import List, Union
 from PySide6.QtCore import Qt, Signal, QRectF, Property, QPropertyAnimation, QPoint, QSize
@@ -24,6 +27,10 @@ class CardWidget(BackgroundAnimationWidget, QFrame):
     clicked = Signal()
 
     def __init__(self, parent=None):
+        """初始化卡片分隔线
+        Args:
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent=parent)
         self._isClickEnabled = False
         self._borderRadius = 5
@@ -118,6 +125,10 @@ class SimpleCardWidget(CardWidget):
     """
 
     def __init__(self, parent=None):
+        """初始化简单卡片部件
+        Args:
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent)
 
     def _normalBackgroundColor(self):
@@ -151,6 +162,10 @@ class ElevatedCardWidget(SimpleCardWidget):
     """
 
     def __init__(self, parent=None):
+        """初始化标准卡片部件
+        Args:
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent)
         self.shadowAni = DropShadowAnimation(self, hoverColor=QColor(0, 0, 0, 20))
         self.shadowAni.setOffset(0, 5)
@@ -198,6 +213,10 @@ class CardSeparator(QWidget):
     """
 
     def __init__(self, parent=None):
+        """初始化凸起卡片部件
+        Args:
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent=parent)
         self.setFixedHeight(3)
 
@@ -223,6 +242,10 @@ class HeaderCardWidget(SimpleCardWidget):
 
     @singledispatchmethod
     def __init__(self, parent=None):
+        """初始化带头部的卡片部件
+        Args:
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent)
         self.headerView = QWidget(self)
         self.headerLabel = QLabel(self)
@@ -278,6 +301,13 @@ class CardGroupWidget(QWidget):
     """
 
     def __init__(self, icon: Union[str, FluentIconBase, QIcon], title: str, content: str, parent=None):
+        """初始化信息展示卡片
+        Args:
+            icon: 卡片左侧显示的图标，类型为 FluentIcon 或 QIcon
+            title: 卡片标题文本
+            content: 卡片正文内容
+            parent: 父部件，默认为 None，指定后嵌入对应部件的子树中
+        """
         super().__init__(parent=parent)
         self.vBoxLayout = QVBoxLayout(self)
         self.hBoxLayout = QHBoxLayout()

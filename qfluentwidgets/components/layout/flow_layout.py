@@ -1,5 +1,8 @@
 # coding: utf-8
-"""流式布局组件"""
+"""提供流式布局组件，实现控件的水平流式排列与自动换行
+
+适用于需要根据容器宽度动态调整子控件位置的界面场景，如标签云、卡片列表或图片画廊等
+"""
 
 from typing import List
 
@@ -8,7 +11,10 @@ from PySide6.QtWidgets import QLayout, QWidgetItem, QLayoutItem
 
 
 class FlowLayout(QLayout):
-    """流式布局"""
+    """按水平方向排列子控件并在空间不足时自动换行的布局管理器
+    
+    常用于构建弹性列表、标签组或图标网格等界面，支持通过动画选项开启插入和移除时的过渡效果，在窗口尺寸变化时能够自动重新排列子控件
+    """
 
     def __init__(self, parent=None, needAni=False, isTight=False):
         """初始化流式布局

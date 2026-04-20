@@ -10,9 +10,15 @@ from ...common.animation import FluentAnimation
 
 
 class OpacityAniStackedWidget(QStackedWidget):
-    """使用淡入淡出动画的 StackedWidget"""
+    """使用淡入淡出动画切换页面的 StackedWidget
+    适用于需要柔和、平滑页面过渡的场景，例如设置面板、向导步骤或相册浏览
+    切换页面时会自动对当前页面执行淡出、对新页面执行淡入，无需手动调用动画
+    """
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget, optional): 父级窗口组件，默认为 None
+        """
         super().__init__(parent=parent)
         self.__nextIndex = 0
         self.__effects = []  # type:List[QPropertyAnimation]
@@ -57,9 +63,18 @@ class OpacityAniStackedWidget(QStackedWidget):
 
 
 class PopUpAniInfo:
-    """弹出动画信息类"""
+    """存储弹出动画参数的辅助信息类
+    用于记录待弹出窗口组件的位移偏移量与阴影效果，通常由 PopUpAniStackedWidget 内部管理
+    一般不建议在外部直接实例化
+    """
 
     def __init__(self, widget: QWidget, deltaX: int, deltaY: int, effect: QGraphicsOpacityEffect):
+        """Args:
+            widget (QWidget): 目标窗口组件
+            deltaX (int): 水平方向位移偏移量，决定组件从哪个水平位置开始动画
+            deltaY (int): 垂直方向位移偏移量，决定组件从哪个垂直位置开始动画
+            effect (QGraphicsDropShadowEffect): 阴影效果实例，用于在弹出时绘制投影
+        """
         self.widget = widget
         self.deltaX = deltaX
         self.deltaY = deltaY
@@ -67,12 +82,18 @@ class PopUpAniInfo:
 
 
 class PopUpAniStackedWidget(QStackedWidget):
-    """使用弹出动画的 StackedWidget"""
+    """使用弹出动画切换页面的 StackedWidget
+    适用于需要强调内容层级、营造卡片弹出感的场景，例如对话框、底部菜单或通知面板
+    切换页面时组件会从指定偏移位置平滑弹入，并伴随阴影效果增强视觉层次
+    """
 
     aniFinished = Signal()
     aniStart = Signal()
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget, optional): 父级窗口组件，默认为 None
+        """
         super().__init__(parent)
         self.aniInfos = []  # type: 列表[PopUpAniInfo]
         self.isAnimationEnabled = True
@@ -259,11 +280,18 @@ class PopUpAniStackedWidget(QStackedWidget):
 
 
 class TransitionStackedWidget(QStackedWidget):
+    """提供页面滑动过渡效果的 StackedWidget
+    适用于需要直观体现页面之间空间关系的场景，例如横向导航的表单、标签页或内容轮播
+    支持左右滑动切换，可通过子类扩展实现更丰富的过渡动画
+    """
 
     aniFinished = Signal()
     aniStart = Signal()
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget, optional): 父级窗口组件，默认为 None
+        """
         super().__init__(parent)
         self._aniGroup = QParallelAnimationGroup(self)
         self._currentSnapshot = self._createSnapshotLabel()
@@ -392,8 +420,15 @@ class TransitionStackedWidget(QStackedWidget):
 
 
 class EntranceTransitionStackedWidget(TransitionStackedWidget):
+    """使用进入式过渡动画的 StackedWidget
+    适用于新页面从特定方向滑入覆盖当前内容的场景，例如向导流程、详情页展开
+    动画强调新内容的进入动作，适合需要引导用户关注新页面的交互
+    """
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget, optional): 父级窗口组件，默认为 None
+        """
         super().__init__(parent)
         self.outDuration = 150
         self.offset = 140
@@ -460,8 +495,15 @@ class EntranceTransitionStackedWidget(TransitionStackedWidget):
 
 
 class DrillInTransitionStackedWidget(TransitionStackedWidget):
+    """使用 drill-in 钻取过渡动画的 StackedWidget
+    适用于层级内容逐层深入的场景，例如设置项展开子页面、文件夹进入、详情钻取
+    动画通常表现为页面从右侧推入或伴随轻微缩放，模拟系统级导航的层级递进效果
+    """
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget, optional): 父级窗口组件，默认为 None
+        """
         super().__init__(parent)
         self.currentScaleOutAni = QPropertyAnimation(self._currentSnapshot, b'geometry', self)
         self.currentFadeOutAni = QPropertyAnimation(self._currentSnapshot.graphicsEffect(), b'opacity', self)

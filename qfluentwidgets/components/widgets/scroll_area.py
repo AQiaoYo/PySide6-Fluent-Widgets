@@ -8,9 +8,17 @@ from .scroll_bar import ScrollBar, SmoothScrollBar, SmoothScrollDelegate
 
 
 class ScrollArea(QScrollArea):
-    """平滑滚动区域"""
+    """平滑滚动区域
+    用于展示超出可视区域的内容，支持垂直与水平双向滚动，适用于长列表、大图片浏览等场景
+    提供流畅的滚动体验并支持自定义滚动条样式，可作为复杂布局的容器基类
+    """
 
     def __init__(self, parent=None):
+        """初始化滚动区域
+        
+        Args:
+            parent: 父控件，类型为 QWidget，None 表示作为顶级窗口
+        """
         super().__init__(parent)
         self.scrollDelagate = SmoothScrollDelegate(self)
 
@@ -34,7 +42,10 @@ class ScrollArea(QScrollArea):
 
 
 class SingleDirectionScrollArea(QScrollArea):
-    """单方向滚动区域"""
+    """单方向滚动区域
+    限制内容仅在水平或垂直单一方向上滚动，适用于横向时间轴、纵向消息列表等线性布局场景
+    自动屏蔽另一方向的滚动事件，避免误触导致页面偏移
+    """
 
     def __init__(self, parent=None, orient=Qt.Vertical):
         """构造函数
@@ -86,9 +97,17 @@ class SingleDirectionScrollArea(QScrollArea):
 
 
 class SmoothScrollArea(QScrollArea):
-    """平滑滚动区域"""
+    """平滑滚动区域
+    基于动画插值实现丝滑的滚动过渡效果，适用于对交互体验要求较高的内容展示场景
+    相比普通滚动区域可有效消除滚轮切换时的生硬感，特别适合长文本阅读与信息流浏览
+    """
 
     def __init__(self, parent=None):
+        """初始化平滑滚动区域
+        
+        Args:
+            parent: 父控件，类型为 QWidget，None 表示作为顶级窗口
+        """
         super().__init__(parent)
         self.delegate = SmoothScrollDelegate(self, True)
 

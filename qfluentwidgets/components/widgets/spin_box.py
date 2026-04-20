@@ -16,7 +16,11 @@ from .flyout import Flyout, FlyoutViewBase, FlyoutAnimationType
 
 
 class SpinIcon(FluentIconBase, Enum):
-    """ Spin 图标 """
+    """SpinBox 的图标枚举类
+    
+    定义了微调框组件中增减按钮与飞出视图中使用的图标类型，
+    供 SpinButton 等内部控件使用以保持主题风格一致
+    """
 
     UP = "Up"
     DOWN = "Down"
@@ -27,8 +31,19 @@ class SpinIcon(FluentIconBase, Enum):
 
 
 class SpinButton(QToolButton):
+    """微调框的增减按钮
+    
+    提供带图标的上下箭头按钮，通常成对嵌入 SpinBox 中使用，
+    点击后发射 clicked 信号用于触发数值的递增或递减操作
+    """
 
     def __init__(self, icon: SpinIcon, parent=None):
+        """初始化按钮
+        
+        Args:
+            icon: 按钮显示的图标，类型为 SpinIcon，用于指定显示递增或递减箭头
+            parent: 父级控件，默认为 None，传入后按钮将跟随父控件销毁
+        """
         super().__init__(parent=parent)
         self.isPressed = False
         self._icon = icon
@@ -59,9 +74,18 @@ class SpinButton(QToolButton):
 
 
 class CompactSpinButton(QToolButton):
-    """ 紧凑 spin 按钮 """
+    """紧凑风格的微调框增减按钮
+    
+    与 SpinButton 功能相同，但尺寸更小、边距更紧凑，
+    通常作为 CompactSpinBox 和 CompactDoubleSpinBox 的内部组件使用
+    """
 
     def __init__(self, parent=None):
+        """初始化按钮
+        
+        Args:
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent=parent)
         self.setFixedSize(26, 33)
         self.setCursor(Qt.IBeamCursor)
@@ -78,9 +102,18 @@ class CompactSpinButton(QToolButton):
 
 
 class SpinFlyoutView(FlyoutViewBase):
-    """ Spin 浮出层 视图 """
+    """微调框的飞出视图
+    
+    在移动端或触控场景下点击 SpinBox 时弹出，
+    提供滚轮或按钮形式的选择界面，方便用户快速调整数值
+    """
 
     def __init__(self, parent=None):
+        """初始化视图
+        
+        Args:
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent)
         self.upButton = TransparentToolButton(SpinIcon.UP, self)
         self.downButton = TransparentToolButton(SpinIcon.DOWN, self)
@@ -110,9 +143,18 @@ class SpinFlyoutView(FlyoutViewBase):
 
 
 class SpinBoxBase:
-    """微调框基类"""
+    """微调框基类
+    
+    封装了数值范围校验、步长控制、按钮响应和焦点处理等通用逻辑，
+    派生类可通过重写相关方法实现整数、浮点数、时间、日期等不同数据类型的输入
+    """
 
     def __init__(self, parent=None):
+        """初始化基类
+        
+        Args:
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent=parent)
         self._isError = False
         self.lightFocusedBorderColor = QColor()
@@ -203,9 +245,18 @@ class SpinBoxBase:
 
 
 class InlineSpinBoxBase(SpinBoxBase):
-    """内联微调框基类"""
+    """内联微调框基类
+    
+    在 SpinBoxBase 基础上采用内联编辑风格，编辑区与按钮布局更为紧凑，
+    适用于需要在列表或表格等狭窄空间内嵌入数值输入的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化基类
+        
+        Args:
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent)
         self.upButton = SpinButton(SpinIcon.UP, self)
         self.downButton = SpinButton(SpinIcon.DOWN, self)
@@ -231,9 +282,18 @@ class InlineSpinBoxBase(SpinBoxBase):
 
 
 class CompactSpinBoxBase(SpinBoxBase):
-    """紧凑微调框基类"""
+    """紧凑微调框基类
+    
+    在 SpinBoxBase 基础上缩小了控件尺寸和边距，按钮使用 CompactSpinButton，
+    适用于工具栏、状态栏或高密度表单等对空间要求严格的界面布局
+    """
 
     def __init__(self, parent=None):
+        """初始化基类
+        
+        Args:
+            parent: 父级控件，默认为 None
+        """
         super().__init__(parent)
         self.compactSpinButton = CompactSpinButton(self)
         self.spinFlyoutView = SpinFlyoutView(self)
@@ -273,40 +333,80 @@ class CompactSpinBoxBase(SpinBoxBase):
 
 
 class SpinBox(InlineSpinBoxBase, QSpinBox):
-    """ 微调框 """
+    """整数微调框
+    
+    提供带上下箭头的数值输入控件，支持设置最小值、最大值、步长和前缀后缀，
+    适用于需要精确输入整数的场景，如数量选择、页码跳转等
+    """
 
 
 class CompactSpinBox(CompactSpinBoxBase, QSpinBox):
-    """ 紧凑 微调框 """
+    """紧凑整数微调框
+    
+    功能与 SpinBox 一致，但控件整体尺寸更小，按钮和文本边距更紧凑，
+    适合嵌入工具栏或空间受限的表单中使用
+    """
 
 
 class DoubleSpinBox(InlineSpinBoxBase, QDoubleSpinBox):
-    """ Double 微调框 """
+    """浮点数微调框
+    
+    提供带上下箭头的浮点数输入控件，支持设置小数精度、最小值、最大值和步长，
+    适用于需要精确输入小数的场景，如参数调节、比例设置等
+    """
 
 
 class CompactDoubleSpinBox(CompactSpinBoxBase, QDoubleSpinBox):
-    """紧凑 Double 微调框"""
+    """紧凑浮点数微调框
+    
+    功能与 DoubleSpinBox 一致，但控件整体尺寸更小，按钮和文本边距更紧凑，
+    适合嵌入工具栏或空间受限的表单中使用
+    """
 
 
 class TimeEdit(InlineSpinBoxBase, QTimeEdit):
-    """ 时间 edit """
+    """时间编辑框
+    
+    提供带上下箭头的时间选择控件，支持时、分、秒的输入与调节，
+    适用于需要设置或显示具体时刻的场景，如闹钟设置、日程安排等
+    """
 
 
 class CompactTimeEdit(CompactSpinBoxBase, QTimeEdit):
-    """ 紧凑 时间 edit """
+    """紧凑时间编辑框
+    
+    功能与 TimeEdit 一致，但控件整体尺寸更小，按钮和文本边距更紧凑，
+    适合嵌入工具栏或空间受限的表单中使用
+    """
 
 
 class DateTimeEdit(InlineSpinBoxBase, QDateTimeEdit):
-    """ 日期 时间 edit """
+    """日期时间编辑框
+    
+    提供带上下箭头的日期和时间选择控件，支持同时编辑年月日与时、分、秒，
+    适用于需要精确到秒的时间点选择场景，如日志筛选、预约设置等
+    """
 
 
 class CompactDateTimeEdit(CompactSpinBoxBase, QDateTimeEdit):
-    """ 紧凑 日期 时间 edit """
+    """紧凑日期时间编辑框
+    
+    功能与 DateTimeEdit 一致，但控件整体尺寸更小，按钮和文本边距更紧凑，
+    适合嵌入工具栏或空间受限的表单中使用
+    """
 
 
 class DateEdit(InlineSpinBoxBase, QDateEdit):
-    """ 日期 edit """
+    """日期编辑框
+    
+    提供带上下箭头的日期选择控件，支持年、月、日的输入与调节，
+    适用于需要选择或显示日期的场景，如生日填写、截止日期设置等
+    """
 
 
 class CompactDateEdit(CompactSpinBoxBase, QDateEdit):
-    """ 紧凑 日期 edit """
+    """紧凑日期编辑框
+    
+    功能与 DateEdit 一致，但控件整体尺寸更小，按钮和文本边距更紧凑，
+    适合嵌入工具栏或空间受限的表单中使用
+    """

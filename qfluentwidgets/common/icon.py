@@ -1,5 +1,7 @@
 # coding: utf-8
-"""图标相关工具模块"""
+"""图标相关工具模块
+提供 Fluent 图标、SVG 图标、字体图标等多种图标引擎与图标类，用于在 PyQt/PySide 应用中绘制、管理和切换图标资源，支持自动适配明暗主题
+"""
 
 from enum import Enum
 from typing import Union
@@ -16,7 +18,9 @@ from .overload import singledispatchmethod
 
 
 class FluentIconEngine(QIconEngine):
-    """Fluent 图标 engine"""
+    """Fluent 图标引擎
+    负责将 FluentIconBase 渲染为 QIcon，支持根据主题自动切换图标颜色，通常作为内部引擎在设置按钮、菜单项或工具栏图标时使用
+    """
 
     def __init__(self, icon, reverse=False):
         """初始化 Fluent 图标 engine
@@ -74,9 +78,15 @@ class FluentIconEngine(QIconEngine):
 
 
 class SvgIconEngine(QIconEngine):
-    """Svg 图标 engine"""
+    """Svg 图标引擎
+    基于 SVG 数据渲染矢量图标，支持任意缩放且保持清晰，适用于工具栏、状态栏等需要高分辨率图标的场景
+    """
 
     def __init__(self, svg: str):
+        """初始化图标引擎
+        Args:
+            svg: SVG 字符串或 QByteArray 数据，作为图标绘制源
+        """
         super().__init__()
         self.svg = svg
 
@@ -101,9 +111,18 @@ class SvgIconEngine(QIconEngine):
 
 
 class FontIconEngine(QIconEngine):
-    """Font 图标 engine"""
+    """Font 图标引擎
+    使用字体族中的指定字符渲染图标，支持自定义颜色和粗体样式，适用于需要通过字体文件加载单色图标的轻量级场景
+    """
 
     def __init__(self, fontFamily: str, char: str, color, isBold):
+        """初始化字体图标引擎
+        Args:
+            fontFamily: 字体族名称，用于指定图标所在字体
+            char: 图标对应的字符或 Unicode 编码
+            color: 图标颜色，可以是 QColor、Qt.GlobalColor 或十六进制颜色字符串
+            isBold: 是否使用粗体样式绘制图标
+        """
         super().__init__()
         self.color = color
         self.char = char
@@ -231,7 +250,9 @@ def drawIcon(icon, painter, rect, state=QIcon.Off, **attributes):
 
 
 class FluentIconBase:
-    """Fluent 图标基类"""
+    """Fluent 图标基类
+    定义 Fluent 图标的公共接口与主题切换行为，所有具体 Fluent 图标类均需继承此类并实现 path 属性，以便图标引擎正确加载资源
+    """
 
     def path(self, theme=Theme.AUTO) -> str:
         """获取图标路径
@@ -318,7 +339,9 @@ class FluentIconBase:
 
 
 class FluentFontIconBase(FluentIconBase):
-    """Fluent font 图标基类"""
+    """Fluent font 图标基类
+    为基于字体的 Fluent 图标提供统一基类，管理字符编码与主题色映射，适合构建通过自定义字体承载的图标体系
+    """
 
     _isFontLoaded = False
     fontId = None
@@ -326,6 +349,10 @@ class FluentFontIconBase(FluentIconBase):
     _iconNames = {}
 
     def __init__(self, char: str):
+        """初始化字体图标基类
+        Args:
+            char: 图标对应的字符或 Unicode 字符串，作为字体图标的显示内容
+        """
         super().__init__()
         self.char = char
         self.lightColor = QColor(0, 0, 0)
@@ -416,7 +443,9 @@ class FluentFontIconBase(FluentIconBase):
 
 
 class ColoredFluentIcon(FluentIconBase):
-    """带主题色的 Fluent 图标"""
+    """带主题色的 Fluent 图标
+    在 FluentIcon 基础上支持自定义主题色覆盖，可根据应用主题自动调整图标色调，适用于需要强调视觉层次或品牌色的界面元素
+    """
 
     def __init__(self, icon: FluentIconBase, lightColor, darkColor):
         """初始化带主题色的 Fluent 图标
@@ -452,7 +481,9 @@ class ColoredFluentIcon(FluentIconBase):
 
 
 class FluentIcon(FluentIconBase, Enum):
-    """Fluent 图标"""
+    """Fluent 图标
+    内置丰富的标准化 Fluent Design 图标资源，支持自动适配应用明暗主题，常用于导航栏、按钮、菜单和设置面板等控件
+    """
 
     UP = "Up"
     ADD = "Add"
@@ -635,8 +666,15 @@ class FluentIcon(FluentIconBase, Enum):
 
 
 class Icon(QIcon):
+    """图标包装类
+    对 FluentIconBase 或 QIcon 进行统一包装，提供与主题系统集成的图标对象，可在控件中直接使用并支持主题变更时自动刷新
+    """
 
     def __init__(self, fluentIcon: FluentIcon):
+        """初始化图标包装类
+        Args:
+            fluentIcon: 要包装的图标对象，可以是 FluentIconBase 枚举成员或 QIcon 实例
+        """
         super().__init__(fluentIcon.path())
         self.fluentIcon = fluentIcon
 
@@ -661,7 +699,7 @@ def toQIcon(icon: Union[QIcon, FluentIconBase, str]) -> QIcon:
 
 class Action(QAction):
     """Fluent Action
-
+    继承自 QAction 并提供 Fluent 风格图标支持，可接受 FluentIcon 作为图标并自动跟随主题切换颜色，适用于菜单栏、工具栏和右键菜单等场景
     构造函数重载:
         * Action(parent: QObject = None, **kwargs)
         * Action(text: str, parent: QObject = None, **kwargs)
@@ -670,6 +708,11 @@ class Action(QAction):
 
     @singledispatchmethod
     def __init__(self, parent: QObject = None, **kwargs):
+        """初始化动作
+        Args:
+            parent: 父级 QObject
+            **kwargs: 其他关键字参数，支持传入 text、icon、shortcut、triggered 等 QAction 属性进行快捷初始化
+        """
         super().__init__(parent, **kwargs)
         self.fluentIcon = None
 

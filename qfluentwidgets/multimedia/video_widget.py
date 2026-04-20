@@ -1,5 +1,7 @@
 # coding: utf-8
-"""视频播放组件"""
+"""提供视频播放相关的界面组件，支持在 PyQt/PySide 应用中嵌入视频渲染功能
+ 包含适用于 QGraphicsScene 的图形项与常规 QWidget 控件，适用于需要集成多媒体播放的 Fluent Design 桌面应用
+"""
 
 from PySide6.QtCore import Qt, Signal, QUrl, QSizeF, QTimer
 from PySide6.QtGui import QPainter
@@ -11,7 +13,9 @@ from .media_play_bar import StandardMediaPlayBar
 
 
 class GraphicsVideoItem(QGraphicsVideoItem):
-    """图形视频项"""
+    """用于在 QGraphicsScene 中渲染视频画面的图形项
+     适合需要与其他图形元素叠加、进行几何变换或精细化布局控制的场景，可作为复杂可视化界面的一部分嵌入使用
+    """
 
     def paint(self, painter: QPainter, option, widget):
         painter.setCompositionMode(QPainter.CompositionMode_Difference)
@@ -19,9 +23,15 @@ class GraphicsVideoItem(QGraphicsVideoItem):
 
 
 class VideoWidget(QGraphicsView):
-    """视频部件"""
+    """基于 QWidget 的视频播放控件，提供完整的视频渲染与交互界面
+     可直接嵌入到应用窗口的布局中使用，支持播放状态展示和鼠标事件响应，满足常规桌面视频播放需求
+    """
 
     def __init__(self, parent=None):
+        """初始化视频播放控件
+         Args:
+             parent: 父控件，用于指定该控件的父级窗口或布局容器，传入 None 时表示该控件为独立顶层窗口
+        """
         super().__init__(parent)
         self.isHover = False
         self.timer = QTimer(self)

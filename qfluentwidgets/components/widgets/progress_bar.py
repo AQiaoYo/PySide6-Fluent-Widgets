@@ -1,5 +1,8 @@
 # coding: utf-8
-"""进度条组件"""
+"""提供进度条相关控件，用于在界面中直观展示任务处理进度
+
+适用于需要向用户反馈当前完成度的各类场景，包括文件下载、软件安装和数据加载等，支持确定与不确定两种进度显示模式
+"""
 
 from math import floor
 
@@ -13,7 +16,10 @@ from ...common.style_sheet import themeColor, isDarkTheme
 
 
 class ProgressBar(QProgressBar):
-    """进度条"""
+    """用于展示已知完成百分比的水平进度条控件
+    
+    适用于能够精确计算当前任务进度的场景，例如文件下载、视频转码或批量数据处理，可通过 setValue() 方法实时更新进度值以反馈最新状态
+    """
 
     def __init__(self, parent=None, useAni=True):
         """初始化进度条
@@ -245,7 +251,10 @@ class ProgressBar(QProgressBar):
 
 
 class IndeterminateProgressBar(QProgressBar):
-    """不确定进度条"""
+    """用于展示未知完成度的循环动画进度条控件
+    
+    适用于无法预估剩余时间或完成比例的场景，例如网络请求等待、后台同步或数据库查询，通过无限循环动画提示用户当前正处于处理中
+    """
 
     def __init__(self, parent=None, start=True):
         """初始化不确定进度条

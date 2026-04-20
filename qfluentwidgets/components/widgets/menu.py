@@ -1,5 +1,7 @@
 # coding: utf-8
-"""菜单组件"""
+"""菜单组件模块，提供圆角菜单、可选中菜单、系统托盘菜单及各类右键菜单实现
+包含菜单动画管理器、菜单项委托和子菜单部件，用于构建 Fluent Design 风格的完整菜单体系
+"""
 from enum import Enum
 from typing import List, Union
 
@@ -23,7 +25,10 @@ from .tool_tip import ItemViewToolTipDelegate, ItemViewToolTipType
 
 
 class CustomMenuStyle(QProxyStyle):
-    """自定义菜单样式"""
+    """自定义菜单样式
+    继承自 QProxyStyle，用于自定义菜单绘制逻辑，调整菜单项间距、图标尺寸和文本对齐方式
+    适用于需要微调菜单视觉表现但不想完全重绘的场景
+    """
 
     def __init__(self, iconSize=14):
         """
@@ -41,9 +46,18 @@ class CustomMenuStyle(QProxyStyle):
 
 
 class DWMMenu(QMenu):
-    """使用 DWM 阴影的菜单"""
+    """使用 DWM 阴影的菜单
+    基于 Windows DWM（Desktop Window Manager）实现系统级阴影效果，提升菜单视觉层级
+    通常作为启用系统阴影的菜单基类使用，仅在 Windows 平台生效
+    """
 
     def __init__(self, title="", parent=None):
+        """初始化 DWM 阴影菜单
+        
+        Args:
+            title: 菜单标题文本，若为 None 则不显示标题栏
+            parent: 父窗口或部件，决定菜单的层级关系
+        """
         super().__init__(title, parent)
         self.windowEffect = WindowEffect(self)
         self.setWindowFlags(
@@ -59,7 +73,10 @@ class DWMMenu(QMenu):
 
 
 class MenuAnimationType(Enum):
-    """菜单动画类型"""
+    """菜单动画类型
+    定义菜单弹出时使用的动画效果枚举，包括无动画、下拉、上拉、淡入下拉和淡入上拉
+    通过 RoundMenu.setAnimationType() 设置，控制菜单显隐的过渡效果
+    """
 
     NONE = 0
     DROP_DOWN = 1
@@ -70,7 +87,10 @@ class MenuAnimationType(Enum):
 
 
 class SubMenuItemWidget(QWidget):
-    """子菜单项部件"""
+    """子菜单项部件
+    用于在菜单项右侧绘制向右箭头，标识该项包含子菜单，支持悬停自动弹出子菜单
+    通常由 RoundMenu 内部创建，无需手动实例化
+    """
 
     showMenuSig = Signal(QListWidgetItem)
 
@@ -99,9 +119,17 @@ class SubMenuItemWidget(QWidget):
 
 
 class MenuItemDelegate(QStyledItemDelegate):
-    """菜单项委托"""
+    """菜单项委托
+    负责菜单列表中单个选项的绘制与布局，包括文本、图标、快捷键和分隔符的渲染
+    可通过继承此类并重写 paint 方法来自定义菜单项外观
+    """
 
     def __init__(self, parent=None):
+        """初始化菜单项委托
+        
+        Args:
+            parent: 父对象，通常为关联的列表部件
+        """
         super().__init__(parent)
         self.tooltipDelegate = None
 
@@ -132,7 +160,10 @@ class MenuItemDelegate(QStyledItemDelegate):
 
 
 class ShortcutMenuItemDelegate(MenuItemDelegate):
-    """带快捷键文本的菜单项委托"""
+    """带快捷键文本的菜单项委托
+    在菜单项右侧预留区域绘制 QAction 的快捷键文本，支持调整快捷键与文本的间距
+    适用于需要展示键盘快捷方式的菜单场景
+    """
 
     def paint(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
         super().paint(painter, option, index)
@@ -166,9 +197,17 @@ class ShortcutMenuItemDelegate(MenuItemDelegate):
 
 
 class MenuActionListWidget(QListWidget):
-    """菜单动作列表部件"""
+    """菜单动作列表部件
+    内部使用 QListWidget 承载 QAction，负责动作与列表项的映射、尺寸计算和事件转发
+    作为 RoundMenu 的核心内容区域，管理所有菜单项的排布与交互
+    """
 
     def __init__(self, parent=None):
+        """初始化菜单动作列表部件
+        
+        Args:
+            parent: 父菜单实例，用于接收动作触发事件和尺寸调整通知
+        """
         super().__init__(parent)
         self._itemHeight = 28
         self._maxVisibleItems = -1  # 根据屏幕尺寸调整可见项数量.
@@ -263,11 +302,23 @@ class MenuActionListWidget(QListWidget):
 
 
 class RoundMenu(QMenu):
-    """圆角菜单"""
+    """圆角菜单
+    提供 Fluent Design 风格的圆角弹出菜单，支持图标、快捷键、子菜单和自定义动作
+    适用于按钮下拉菜单、右键上下文菜单等常见场景，可配合 MenuAnimationManager 实现弹出动画
+    构造函数重载:
+        - RoundMenu(parent)
+        - RoundMenu(title, parent)
+    """
 
     closedSignal = Signal()
 
     def __init__(self, title="", parent=None):
+        """初始化圆角菜单
+        
+        Args:
+            title: 菜单标题文本，若为 None 则不显示标题栏
+            parent: 父窗口或部件，用于定位菜单和内存管理
+        """
         super().__init__(parent=parent)
         self.setTitle(title)
         self._icon = QIcon()
@@ -783,11 +834,19 @@ class RoundMenu(QMenu):
 
 
 class MenuAnimationManager(QObject):
-    """菜单动画管理器"""
+    """菜单动画管理器
+    抽象基类，负责计算菜单弹出位置和执行显示/隐藏动画序列
+    子类需实现 availableGeometry、moveTo 和 play 方法以提供具体的动画行为
+    """
 
     managers = {}
 
     def __init__(self, menu: RoundMenu):
+        """初始化菜单动画管理器
+        
+        Args:
+            menu: 目标 RoundMenu 实例，动画将作用于此菜单
+        """
         super().__init__()
         self.menu = menu
         self.ani = QPropertyAnimation(menu, b'pos', menu)
@@ -855,7 +914,10 @@ class MenuAnimationManager(QObject):
 
 @MenuAnimationManager.register(MenuAnimationType.NONE)
 class DummyMenuAnimationManager(MenuAnimationManager):
-    """空菜单动画管理器"""
+    """空菜单动画管理器
+    禁用所有动画效果，菜单将直接显示在目标位置而不产生过渡动画
+    适用于追求响应速度或对动画性能敏感的场景
+    """
 
     def exec(self, pos: QPoint):
         self.menu.move(self._endPosition(pos))
@@ -863,7 +925,10 @@ class DummyMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.DROP_DOWN)
 class DropDownMenuAnimationManager(MenuAnimationManager):
-    """下拉菜单动画管理器"""
+    """下拉菜单动画管理器
+    菜单从触发点下方展开，若下方空间不足则自动翻转至上方的标准下拉动画
+    适用于 ComboBox、PushButton 等控件的下拉菜单场景
+    """
 
     def exec(self, pos):
         pos = self._endPosition(pos)
@@ -885,7 +950,10 @@ class DropDownMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.PULL_UP)
 class PullUpMenuAnimationManager(MenuAnimationManager):
-    """上拉菜单动画管理器"""
+    """上拉菜单动画管理器
+    菜单从触发点上方展开，若上方空间不足则自动翻转至下方
+    适用于任务栏、底部工具栏等靠近屏幕边缘的弹出菜单场景
+    """
 
     def _endPosition(self, pos):
         m = self.menu
@@ -915,9 +983,17 @@ class PullUpMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.FADE_IN_DROP_DOWN)
 class FadeInDropDownMenuAnimationManager(MenuAnimationManager):
-    """淡入下拉菜单动画管理器"""
+    """淡入下拉菜单动画管理器
+    在下拉展开的同时叠加透明度从 0 到 1 的淡入效果，增强视觉流畅感
+    适用于需要柔和过渡效果的下拉菜单场景
+    """
 
     def __init__(self, menu: RoundMenu):
+        """初始化淡入下拉菜单动画管理器
+        
+        Args:
+            menu: 目标 RoundMenu 实例，将应用淡入下拉动画
+        """
         super().__init__(menu)
         self.opacityAni = QPropertyAnimation(menu, b'windowOpacity', self)
         self.aniGroup = QParallelAnimationGroup(self)
@@ -946,9 +1022,17 @@ class FadeInDropDownMenuAnimationManager(MenuAnimationManager):
 
 @MenuAnimationManager.register(MenuAnimationType.FADE_IN_PULL_UP)
 class FadeInPullUpMenuAnimationManager(MenuAnimationManager):
-    """淡入上拉菜单动画管理器"""
+    """淡入上拉菜单动画管理器
+    在上拉展开的同时叠加透明度渐变效果，兼顾空间适配与视觉平滑度
+    适用于底部弹出且需要柔和显隐过渡的菜单场景
+    """
 
     def __init__(self, menu: RoundMenu):
+        """初始化淡入上拉菜单动画管理器
+        
+        Args:
+            menu: 目标 RoundMenu 实例，将应用淡入上拉动画
+        """
         super().__init__(menu)
         self.opacityAni = QPropertyAnimation(menu, b'windowOpacity', self)
         self.aniGroup = QParallelAnimationGroup(self)
@@ -983,7 +1067,10 @@ class FadeInPullUpMenuAnimationManager(MenuAnimationManager):
 
 
 class EditMenu(RoundMenu):
-    """编辑菜单"""
+    """编辑菜单
+    提供剪切、复制、粘贴、删除和全选等标准文本编辑操作，自动根据当前选区状态启用或禁用动作
+    适用于文本输入类控件的通用右键菜单，可配合 QLineEdit、QTextEdit 使用
+    """
 
     def createActions(self):
         self.cutAct = QAction(
@@ -1071,9 +1158,17 @@ class EditMenu(RoundMenu):
 
 
 class LineEditMenu(EditMenu):
-    """行编辑器菜单"""
+    """行编辑器菜单
+    专为 QLineEdit 设计的右键菜单，集成撤销、重做、剪切、复制、粘贴、删除和全选功能
+    自动识别编辑器状态，在无选中内容时禁用剪切/复制/删除，在不可编辑时禁用修改类操作
+    """
 
     def __init__(self, parent: QLineEdit):
+        """初始化行编辑器菜单
+        
+        Args:
+            parent: 关联的 QLineEdit 实例，菜单将作用于该编辑器
+        """
         super().__init__("", parent)
         self.selectionStart = parent.selectionStart()
         self.selectionLength = parent.selectionLength()
@@ -1095,9 +1190,17 @@ class LineEditMenu(EditMenu):
 
 
 class TextEditMenu(EditMenu):
-    """文本编辑菜单"""
+    """文本编辑菜单
+    专为 QTextEdit 和 QPlainTextEdit 设计的右键菜单，支持富文本和纯文本的编辑操作
+    除标准编辑功能外，可自动适配文本状态并支持扩展自定义动作
+    """
 
     def __init__(self, parent: QTextEdit):
+        """初始化文本编辑菜单
+        
+        Args:
+            parent: 关联的文本编辑器实例，通常为 QTextEdit 或 QPlainTextEdit
+        """
         super().__init__("", parent)
         cursor = parent.textCursor()
         self.selectionStart = cursor.selectionStart()
@@ -1123,7 +1226,10 @@ class TextEditMenu(EditMenu):
 
 
 class IndicatorMenuItemDelegate(MenuItemDelegate):
-    """带指示器的菜单项委托"""
+    """带指示器的菜单项委托
+    在菜单项左侧绘制选中状态指示器（单选或复选框），继承自 MenuItemDelegate
+    用于 CheckableMenu 内部，根据 indicatorType 决定绘制样式
+    """
 
     def paint(self, painter: QPainter, option, index):
         super().paint(painter, option, index)
@@ -1142,7 +1248,10 @@ class IndicatorMenuItemDelegate(MenuItemDelegate):
 
 
 class CheckableMenuItemDelegate(ShortcutMenuItemDelegate):
-    """可选中菜单项委托"""
+    """可选中菜单项委托
+    支持在菜单项左侧显示勾选标记的委托基类，处理 checked 状态的绘制和布局偏移
+    适用于需要展示选中/未选中状态的菜单项，通常与 CheckableMenu 配合使用
+    """
 
     def _drawIndicator(self, painter: QPainter, option: QStyleOptionViewItem, index: QModelIndex):
         raise NotImplementedError
@@ -1161,7 +1270,10 @@ class CheckableMenuItemDelegate(ShortcutMenuItemDelegate):
 
 
 class RadioIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
-    """带单选指示器的可选中菜单项委托"""
+    """带单选指示器的可选中菜单项委托
+    绘制圆形单选按钮样式的指示器，用于标识一组互斥选项中的当前选中项
+    适用于 CheckableMenu 的 indicatorType 为 Radio 时的菜单项渲染
+    """
 
     def _drawIndicator(self, painter, option, index):
         rect = option.rect
@@ -1179,7 +1291,10 @@ class RadioIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
 
 
 class CheckIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
-    """带复选指示器的可选中菜单项委托"""
+    """带复选指示器的可选中菜单项委托
+    绘制方形复选框样式的指示器，支持勾选和未勾选两种视觉状态
+    适用于 CheckableMenu 的 indicatorType 为 Check 时的菜单项渲染
+    """
 
     def _drawIndicator(self, painter, option, index):
         rect = option.rect
@@ -1195,7 +1310,10 @@ class CheckIndicatorMenuItemDelegate(CheckableMenuItemDelegate):
 
 
 class MenuIndicatorType(Enum):
-    """菜单指示器类型"""
+    """菜单指示器类型
+    定义可选中菜单项的指示器样式枚举，包括无指示器、单选按钮和复选框
+    通过 CheckableMenu 设置，控制所有子菜单项的选中表现形式
+    """
     CHECK = 0
     RADIO = 1
 
@@ -1211,9 +1329,19 @@ def createCheckableMenuItemDelegate(style: MenuIndicatorType):
 
 
 class CheckableMenu(RoundMenu):
-    """可选中菜单"""
+    """可选中菜单
+    支持添加带单选或复选指示器的菜单项，用户可通过点击切换选中状态
+    适用于需要让用户进行多项选择或单项选择的弹出菜单场景，如视图设置、筛选条件等
+    """
 
     def __init__(self, title="", parent=None, indicatorType=MenuIndicatorType.CHECK):
+        """初始化可选中菜单
+        
+        Args:
+            title: 菜单标题文本，若为 None 则不显示标题栏
+            parent: 父窗口或部件
+            indicatorType: 指示器类型，决定菜单项使用 Radio 单选或 Check 复选样式
+        """
         super().__init__(title, parent)
         self.view.setItemDelegate(createCheckableMenuItemDelegate(indicatorType))
         self.view.setObjectName('checkableListWidget')
@@ -1227,7 +1355,10 @@ class CheckableMenu(RoundMenu):
 
 
 class SystemTrayMenu(RoundMenu):
-    """系统托盘菜单"""
+    """系统托盘菜单
+    专为 QSystemTrayIcon 设计的上下文菜单，支持圆角风格和 Fluent Design 视觉效果
+    适用于托盘图标右键弹出的操作菜单，可添加常规动作和子菜单
+    """
 
     def sizeHint(self) -> QSize:
         m = self.layout().contentsMargins()
@@ -1236,7 +1367,10 @@ class SystemTrayMenu(RoundMenu):
 
 
 class CheckableSystemTrayMenu(CheckableMenu):
-    """可选中系统托盘菜单"""
+    """可选中系统托盘菜单
+    在系统托盘菜单基础上支持单选/复选菜单项，允许用户在托盘菜单中进行状态切换
+    适用于需要展示开关状态或模式选择的托盘快捷菜单，如显示/隐藏窗口、切换主题等
+    """
 
     def sizeHint(self) -> QSize:
         m = self.layout().contentsMargins()
@@ -1245,9 +1379,17 @@ class CheckableSystemTrayMenu(CheckableMenu):
 
 
 class LabelContextMenu(RoundMenu):
-    """标签上下文菜单"""
+    """标签上下文菜单
+    为 QLabel 提供的轻量级右键菜单，默认包含复制文本功能
+    适用于不可编辑文本标签的快速复制交互，可扩展添加自定义动作
+    """
 
     def __init__(self, parent: QLabel):
+        """初始化标签上下文菜单
+        
+        Args:
+            parent: 关联的 QLabel 实例，菜单将读取该标签文本用于复制操作
+        """
         super().__init__("", parent)
         self.selectedText = parent.selectedText()
 

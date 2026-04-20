@@ -1,5 +1,9 @@
 # coding: utf-8
-"""导航界面组件"""
+"""导航界面组件
+
+该模块提供 NavigationInterface 类及相关辅助接口，用于构建侧栏导航体系
+适用于需要多页面管理与层级切换的桌面应用，支持导航项分组、面板折叠与 Acrylic 材质效果
+"""
 
 from typing import Union
 
@@ -14,7 +18,12 @@ from ...common.icon import FluentIconBase
 
 
 class NavigationInterface(QWidget):
-    """导航界面"""
+    """导航界面
+    
+    提供侧栏导航功能，管理导航项的添加、移除与页面切换逻辑
+    作为主窗口的核心导航容器，适用于具有多模块或分级页面的 Fluent Design 应用
+    支持通过 addItem() 注册导航按钮，配合 NavigationItemPosition 实现顶部、滚动区与底部分层固定，并可通过 setCurrentItem() 控制页面显隐
+    """
 
     displayModeChanged = Signal(NavigationDisplayMode)
 

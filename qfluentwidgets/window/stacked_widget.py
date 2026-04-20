@@ -1,5 +1,8 @@
 # coding: utf-8
-"""堆叠部件"""
+"""提供堆叠部件模块，用于管理多个子界面的层级堆叠与切换显示
+
+该模块通常与导航组件配合使用，适用于需要根据用户选择动态展示不同功能页面的多窗口应用场景
+"""
 
 from PySide6.QtCore import Qt, Signal, QEasingCurve
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QAbstractScrollArea
@@ -9,7 +12,10 @@ from ..components.widgets.stacked_widget import PopUpAniStackedWidget, EntranceT
 
 
 class StackedWidget(QFrame):
-    """堆叠部件"""
+    """堆叠部件，继承自 QStackedWidget，用于管理多个子页面的显示与切换，同一时间仅有一个页面处于可见状态
+    
+    适合作为主窗口的内容区域，配合导航栏实现不同功能模块的页面切换，支持通过 addWidget、setCurrentIndex 和 setCurrentWidget 等方法动态管理页面，可根据需要启用切换动画以提升视觉体验
+    """
 
     currentChanged = Signal(int)
 

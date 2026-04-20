@@ -21,8 +21,10 @@ from .menu import RoundMenu, MenuAnimationType
 
 
 class PushButton(QPushButton):
-    """ 按钮组件
-
+    """标准推送按钮，用于触发常见的界面操作
+    
+    适用于提交表单、确认对话框、执行命令等常规交互场景，支持文本和图标组合展示
+    
     构造函数重载:
         * PushButton(parent: QWidget = None)
         * PushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -159,8 +161,10 @@ class PushButton(QPushButton):
 
 
 class PrimaryPushButton(PushButton):
-    """ 主题色按钮
-
+    """主题色推送按钮，用于强调当前界面的主要操作
+    
+    通常在一个操作区域中只使用一个，以视觉高亮引导用户完成核心任务，如保存、提交或继续
+    
     构造函数重载:
         * PrimaryPushButton(parent: QWidget = None)
         * PrimaryPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -181,8 +185,10 @@ class PrimaryPushButton(PushButton):
 
 
 class TransparentPushButton(PushButton):
-    """ 透明按钮
-
+    """透明背景推送按钮，用于次要或低频操作
+    
+    在需要减少视觉干扰的界面中使用，悬浮或点击时才会显现明显的背景反馈，适合工具栏或列表内的辅助操作
+    
     构造函数重载:
         * TransparentPushButton(parent: QWidget = None)
         * TransparentPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -191,8 +197,10 @@ class TransparentPushButton(PushButton):
 
 
 class ToggleButton(PushButton):
-    """ 切换按钮
-
+    """状态切换按钮，用于在两种互斥状态之间切换
+    
+    适用于需要开启/关闭某项功能或切换视图模式的场景，点击后按钮会保持选中或取消选中的视觉状态
+    
     构造函数重载:
         * ToggleButton(parent: QWidget = None)
         * ToggleButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -214,8 +222,10 @@ TogglePushButton = ToggleButton
 
 
 class TransparentTogglePushButton(TogglePushButton):
-    """ 透明切换按钮
-
+    """透明背景的状态切换按钮，用于轻量级的开关切换
+    
+    在需要保持界面简洁的同时提供状态切换能力，常用于工具栏、侧边栏或卡片内的功能启停控制
+    
     构造函数重载:
         * TransparentTogglePushButton(parent: QWidget = None)
         * TransparentTogglePushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -224,8 +234,10 @@ class TransparentTogglePushButton(TogglePushButton):
 
 
 class HyperlinkButton(PushButton):
-    """ 超链接按钮
-
+    """超链接样式按钮，用于打开外部链接或执行页面跳转
+    
+    以文本链接形式呈现，通常带有下划线或主题色高亮，适合在提示信息、关于页面或登录界面中引导用户访问相关资源
+    
     构造函数重载:
         * HyperlinkButton(parent: QWidget = None)
         * HyperlinkButton(url: str, text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -234,6 +246,11 @@ class HyperlinkButton(PushButton):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化控件
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent)
         self._url = QUrl()
         FluentStyleSheet.BUTTON.apply(self)
@@ -288,8 +305,10 @@ class HyperlinkButton(PushButton):
 
 
 class RadioButton(QRadioButton):
-    """ 单选按钮
-
+    """单选按钮，用于在一组互斥选项中选择其中一项
+    
+    通常与 QButtonGroup 配合使用，确保同一组内只有一个按钮被选中，适用于性别选择、支付方式或分类筛选等场景
+    
     构造函数重载:
         * RadioButton(parent: QWidget = None)
         * RadioButton(text: str, parent: QWidget = None)
@@ -297,6 +316,11 @@ class RadioButton(QRadioButton):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化单选按钮
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent)
         self._lightTextColor = QColor(0, 0, 0)
         self._darkTextColor = QColor(255, 255, 255)
@@ -452,8 +476,10 @@ class RadioButton(QRadioButton):
 
 
 class ToolButton(QToolButton):
-    """ 工具按钮
-
+    """工具按钮，用于在工具栏中执行快捷操作
+    
+    仅显示图标或简短文本，占用空间较小，适合在窗口标题栏、侧边工具栏或富文本编辑器的格式栏中密集排列
+    
     构造函数重载:
         * ToolButton(parent: QWidget = None)
         * ToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -461,6 +487,11 @@ class ToolButton(QToolButton):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化工具按钮
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent)
         FluentStyleSheet.BUTTON.apply(self)
         self.isPressed = False
@@ -571,8 +602,10 @@ class ToolButton(QToolButton):
 
 
 class TransparentToolButton(ToolButton):
-    """ 透明背景工具按钮
-
+    """透明背景工具按钮，用于工具栏中的次要或辅助操作
+    
+    在没有选中或悬浮时与背景融为一体，可减少工具栏的视觉重量，适合在需要突出内容而非控件的创意或媒体应用中使用
+    
     构造函数重载:
         * TransparentToolButton(parent: QWidget = None)
         * TransparentToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -580,8 +613,10 @@ class TransparentToolButton(ToolButton):
 
 
 class PrimaryToolButton(ToolButton):
-    """ 主题色工具按钮
-
+    """主题色工具按钮，用于强调工具栏中的核心功能
+    
+    通过主题色背景突出当前最重要的工具操作，如保存、刷新或新建，通常在一个功能区域中少量使用以避免视觉混乱
+    
     构造函数重载:
         * PrimaryToolButton(parent: QWidget = None)
         * PrimaryToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -604,8 +639,10 @@ class PrimaryToolButton(ToolButton):
 
 
 class ToggleToolButton(ToolButton):
-    """ 切换工具按钮
-
+    """状态切换工具按钮，用于工具栏中的功能开关
+    
+    在需要开启/关闭某个编辑模式、视图选项或面板显示时使用，选中状态会保持高亮以明确告知用户当前功能是否启用
+    
     构造函数重载:
         * ToggleToolButton(parent: QWidget = None)
         * ToggleToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -623,8 +660,10 @@ class ToggleToolButton(ToolButton):
 
 
 class TransparentToggleToolButton(ToggleToolButton):
-    """ 透明切换工具按钮
-
+    """透明背景的状态切换工具按钮，用于轻量级的功能开关
+    
+    适合在简洁风格的工具栏或浮动面板中使用，在保持界面干净的同时提供可视化的选中状态反馈
+    
     构造函数重载:
         * TransparentToggleToolButton(parent: QWidget = None)
         * TransparentToggleToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -632,9 +671,18 @@ class TransparentToggleToolButton(ToggleToolButton):
 
 
 class DropDownButtonBase:
-    """ Drop down 按钮 基类 """
+    """下拉按钮基类，为带下拉箭头的按钮提供通用功能
+    
+    继承此类可快速实现点击后弹出菜单或选项列表的复合按钮，通常与 PushButton 或 ToolButton 组合使用以实现更多命令收纳
+    """
 
     def __init__(self, *args, **kwargs):
+        """初始化下拉按钮基类
+        
+        Args:
+            *args: 位置参数，用于兼容子类多样化的构造参数
+            **kwargs: 关键字参数，用于兼容子类多样化的构造参数
+        """
         super().__init__(*args, **kwargs)
         self._menu = None
         self.arrowAni = TranslateYAnimation(self)
@@ -703,8 +751,10 @@ class DropDownButtonBase:
 
 
 class DropDownPushButton(DropDownButtonBase, PushButton):
-    """ 下拉按钮
-
+    """带下拉箭头的推送按钮，用于执行主操作并展开相关选项
+    
+    主按钮区域响应最常见的命令，下拉箭头区域展示更多同组操作，适合保存为、分享或格式设置等具有多种变体的场景
+    
     构造函数重载:
         * DropDownPushButton(parent: QWidget = None)
         * DropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -721,8 +771,10 @@ class DropDownPushButton(DropDownButtonBase, PushButton):
 
 
 class TransparentDropDownPushButton(DropDownPushButton):
-    """ 透明下拉按钮
-
+    """透明背景的带下拉箭头推送按钮，用于次要的分组操作
+    
+    在需要保持界面简洁的同时提供多级命令入口，点击下拉箭头可展开与当前上下文相关的附加选项
+    
     构造函数重载:
         * TransparentDropDownPushButton(parent: QWidget = None)
         * TransparentDropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -731,8 +783,10 @@ class TransparentDropDownPushButton(DropDownPushButton):
 
 
 class DropDownToolButton(DropDownButtonBase, ToolButton):
-    """ 下拉工具按钮
-
+    """带下拉箭头的工具按钮，用于工具栏中的复合快捷操作
+    
+    图标区域执行默认命令，下拉箭头展开同类命令列表，适合在有限空间内提供一组相关的编辑或视图控制功能
+    
     构造函数重载:
         * DropDownToolButton(parent: QWidget = None)
         * DropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -752,8 +806,10 @@ class DropDownToolButton(DropDownButtonBase, ToolButton):
 
 
 class TransparentDropDownToolButton(DropDownToolButton):
-    """ 透明下拉工具按钮
-
+    """透明背景的带下拉箭头工具按钮，用于轻量级的复合工具操作
+    
+    在简洁风格的工具栏中提供默认操作与附加选项的分离入口，悬浮时显现背景以提示可交互性
+    
     构造函数重载:
         * TransparentDropDownToolButton(parent: QWidget = None)
         * TransparentDropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -761,7 +817,10 @@ class TransparentDropDownToolButton(DropDownToolButton):
 
 
 class PrimaryDropDownButtonBase(DropDownButtonBase):
-    """主题色下拉按钮基类."""
+    """主题色下拉按钮基类，为主题色样式的下拉按钮提供通用实现
+    
+    继承此类可构建带有下拉箭头的高强调度按钮，常用于需要突出展示主要命令组的应用栏或对话框底部
+    """
 
     def _drawDropDownIcon(self, painter, rect):
         theme = Theme.DARK if not isDarkTheme() else Theme.LIGHT
@@ -769,8 +828,10 @@ class PrimaryDropDownButtonBase(DropDownButtonBase):
 
 
 class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
-    """ 主题色下拉按钮
-
+    """主题色带下拉箭头推送按钮，用于强调最重要的分组操作
+    
+    通过主题色突出主命令入口，下拉区域收纳同类变体命令，适合新建、导出等高频且有多选项的核心业务流程
+    
     构造函数重载:
         * PrimaryDropDownPushButton(parent: QWidget = None)
         * PrimaryDropDownPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -787,8 +848,10 @@ class PrimaryDropDownPushButton(PrimaryDropDownButtonBase, PrimaryPushButton):
 
 
 class PrimaryDropDownToolButton(PrimaryDropDownButtonBase, PrimaryToolButton):
-    """ 主题色下拉工具按钮
-
+    """主题色带下拉箭头工具按钮，用于强调工具栏中的核心复合操作
+    
+    在工具栏中以主题色图标突出最常用命令，下拉箭头提供相关选项，适合主题切换、缩放级别或样式库选择等场景
+    
     构造函数重载:
         * PrimaryDropDownToolButton(parent: QWidget = None)
         * PrimaryDropDownToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -808,6 +871,10 @@ class PrimaryDropDownToolButton(PrimaryDropDownButtonBase, PrimaryToolButton):
 
 
 class SplitDropButton(ToolButton):
+    """分离式按钮的下拉箭头部件，用于触发下拉菜单弹出
+    
+    作为 SplitPushButton 或 SplitToolButton 的附属组件，单独响应下拉箭头区域的点击事件以展开选项列表，通常不独立使用
+    """
 
     def _postInit(self):
         self.arrowAni = TranslateYAnimation(self)
@@ -829,6 +896,10 @@ class SplitDropButton(ToolButton):
 
 
 class PrimarySplitDropButton(PrimaryToolButton):
+    """主题色分离式按钮的下拉箭头部件，用于触发下拉菜单弹出
+    
+    以主题色样式呈现，配合 PrimarySplitPushButton 等控件使用，负责处理下拉区域的点击与菜单展示逻辑
+    """
 
     def _postInit(self):
         self.arrowAni = TranslateYAnimation(self)
@@ -853,11 +924,19 @@ class PrimarySplitDropButton(PrimaryToolButton):
 
 
 class SplitWidgetBase(QWidget):
-    """ 分离式部件基类 """
+    """分离式部件基类，提供主按钮与下拉箭头分离布局的通用实现
+    
+    继承此类可将默认操作与下拉选项物理分离，让用户直接点击主区域执行最常用命令，或通过下拉箭头选择其他变体，适合保存为、发送等具有明确主次之分的场景
+    """
 
     dropDownClicked = Signal()
 
     def __init__(self, parent=None):
+        """初始化分离式部件基类
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent=parent)
         self.flyout = None  # type: QWidget
         self.dropButton = SplitDropButton(self)
@@ -942,8 +1021,10 @@ class SplitWidgetBase(QWidget):
 
 
 class SplitPushButton(SplitWidgetBase):
-    """ 分离式按钮
-
+    """分离式推送按钮，将主操作与下拉选项分离为两个可点击区域
+    
+    左侧主按钮直接执行默认命令，右侧下拉箭头展开相关选项列表，适合在表单或对话框中提供高频主操作与低频选项的快捷入口
+    
     构造函数重载:
         * SplitPushButton(parent: QWidget = None)
         * SplitPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -953,6 +1034,11 @@ class SplitPushButton(SplitWidgetBase):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化分离式推送按钮
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent=parent)
         self.button = PushButton(self)
         self.button.setObjectName('splitPushButton')
@@ -1023,8 +1109,10 @@ class SplitPushButton(SplitWidgetBase):
 
 
 class PrimarySplitPushButton(SplitPushButton):
-    """ 主题色分离式按钮
-
+    """主题色分离式推送按钮，以高强调度呈现主次分明的操作入口
+    
+    左侧主题色按钮执行最核心的默认命令，右侧下拉箭头提供相关变体，适用于保存、发布、打印等业务流程中的主行动点
+    
     构造函数重载:
         * PrimarySplitPushButton(parent: QWidget = None)
         * PrimarySplitPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -1044,8 +1132,10 @@ class PrimarySplitPushButton(SplitPushButton):
 
 
 class SplitToolButton(SplitWidgetBase):
-    """ 分离式工具按钮
-
+    """分离式工具按钮，用于工具栏中主次分明的快捷操作
+    
+    图标区域直接执行默认命令，下拉箭头展开同组命令选项，适合在紧凑的工具栏中提供多样化的格式或视图控制
+    
     构造函数重载:
         * SplitToolButton(parent: QWidget = None)
         * SplitToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -1055,6 +1145,11 @@ class SplitToolButton(SplitWidgetBase):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化分离式工具按钮
+        
+        Args:
+            parent (QWidget): 父级窗口部件，None 表示无父控件
+        """
         super().__init__(parent=parent)
         self.button = ToolButton(self)
         self.button.setObjectName('splitToolButton')
@@ -1108,8 +1203,10 @@ class SplitToolButton(SplitWidgetBase):
 
 
 class PrimarySplitToolButton(SplitToolButton):
-    """ 主题色分离式工具按钮
-
+    """主题色分离式工具按钮，用于强调工具栏中的核心复合功能
+    
+    以主题色突出默认命令的优先级，下拉区域收纳相关选项，适合在应用栏中提供设置、视图模式或缩放控制等关键入口
+    
     构造函数重载:
         * PrimarySplitToolButton(parent: QWidget = None)
         * PrimarySplitToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)
@@ -1128,9 +1225,18 @@ class PrimarySplitToolButton(SplitToolButton):
 
 
 class PillButtonBase:
-    """ Pill 按钮基类 """
+    """Pill 按钮基类，为圆角胶囊形态的按钮提供通用实现
+    
+    继承此类可实现具有大圆角风格的标签式按钮，常用于导航栏、分类筛选或状态标签等需要柔和视觉风格的场景
+    """
 
     def __init__(self, *args, **kwargs):
+        """初始化 Pill 按钮基类
+        
+        Args:
+            *args: 位置参数，用于兼容子类多样化的构造参数
+            **kwargs: 关键字参数，用于兼容子类多样化的构造参数
+        """
         super().__init__(*args, **kwargs)
 
     def paintEvent(self, e):
@@ -1170,8 +1276,10 @@ class PillButtonBase:
 
 
 class PillPushButton(TogglePushButton, PillButtonBase):
-    """ Pill 按钮
-
+    """胶囊形推送按钮，以圆润的 Pill 外观呈现标准操作
+    
+    适合在需要柔和现代感的界面中使用，如移动端适配窗口、卡片式布局或顶部导航栏中的操作入口，视觉上比直角按钮更友好
+    
     构造函数重载:
         * PillPushButton(parent: QWidget = None)
         * PillPushButton(text: str, parent: QWidget = None, icon: QIcon | str | FluentIconBase = None)
@@ -1184,8 +1292,10 @@ class PillPushButton(TogglePushButton, PillButtonBase):
 
 
 class PillToolButton(ToggleToolButton, PillButtonBase):
-    """ Pill 工具按钮
-
+    """胶囊形工具按钮，以圆润的 Pill 外观呈现图标操作
+    
+    在需要统一柔和风格的工具栏或导航栏中使用，兼具工具按钮的紧凑性与 Pill 形状的亲和力，适合作为视图切换或筛选条件
+    
     构造函数重载:
         * PillToolButton(parent: QWidget = None)
         * PillToolButton(icon: QIcon | str | FluentIconBase, parent: QWidget = None)

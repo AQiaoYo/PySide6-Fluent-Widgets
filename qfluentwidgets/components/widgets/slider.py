@@ -10,12 +10,20 @@ from ...common.overload import singledispatchmethod
 
 
 class SliderHandle(QWidget):
-    """滑块手柄控件"""
+    """自定义绘制的滑块手柄控件，用于拖拽调节数值的可视化交互元素
+    
+    该类通常作为 Slider 或 ClickableSlider 的内部组件使用，支持鼠标悬停、按下等状态的样式实时切换。当需要实现自定义外观的滑块手柄（如空心圆环、渐变填充等）时，可配合 HollowHandleStyle 等样式类进行扩展，也适用于需要独立控制手柄渲染逻辑的多滑块场景
+    """
 
     pressed = Signal()
     released = Signal()
 
     def __init__(self, parent: QSlider):
+        """初始化滑块手柄实例
+        
+        Args:
+            parent: 父级 QWidget 实例。指定父控件可确保手柄在滑块槽内正确嵌套并继承事件传递链，通常由 Slider 内部自动创建和设置
+        """
         super().__init__(parent=parent)
         self.setFixedSize(22, 22)
         self._radius = 5
@@ -76,7 +84,9 @@ class SliderHandle(QWidget):
 
 
 class Slider(QSlider):
-    """可点击的滑块
+    """支持点击定位和 Fluent 风格渲染的滑块控件
+    
+    继承自 QSlider 并扩展了鼠标直接点击跳转的能力，无需拖拽手柄即可快速定位数值。支持水平与垂直两种方向，适用于音量调节、亮度控制、进度选择等需要连续数值输入的场景。可通过 setPageStep() 和 setSingleStep() 调整步进精度，配合样式代理可进一步自定义槽道与手柄的视觉效果
     
     构造函数重载:
         * Slider(parent: QWidget = None)
@@ -87,6 +97,11 @@ class Slider(QSlider):
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None):
+        """初始化滑块控件
+        
+        Args:
+            parent: 父级 QWidget 实例，默认为 None。指定父控件后滑块将嵌入对应容器的布局体系中；若为 None，则作为独立控件存在，通常需要手动管理其几何位置与生命周期
+        """
         super().__init__(parent)
         self._postInit()
 
@@ -195,7 +210,10 @@ class Slider(QSlider):
 
 
 class ClickableSlider(QSlider):
-    """可点击的滑块"""
+    """支持点击直接定位的滑块控件
+    
+    继承自 Slider 并优化了鼠标点击交互逻辑，点击滑块槽任意位置时手柄会直接跳转至对应数值，而非仅响应手柄拖拽区域。适用于需要频繁快速调节数值的场景（如视频进度条、缩放比例控制等），可显著提升用户操作效率。外观与行为遵循 Fluent Design 规范，支持水平与垂直方向
+    """
 
     clicked = Signal(int)
 
@@ -214,7 +232,10 @@ class ClickableSlider(QSlider):
 
 
 class HollowHandleStyle(QProxyStyle):
-    """空心手柄样式"""
+    """空心圆环样式的滑块手柄渲染策略
+    
+    该类定义了滑块手柄的中空视觉效果，通过仅绘制外轮廓而不填充中心区域的方式呈现轻量、现代的 Fluent 风格。适用于需要与实心手柄形成视觉层级区分、或界面整体采用极简/浅色主题的场景。通常作为参数传入 Slider 或 SliderHandle 的样式设置接口，也可作为自定义样式的基类进行扩展
+    """
 
     def __init__(self, config: dict = None):
         """初始化

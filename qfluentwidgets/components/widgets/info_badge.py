@@ -1,5 +1,10 @@
 # coding: utf-8
-"""信息徽标组件"""
+"""信息徽标组件库
+
+  提供数字徽标、文本徽标、圆点徽标和图标徽标等多种形态，以及用于自动挂载和定位的管理器类
+
+  适用于未读消息计数、状态标记、新功能提示等场景，支持通过 InfoLevel 调整视觉层级，通过 InfoBadgePosition 控制挂载方位
+"""
 
 from enum import Enum
 from typing import Union
@@ -15,7 +20,10 @@ from ...common.style_sheet import themeColor, FluentStyleSheet, isDarkTheme, The
 
 
 class InfoLevel(Enum):
-    """信息层级枚举"""
+    """信息层级枚举
+    
+      定义徽标的视觉优先级和配色方案，用于区分普通提示、成功状态、警告信息及严重错误等不同语义级别
+    """
     INFOAMTION = 'Info'
     SUCCESS = 'Success'
     ATTENTION = 'Attension'
@@ -24,7 +32,10 @@ class InfoLevel(Enum):
 
 
 class InfoBadgePosition(Enum):
-    """信息徽标位置枚举"""
+    """徽标挂载位置枚举
+    
+      定义徽标相对于目标控件的方位，配合 InfoBadgeManager 使用以自动计算并同步徽标的几何位置
+    """
     TOP_RIGHT = 0
     BOTTOM_RIGHT = 1
     RIGHT = 2
@@ -35,17 +46,25 @@ class InfoBadgePosition(Enum):
 
 
 class InfoBadge(QLabel):
-    """信息徽标
-
-    构造函数重载:
-        * InfoBadge(parent: QWidget = None, level=InfoLevel.ATTENTION)
-        * InfoBadge(text: str, parent: QWidget = None, level=InfoLevel.ATTENTION)
-        * InfoBadge(num: int, parent: QWidget = None, level=InfoLevel.ATTENTION)
-        * InfoBadge(num: float, parent: QWidget = None, level=InfoLevel.ATTENTION)
+    """信息徽标控件
+    
+      以小型标签形式展示文本、整数、浮点数或百分比等内容，常用于消息计数、状态标记和数据提示
+    
+      构造函数重载:
+          * InfoBadge(parent: QWidget = None, level=InfoLevel.ATTENTION)
+          * InfoBadge(text: str, parent: QWidget = None, level=InfoLevel.ATTENTION)
+          * InfoBadge(num: int, parent: QWidget = None, level=InfoLevel.ATTENTION)
+          * InfoBadge(num: float, parent: QWidget = None, level=InfoLevel.ATTENTION)
     """
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None, level=InfoLevel.ATTENTION):
+        """初始化信息徽标
+        
+          Args:
+              parent: 父控件，为 None 时徽标作为独立浮窗
+              level: 信息层级，决定徽标的主题色，默认值为 InfoLevel.ATTENTION，影响背景与文字配色
+        """
         super().__init__(parent=parent)
         self.level = InfoLevel.INFOAMTION
         self.lightBackgroundColor = None
@@ -187,9 +206,18 @@ class InfoBadge(QLabel):
 
 
 class DotInfoBadge(InfoBadge):
-    """点状信息徽标"""
+    """点状信息徽标
+    
+      仅显示纯色圆点而不展示任何文本或数字，适用于需要低干扰度状态提示的场景，如未读标记、在线状态指示或操作进度标识
+    """
 
     def __init__(self, parent=None, level=InfoLevel.ATTENTION):
+        """初始化点状徽标
+        
+          Args:
+              parent: 父控件
+              level: 信息层级，决定圆点的主题色，默认值为 InfoLevel.ATTENTION，影响填充配色
+        """
         super().__init__(parent, level)
         self.setFixedSize(4, 4)
 
@@ -249,15 +277,23 @@ class DotInfoBadge(InfoBadge):
 
 
 class IconInfoBadge(InfoBadge):
-    """图标徽标
-
-    构造函数重载:
-        * IconInfoBadge(parent: QWidget = None, level=InfoLevel.ATTENTION)
-        * IconInfoBadge(icon: QIcon | str | FluentIconBase, parent: QWidget = None, level=InfoLevel.ATTENTION)
+    """图标徽标控件
+    
+      以图标形式直观表达状态或类别，相比文本徽标更具辨识度，适合空间受限或需要统一图标的场景
+    
+      构造函数重载:
+          * IconInfoBadge(parent: QWidget = None, level=InfoLevel.ATTENTION)
+          * IconInfoBadge(icon: QIcon | str | FluentIconBase, parent: QWidget = None, level=InfoLevel.ATTENTION)
     """
 
     @singledispatchmethod
     def __init__(self, parent: QWidget = None, level=InfoLevel.ATTENTION):
+        """初始化图标徽标
+        
+          Args:
+              parent: 父控件
+              level: 信息层级，决定图标与背景的主题色，默认值为 InfoLevel.ATTENTION，影响整体配色方案
+        """
         super().__init__(parent=parent, level=level)
         self._icon = QIcon()
         self._iconSize = QSize(8, 8)
@@ -360,11 +396,22 @@ class IconInfoBadge(InfoBadge):
 
 
 class InfoBadgeManager(QObject):
-    """信息徽标管理器"""
+    """信息徽标管理器基类
+    
+      负责将徽标实例附加到目标控件并监听其几何变化，自动维护徽标的显示位置
+    
+      通常情况下不应直接实例化此类，而应使用 TopRightInfoBadgeManager 等子类来指定具体的挂载方位
+    """
 
     managers = {}
 
     def __init__(self, target: QWidget, badge: InfoBadge):
+        """初始化徽标管理器
+        
+          Args:
+              target: 目标控件，徽标将围绕该控件进行定位并同步其几何变化
+              badge: 要挂载的徽标实例，应为 InfoBadge、DotInfoBadge 或 IconInfoBadge 的对象
+        """
         super().__init__()
         self.target = target
         self.badge = badge
@@ -417,7 +464,10 @@ class InfoBadgeManager(QObject):
 
 @InfoBadgeManager.register(InfoBadgePosition.TOP_RIGHT)
 class TopRightInfoBadgeManager(InfoBadgeManager):
-    """右上角信息徽标管理器"""
+    """右上角信息徽标管理器
+    
+      将徽标固定于目标控件的右上角，是最常见的消息未读标记和新内容提示位置，徽标会随目标控件的移动和大小变化自动同步更新
+    """
 
     def position(self):
         pos = self.target.geometry().topRight()
@@ -428,7 +478,10 @@ class TopRightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.RIGHT)
 class RightInfoBadgeManager(InfoBadgeManager):
-    """右侧信息徽标管理器"""
+    """右侧信息徽标管理器
+    
+      将徽标固定于目标控件右侧居中位置，适合在横向布局中作为辅助说明或侧边状态标记
+    """
 
     def position(self):
         x = self.target.geometry().right() - self.badge.width() // 2
@@ -438,7 +491,10 @@ class RightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.BOTTOM_RIGHT)
 class BottomRightInfoBadgeManager(InfoBadgeManager):
-    """右下角信息徽标管理器"""
+    """右下角信息徽标管理器
+    
+      将徽标固定于目标控件的右下角，适用于对话框、卡片或特定容器组件中的状态展示
+    """
 
     def position(self):
         pos = self.target.geometry().bottomRight()
@@ -449,7 +505,10 @@ class BottomRightInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.TOP_LEFT)
 class TopLeftInfoBadgeManager(InfoBadgeManager):
-    """左上角信息徽标管理器"""
+    """左上角信息徽标管理器
+    
+      将徽标固定于目标控件的左上角，适用于从左侧开始阅读的场景或特殊布局需求
+    """
 
     def position(self):
         x = self.target.x() - self.badge.width() // 2
@@ -459,7 +518,10 @@ class TopLeftInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.LEFT)
 class LeftInfoBadgeManager(InfoBadgeManager):
-    """左侧信息徽标管理器"""
+    """左侧信息徽标管理器
+    
+      将徽标固定于目标控件左侧居中位置，适合在纵向列表或左侧导航项旁显示状态标记
+    """
 
     def position(self):
         x = self.target.x() - self.badge.width() // 2
@@ -469,7 +531,10 @@ class LeftInfoBadgeManager(InfoBadgeManager):
 
 @InfoBadgeManager.register(InfoBadgePosition.BOTTOM_LEFT)
 class BottomLeftInfoBadgeManager(InfoBadgeManager):
-    """左下角信息徽标管理器"""
+    """左下角信息徽标管理器
+    
+      将徽标固定于目标控件的左下角，可用于左下角优先级提示或特殊方位标记
+    """
 
     def position(self):
         pos = self.target.geometry().bottomLeft()

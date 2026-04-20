@@ -1,4 +1,8 @@
-"""提供屏幕相关功能的工具函数"""
+"""提供与屏幕及显示器相关的辅助工具函数
+
+包含获取屏幕几何信息、DPI 缩放比例以及多显示器环境下窗口定位的常用方法，
+主要用于适配不同分辨率与缩放比例下的界面布局，确保组件在各屏幕配置下均能正确显示
+"""
 
 from PySide6.QtCore import QPoint, QRect
 from PySide6.QtGui import QCursor

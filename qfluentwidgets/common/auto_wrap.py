@@ -1,4 +1,8 @@
-"""自动换行相关工具模块"""
+"""提供文本自动换行的辅助工具与字符分类枚举
+
+该模块主要用于在受限宽度容器（如 QLabel、QToolTip 或自定义绘制组件）中对混合中英文文本进行智能换行处理，避免超长文本破坏界面布局
+通过 CharType 对字符进行语义分类，TextWrap 类可依据字符类型与可用宽度计算最优断行位置
+"""
 
 from enum import Enum, auto
 from functools import lru_cache
@@ -8,7 +12,11 @@ from unicodedata import east_asian_width
 
 
 class CharType(Enum):
-    """字符类型枚举"""
+    """字符类型枚举
+    
+    用于区分不同语系的字符类别（如中文、英文、空格、标点等），作为 TextWrap 换行算法的断行依据
+    不同字符类型对应不同的换行优先级与粘连规则，例如中文与英文交界、标点禁则等场景均需依赖此类别判断
+    """
 
     SPACE = auto()
     ASIAN = auto()
@@ -16,7 +24,11 @@ class CharType(Enum):
 
 
 class TextWrap:
-    """文本自动换行工具类"""
+    """文本自动换行工具类
+    
+    基于字符宽度与 CharType 分类实现混合文本的自动换行，适用于需要精确控制文本布局的自定义绘制或 UI 组件
+    支持通过传入字体度量信息与最大行宽，将长文本拆分为多行并返回各行子串列表
+    """
 
     EAST_ASAIN_WIDTH_TABLE = {
         "F": 2,

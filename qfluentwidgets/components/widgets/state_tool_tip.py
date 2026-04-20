@@ -9,8 +9,18 @@ from ...common.icon import FluentIcon as FIF
 
 
 class StateCloseButton(QToolButton):
+    """状态工具提示的关闭按钮
+    
+    用于 StateToolTip 右上角，提供用户手动关闭提示的途径
+    通常在提示需要持久显示或操作出错时呈现
+    """
 
     def __init__(self, parent=None):
+        """初始化关闭按钮
+        
+        Args:
+            parent: 父窗口或父部件，指定后按钮会随父部件一起销毁并自动定位在父部件内部
+        """
         super().__init__(parent)
         self.setFixedSize(12, 12)
         self.isPressed = False
@@ -48,7 +58,11 @@ class StateCloseButton(QToolButton):
 
 
 class StateToolTip(QWidget):
-    """状态工具提示"""
+    """显示操作状态的工具提示组件
+    
+    适用于向用户反馈长时间操作进度或操作结果的场景，如文件保存、网络请求等
+    支持自动关闭和手动关闭两种模式，可通过 setContent 动态更新提示文本
+    """
 
     closedSignal = Signal()
 

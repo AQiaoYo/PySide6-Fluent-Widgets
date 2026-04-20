@@ -1,5 +1,9 @@
 # coding: utf-8
-"""信息栏组件"""
+"""信息栏组件
+
+用于在窗口或桌面显示非阻塞式通知消息，支持成功、警告、错误和信息等多种类型
+信息栏可从指定位置滑入显示，超时后自动消失，也可通过关闭按钮手动关闭
+"""
 
 from enum import Enum
 import sys
@@ -21,7 +25,11 @@ from .button import TransparentToolButton
 
 
 class InfoBarIcon(FluentIconBase, Enum):
-    """信息栏图标"""
+    """信息栏图标枚举
+    
+    定义信息栏支持的标准图标类型，用于直观标识消息的类别和严重程度
+    与 InfoBar 配合使用时，会根据传入的图标类型自动渲染对应的色彩和图形
+    """
 
     INFORMATION = "Info"
     SUCCESS = "Success"
@@ -38,7 +46,11 @@ class InfoBarIcon(FluentIconBase, Enum):
 
 
 class InfoBarPosition(Enum):
-    """信息栏显示位置"""
+    """信息栏显示位置枚举
+    
+    定义信息栏在父窗口或桌面上的弹出位置，支持顶部、底部及四个角落
+    通过 InfoBar 的 position 参数指定，影响信息栏的进入动画方向和在屏幕上的堆叠方式
+    """
     TOP = 0
     BOTTOM = 1
     TOP_LEFT = 2
@@ -49,9 +61,17 @@ class InfoBarPosition(Enum):
 
 
 class InfoIconWidget(QWidget):
-    """信息栏图标组件"""
+    """信息栏图标组件
+    
+    用于在信息栏内部渲染带彩色圆形背景的图标，根据图标类型自动匹配主题色
+    通常由 InfoBar 在构造时自动创建，开发者无需手动实例化
+    """
 
     def __init__(self, icon: InfoBarIcon, parent=None):
+        """Args:
+            icon (InfoBarIcon): 图标枚举值，决定显示的图标样式和背景颜色
+            parent (QWidget): 父组件，一般为 InfoBar 实例
+        """
         super().__init__(parent=parent)
         self.setFixedSize(36, 36)
         self.icon = icon
@@ -69,7 +89,15 @@ class InfoIconWidget(QWidget):
 
 
 class InfoBar(QFrame):
-    """信息栏"""
+    """信息栏
+    
+    提供轻量级消息提示的弹出组件，支持成功、错误、警告和信息四种预设样式
+    支持自定义标题、内容、显示时长和弹出位置，超时后自动关闭并释放资源
+    
+    构造函数重载:
+        - 直接实例化: 手动创建 InfoBar 实例并配置参数后显示
+        - 静态工厂: 使用 success()、error()、warning()、info() 等方法一键创建并弹出
+    """
 
     closedSignal = Signal()
     _desktopView = None     # type: DesktopInfoBarView
@@ -308,7 +336,11 @@ class InfoBar(QFrame):
 
 
 class InfoBarManager(QObject):
-    """信息栏管理器"""
+    """信息栏管理器
+    
+    负责管理特定显示位置上所有信息栏的队列与垂直布局，确保多个信息栏有序堆叠不重叠
+    不同位置的管理器以单例形式运行，信息栏在显示时会自动注册到对应位置的管理器中进行生命周期管理
+    """
 
     _instance = None
     managers = {}
@@ -322,6 +354,13 @@ class InfoBarManager(QObject):
         return cls._instance
 
     def __init__(self):
+        """初始化管理器实例
+        
+        创建内部信息栏队列，用于维护当前位置上所有信息栏的层级和布局关系
+        
+        Args:
+            无
+        """
         if self.__initialized:
             return
 
@@ -495,7 +534,11 @@ class InfoBarManager(QObject):
 
 @InfoBarManager.register(InfoBarPosition.TOP)
 class TopInfoBarManager(InfoBarManager):
-    """顶部信息栏管理器"""
+    """顶部信息栏管理器
+    
+    将信息栏居中显示在父窗口顶部，新信息栏自上向下依次堆叠
+    适用于需要在窗口顶部居中展示全局通知的场景，通过 InfoBarPosition.TOP 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize=None):
         p = infoBar.parent()
@@ -516,7 +559,11 @@ class TopInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.TOP_RIGHT)
 class TopRightInfoBarManager(InfoBarManager):
-    """右上角信息栏管理器"""
+    """右上角信息栏管理器
+    
+    将信息栏对齐到父窗口右上角，新信息栏向下堆叠展开
+    适用于常规通知提醒场景，是最常用的信息栏展示位置，通过 InfoBarPosition.TOP_RIGHT 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize=None):
         p = infoBar.parent()
@@ -536,7 +583,11 @@ class TopRightInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM_RIGHT)
 class BottomRightInfoBarManager(InfoBarManager):
-    """右下角信息栏管理器"""
+    """右下角信息栏管理器
+    
+    将信息栏对齐到父窗口右下角，新信息栏向上堆叠展开
+    适用于操作反馈类通知，常与右下角或底部操作栏配合使用，通过 InfoBarPosition.BOTTOM_RIGHT 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize=None) -> QPoint:
         p = infoBar.parent()
@@ -557,7 +608,11 @@ class BottomRightInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.TOP_LEFT)
 class TopLeftInfoBarManager(InfoBarManager):
-    """左上角信息栏管理器"""
+    """左上角信息栏管理器
+    
+    将信息栏对齐到父窗口左上角，新信息栏向下堆叠展开
+    适用于需要在左上角固定展示通知的场景，通过 InfoBarPosition.TOP_LEFT 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize=None) -> QPoint:
         p = infoBar.parent()
@@ -577,7 +632,11 @@ class TopLeftInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM_LEFT)
 class BottomLeftInfoBarManager(InfoBarManager):
-    """左下角信息栏管理器"""
+    """左下角信息栏管理器
+    
+    将信息栏对齐到父窗口左下角，新信息栏向上堆叠展开
+    适用于需要在左下角固定展示通知的场景，通过 InfoBarPosition.BOTTOM_LEFT 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize: QSize = None) -> QPoint:
         p = infoBar.parent()
@@ -597,7 +656,11 @@ class BottomLeftInfoBarManager(InfoBarManager):
 
 @InfoBarManager.register(InfoBarPosition.BOTTOM)
 class BottomInfoBarManager(InfoBarManager):
-    """底部信息栏管理器"""
+    """底部信息栏管理器
+    
+    将信息栏居中显示在父窗口底部，新信息栏自下向上依次堆叠
+    适用于需要在窗口底部居中提示的场景，通过 InfoBarPosition.BOTTOM 触发
+    """
 
     def _pos(self, infoBar: InfoBar, parentSize: QSize = None) -> QPoint:
         p = infoBar.parent()
@@ -618,9 +681,16 @@ class BottomInfoBarManager(InfoBarManager):
 
 
 class DesktopInfoBarView(QWidget):
-    """桌面信息栏视图"""
+    """桌面信息栏视图
+    
+    作为桌面级信息栏的顶层容器，提供无边框、置顶、透背景的特殊窗口用于承载信息栏
+    当信息栏需要跨窗口显示或以桌面为父级时，使用此视图确保信息栏正确浮于所有窗口之上
+    """
 
     def __init__(self, parent=None):
+        """Args:
+            parent (QWidget): 父窗口组件，用于桌面视图的层级管理和位置计算
+        """
         super().__init__(parent)
 
         if sys.platform == "win32":

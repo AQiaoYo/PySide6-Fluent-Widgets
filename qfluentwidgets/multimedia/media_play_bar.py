@@ -1,5 +1,8 @@
 # coding: utf-8
-"""媒体播放栏组件"""
+"""媒体播放栏组件，用于提供音频或视频播放控制界面
+包含播放按钮、音量控制、进度条等常用控件，支持简易和标准两种播放栏样式
+适用于需要内嵌多媒体控制条的应用场景
+"""
 
 from PySide6.QtCore import Qt, Signal, QSize, QPropertyAnimation, QPoint
 from PySide6.QtGui import QPixmap, QPainter, QColor
@@ -16,7 +19,10 @@ from .media_player import MediaPlayer, MediaPlayerBase
 
 
 class MediaPlayBarButton(TransparentToolButton):
-    """媒体播放栏按钮"""
+    """媒体播放栏中的基础功能按钮
+    继承自 ToolButton，提供统一的样式和交互反馈
+    常用于播放、暂停、快进、快退等播放控制操作
+    """
 
     def _postInit(self):
         super()._postInit()
@@ -26,7 +32,10 @@ class MediaPlayBarButton(TransparentToolButton):
 
 
 class PlayButton(MediaPlayBarButton):
-    """播放按钮"""
+    """播放/暂停状态切换按钮
+    可根据当前播放状态自动切换图标样式
+    适用于需要控制媒体播放和暂停的场景
+    """
 
     def _postInit(self):
         super()._postInit()
@@ -43,9 +52,16 @@ class PlayButton(MediaPlayBarButton):
 
 
 class VolumeView(FlyoutViewBase):
-    """音量视图"""
+    """音量调节弹出面板
+    提供音量滑块和静音切换功能，通常配合 VolumeButton 使用
+    在鼠标悬停或点击音量按钮时弹出显示
+    """
 
     def __init__(self, parent=None):
+        """初始化音量视图
+        Args:
+            parent: 父级控件，用于确定视图的显示层级和位置关系，传 None 时作为独立窗口显示
+        """
         super().__init__(parent)
         self.muteButton = MediaPlayBarButton(FluentIcon.VOLUME, self)
         self.volumeSlider = Slider(Qt.Horizontal, self)
@@ -91,7 +107,10 @@ class VolumeView(FlyoutViewBase):
 
 
 class VolumeButton(MediaPlayBarButton):
-    """音量按钮"""
+    """音量控制按钮
+    显示当前音量状态图标，点击后弹出 VolumeView 进行详细调节
+    适用于需要快速查看或调整媒体音量的场景
+    """
 
     volumeChanged = Signal(int)
     mutedChanged = Signal(bool)
@@ -129,9 +148,16 @@ class VolumeButton(MediaPlayBarButton):
 
 
 class MediaPlayBarBase(QWidget):
-    """播放栏基类"""
+    """媒体播放栏的抽象基类
+    定义了播放控制的基本接口和信号，包含播放、暂停、进度控制等核心功能
+    子类需要实现具体的 UI 布局和交互逻辑
+    """
 
     def __init__(self, parent=None):
+        """初始化播放栏基类
+        Args:
+            parent: 父级控件，用于布局嵌套和生命周期管理，传 None 时作为独立窗口显示
+        """
         super().__init__(parent=parent)
         self.player = None  # type: MediaPlayerBase
 
@@ -237,9 +263,16 @@ class MediaPlayBarBase(QWidget):
 
 
 class SimpleMediaPlayBar(MediaPlayBarBase):
-    """简易媒体播放栏"""
+    """简易版媒体播放栏
+    仅提供核心的播放控制和音量调节功能，界面紧凑简洁
+    适合对空间要求较高或只需基础播放功能的场景
+    """
 
     def __init__(self, parent=None):
+        """初始化简易播放栏
+        Args:
+            parent: 父级控件，用于布局嵌套和生命周期管理，传 None 时作为独立窗口显示
+        """
         super().__init__(parent)
         self.hBoxLayout = QHBoxLayout(self)
 
@@ -262,9 +295,16 @@ class SimpleMediaPlayBar(MediaPlayBarBase):
 
 
 class StandardMediaPlayBar(MediaPlayBarBase):
-    """标准媒体播放栏"""
+    """标准版媒体播放栏
+    在简易版基础上增加了进度条、时间标签、播放速率控制等高级功能
+    适合需要完整播放控制体验的应用场景
+    """
 
     def __init__(self, parent=None):
+        """初始化标准播放栏
+        Args:
+            parent: 父级控件，用于布局嵌套和生命周期管理，传 None 时作为独立窗口显示
+        """
         super().__init__(parent)
         self.vBoxLayout = QVBoxLayout(self)
         self.timeLayout = QHBoxLayout()

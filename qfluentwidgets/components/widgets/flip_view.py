@@ -1,5 +1,9 @@
 # coding: utf-8
-"""翻页视图组件"""
+"""翻页视图组件
+
+用于创建支持水平或垂直方向的图像翻页浏览界面，适用于图片预览、轮播展示、相册浏览等场景
+提供 FlipView 及其便捷子类 HorizontalFlipView、VerticalFlipView，以及配套的滚动按钮 ScrollButton 和图像委托 FlipImageDelegate
+"""
 
 from typing import List, Union
 
@@ -15,7 +19,11 @@ from .button import ToolButton
 
 
 class ScrollButton(ToolButton):
-    """滚动按钮"""
+    """滚动按钮
+    
+    用于 FlipView 翻页视图中控制图像前后翻页的导航按钮，支持水平或垂直布局下的自动适配与方向感知
+    通常在视图边缘根据当前图像位置自动显示或隐藏，点击后触发视图滚动到上一张或下一张图像
+    """
 
     def _postInit(self):
         self._opacity = 0
@@ -75,9 +83,18 @@ class ScrollButton(ToolButton):
 
 
 class FlipImageDelegate(QStyledItemDelegate):
-    """翻页视图图像委托"""
+    """翻页视图图像委托
+    
+    负责 FlipView 中图像项的绘制、尺寸计算和样式渲染，将模型中的图像数据转换为可视化的列表项
+    可通过继承此类自定义图像在翻页视图中的显示效果，例如添加圆角、阴影、选中边框或占位图样式
+    """
 
     def __init__(self, parent=None):
+        """初始化滚动按钮
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(parent)
         self.borderRadius = 0
 
@@ -135,7 +152,10 @@ class FlipImageDelegate(QStyledItemDelegate):
 
 class FlipView(QListWidget):
     """翻页视图
-
+    
+    用于展示一系列图像并支持水平或垂直方向翻页浏览的控件，适用于相册预览、商品图轮播、广告横幅、图片选择器等场景
+    支持通过索引切换、导航按钮点击或拖拽手势来浏览图像，可配合 FlipImageDelegate 自定义图像渲染与交互反馈
+    
     构造函数重载:
         * FlipView(parent: QWidget = None)
         * FlipView(orientation: Qt.Orientation, parent: QWidget = None)
@@ -145,6 +165,12 @@ class FlipView(QListWidget):
 
     @singledispatchmethod
     def __init__(self, parent=None):
+        """初始化翻页视图
+        
+        Args:
+            orientation (Qt.Orientation, optional): 布局方向，决定图像是水平排列还是垂直排列，默认为 Qt.Horizontal
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(parent=parent)
         self.orientation = Qt.Horizontal
         self._postInit()
@@ -414,14 +440,32 @@ class FlipView(QListWidget):
 
 
 class HorizontalFlipView(FlipView):
-    """水平翻页视图"""
+    """水平翻页视图
+    
+    用于水平方向展示图像并支持左右翻页浏览的便捷控件，适用于横向相册、Banner 轮播、商品横图预览等场景
+    继承自 FlipView，默认使用 Qt.Horizontal 方向，无需手动设置 orientation 即可直接创建水平翻页效果
+    """
 
     def __init__(self, parent=None):
+        """初始化水平翻页视图
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(Qt.Horizontal, parent)
 
 
 class VerticalFlipView(FlipView):
-    """垂直翻页视图"""
+    """垂直翻页视图
+    
+    用于垂直方向展示图像并支持上下翻页浏览的便捷控件，适用于纵向相册、竖图瀑布流、长图预览等场景
+    继承自 FlipView，默认使用 Qt.Vertical 方向，无需手动设置 orientation 即可直接创建垂直翻页效果
+    """
 
     def __init__(self, parent=None):
+        """初始化垂直翻页视图
+        
+        Args:
+            parent (QWidget, optional): 父控件，默认为 None
+        """
         super().__init__(Qt.Vertical, parent)

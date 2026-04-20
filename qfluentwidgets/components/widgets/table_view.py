@@ -17,8 +17,18 @@ from .tool_tip import ItemViewToolTipDelegate, ItemViewToolTipType
 
 
 class TableItemDelegate(QStyledItemDelegate):
+    """Table 单元格委托类，负责控制单元格的绘制、编辑和交互行为
+    
+    在 TableView 或 TableWidget 中使用，提供 Fluent 风格的单元格视觉效果，
+    包括圆角、悬停高亮、选中状态以及自定义编辑控件等
+    """
 
     def __init__(self, parent: QTableView):
+        """初始化委托实例
+        
+        Args:
+            parent: 父对象，通常为关联的表格视图实例
+        """
         super().__init__(parent)
         self.margin = 2
         self.hoverRow = -1
@@ -213,9 +223,19 @@ class TableItemDelegate(QStyledItemDelegate):
 
 
 class TableBase:
-    """ Table 基类 """
+    """Table 基类，提供 Fluent 风格表格的通用功能和样式基础设施
+    
+    封装了 TableView 和 TableWidget 共有的行为，包括滚动条样式、网格线渲染、
+    选中策略及主题适配等，通常作为抽象基类使用，建议直接使用 TableWidget 或 TableView
+    """
 
     def __init__(self, *args, **kwargs):
+        """初始化表格基类
+        
+        Args:
+            *args: 传递给父类构造方法的位置参数
+            **kwargs: 传递给父类构造方法的关键字参数
+        """
         super().__init__(*args, **kwargs)
         self.delegate = TableItemDelegate(self)
         self.scrollDelagate = SmoothScrollDelegate(self)
@@ -346,9 +366,18 @@ class TableBase:
 
 
 class TableWidget(TableBase, QTableWidget):
-    """ Table 部件 """
+    """基于项的 Table 部件，提供即用的 Fluent 风格表格
+    
+    继承 QTableWidget 的便捷接口，适合通过 QTableWidgetItem 直接操作单元格数据、
+    表头和行列结构的场景，无需自定义数据模型，适用于数据量较小、需要快速搭建的表格界面
+    """
 
     def __init__(self, parent=None):
+        """初始化 Table 部件
+        
+        Args:
+            parent: 父窗口部件，指定父级可确保部件随父窗口一起释放
+        """
         super().__init__(parent)
         updateDynamicStyle(self)
 
@@ -373,9 +402,18 @@ class TableWidget(TableBase, QTableWidget):
 
 
 class TableView(TableBase, QTableView):
-    """ 表格视图 """
+    """基于模型的 Table 视图，支持自定义数据源的 Fluent 风格表格
+    
+    与 QAbstractTableModel 及其子类配合使用，实现数据与视图的分离，适合处理
+    大规模数据、需要自定义数据逻辑或支持动态刷新的复杂表格场景
+    """
 
     def __init__(self, parent=None):
+        """初始化 Table 视图
+        
+        Args:
+            parent: 父窗口部件，指定父级可确保部件随父窗口一起释放
+        """
         super().__init__(parent)
         updateDynamicStyle(self)
 

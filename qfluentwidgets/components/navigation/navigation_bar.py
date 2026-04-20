@@ -1,5 +1,10 @@
 # coding: utf-8
-"""导航栏组件"""
+"""导航栏组件
+
+提供 NavigationBar、NavigationBarPushButton 与 IconSlideAnimation 等组件
+用于构建应用的侧边或底部导航界面，支持图标化导航项的排列与页面切换
+常与 QStackedWidget 配合使用，实现单窗口多页面的导航架构
+"""
 
 from typing import Dict, Union
 
@@ -21,7 +26,12 @@ from .navigation_types import RouteKeyError, NavigationItemPosition
 
 
 class IconSlideAnimation(QPropertyAnimation):
-    """图标滑动动画"""
+    """图标滑动动画
+    
+    为 NavigationBarPushButton 提供图标在选中状态切换时的位移动画效果
+    通过改变图标绘制偏移量实现平滑过渡，增强导航栏交互的视觉反馈
+    通常由导航按钮内部自动创建和使用，无需手动实例化
+    """
 
     def __init__(self, parent=None):
         """初始化动画
@@ -65,7 +75,12 @@ class IconSlideAnimation(QPropertyAnimation):
 
 
 class NavigationBarPushButton(NavigationPushButton):
-    """导航栏按钮"""
+    """导航栏按钮
+    
+    NavigationBar 中的可点击导航项，同时显示图标和可选的文本标签
+    支持选中状态高亮与悬停反馈，点击后触发对应页面的切换信号
+    一般通过 NavigationBar.addItem() 方法添加，不推荐直接创建
+    """
 
     def __init__(self, icon: Union[str, QIcon, FIF], text: str, isSelectable: bool, selectedIcon=None, parent=None):
         """初始化按钮
@@ -212,7 +227,12 @@ class NavigationBarPushButton(NavigationPushButton):
 
 
 class NavigationBar(QWidget):
-    """导航栏"""
+    """导航栏
+    
+    提供紧凑的垂直图标导航容器，用于管理一组 NavigationBarPushButton 导航项
+    适用于工具类应用或需要常驻导航入口的侧边界面，可与 QStackedWidget 配合实现页面路由
+    支持添加、插入和删除导航项，并通过信号通知当前选中项的变化
+    """
 
     def __init__(self, parent=None):
         """初始化导航栏

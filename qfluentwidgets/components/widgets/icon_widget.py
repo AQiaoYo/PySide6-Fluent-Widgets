@@ -1,5 +1,8 @@
 # coding: utf-8
-"""图标控件"""
+"""提供图标显示控件
+
+该模块包含 IconWidget 类，用于在界面中展示图标资源，支持 QIcon、字符串路径以及 FluentIconBase 对象作为图标源，适用于工具栏、导航栏等需要展示图标的场景
+"""
 
 from typing import Union
 
@@ -12,8 +15,10 @@ from ...common.overload import singledispatchmethod
 
 
 class IconWidget(QWidget):
-    """图标控件
-
+    """用于显示图标的控件
+    
+    可用于按钮、工具栏、列表项等需要展示图标的场景，支持 QIcon、字符串路径以及 FluentIconBase 对象作为图标输入并响应鼠标交互状态变化
+    
     构造函数重载:
         * IconWidget(parent=None)
         * IconWidget(icon: QIcon | str | FluentIconBase, parent: QWidget = None)

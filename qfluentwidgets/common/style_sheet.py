@@ -1,5 +1,9 @@
 # coding: utf-8
-"""样式表管理模块"""
+"""样式表管理模块
+
+提供 QSS 样式表的加载、解析、组合与应用能力，支持主题颜色替换和自定义样式覆盖
+该模块是 Fluent Widgets 视觉系统的核心，负责将 Fluent Design 样式应用到各控件
+"""
 
 from enum import Enum
 from string import Template
@@ -15,9 +19,18 @@ from .config import qconfig, Theme, isDarkTheme, QT_VERSION
 
 
 class StyleSheetManager(QObject):
-    """样式表管理器"""
+    """样式表管理器
+    
+    负责全局样式表实例的注册、缓存与生命周期管理
+    通过统一入口获取样式表内容，避免重复加载与解析，提升渲染性能
+    """
 
     def __init__(self):
+        """初始化样式表管理器
+        
+        Args:
+            无
+        """
         self.widgets = weakref.WeakKeyDictionary()
 
     def register(self, source, widget: QWidget, reset=True):
@@ -68,7 +81,11 @@ styleSheetManager = StyleSheetManager()
 
 
 class QssTemplate(Template):
-    """QSS 模板"""
+    """QSS 模板
+    
+    支持基于字符串模板的样式表生成，可替换主题色、尺寸等占位变量
+    适用于需要动态注入颜色值或根据状态生成差异化样式的场景
+    """
 
     delimiter = '--'
 
@@ -101,7 +118,11 @@ def renderQss(qss: str):
 
 
 class StyleSheetBase:
-    """样式表基类"""
+    """样式表基类
+    
+    定义样式表内容的统一获取接口，所有具体样式表类均应继承此类
+    子类需实现 content 方法以返回有效的 QSS 字符串，供渲染系统消费
+    """
 
     def path(self, theme=Theme.AUTO):
         """获取样式表路径"""
@@ -117,7 +138,11 @@ class StyleSheetBase:
 
 
 class FluentStyleSheet(StyleSheetBase, Enum):
-    """Fluent 样式表"""
+    """Fluent 样式表
+    
+    内置的 Fluent Design 控件样式集合，涵盖按钮、输入框、导航等组件的标准样式
+    通常通过枚举值选择对应控件的样式文件路径，配合 StyleSheetCompose 实现主题切换
+    """
 
     MENU = "menu"
     LABEL = "label"
@@ -160,9 +185,18 @@ class FluentStyleSheet(StyleSheetBase, Enum):
 
 
 class StyleSheetFile(StyleSheetBase):
-    """样式表文件"""
+    """样式表文件
+    
+    从本地 QSS 文件加载样式内容，支持相对路径与绝对路径
+    适用于需要外置样式文件以便热更新或让用户自定义主题的场景
+    """
 
     def __init__(self, path: str):
+        """初始化样式表文件
+        
+        Args:
+            path: QSS 文件路径，可以是相对路径或绝对路径，文件应包含有效的 QSS 内容
+        """
         super().__init__()
         self.filePath = path
 
@@ -171,12 +205,21 @@ class StyleSheetFile(StyleSheetBase):
 
 
 class CustomStyleSheet(StyleSheetBase):
-    """自定义样式表"""
+    """自定义样式表
+    
+    允许为指定控件附加额外的 QSS 规则，实现局部样式覆盖而不影响全局主题
+    常用于对特定实例进行个性化调整，如修改边距、背景图或字体颜色
+    """
 
     DARK_QSS_KEY = 'darkCustomQss'
     LIGHT_QSS_KEY = 'lightCustomQss'
 
     def __init__(self, widget: QWidget) -> None:
+        """初始化自定义样式表
+        
+        Args:
+            widget: 目标控件实例，自定义样式将应用于此控件，需为 QWidget 或其子类
+        """
         super().__init__()
         self._widget = weakref.ref(widget)
 
@@ -253,7 +296,11 @@ class CustomStyleSheet(StyleSheetBase):
 
 
 class CustomStyleSheetWatcher(QObject):
-    """自定义样式表监听器"""
+    """自定义样式表监听器
+    
+    监听目标控件的自定义样式属性变化，在规则更新时自动触发重绘
+    通常作为事件过滤器安装到控件上，确保样式修改能及时反映到界面
+    """
 
     def eventFilter(self, obj: QWidget, e: QEvent):
         if e.type() != QEvent.DynamicPropertyChange:
@@ -267,7 +314,11 @@ class CustomStyleSheetWatcher(QObject):
 
 
 class DirtyStyleSheetWatcher(QObject):
-    """脏样式表监听器"""
+    """脏样式表监听器
+    
+    追踪控件样式表的脏标记状态，当样式需要重新计算或应用时通知更新系统
+    适用于批量样式修改场景，可避免频繁的重复刷新，提升界面更新效率
+    """
 
     def eventFilter(self, obj: QWidget, e: QEvent):
         if e.type() != QEvent.Type.Paint or not obj.property('dirty-qss'):
@@ -281,9 +332,18 @@ class DirtyStyleSheetWatcher(QObject):
 
 
 class StyleSheetCompose(StyleSheetBase):
-    """样式表组合器"""
+    """样式表组合器
+    
+    将多个 StyleSheetBase 子类实例按优先级叠加合并，生成最终的 QSS 字符串
+    支持主题层、基础层与自定义层的分层组合，后传入的源会覆盖前者同名规则
+    """
 
     def __init__(self, sources: List[StyleSheetBase]):
+        """初始化样式表组合器
+        
+        Args:
+            sources: 样式表源列表，元素应为 StyleSheetBase 的子类实例，列表顺序决定叠加优先级，后者覆盖前者
+        """
         super().__init__()
         self.sources = sources
 
@@ -455,7 +515,11 @@ def toggleTheme(save=False, lazy=False):
 
 
 class ThemeColor(Enum):
-    """主题颜色"""
+    """主题颜色
+    
+    提供当前活动主题下的主色、辅助色与强调色获取接口，并支持 QSS 变量替换
+    颜色值会随全局主题切换自动更新，常用于动态生成跟随主题变化的样式规则
+    """
 
     PRIMARY = "ThemeColorPrimary"
     DARK_1 = "ThemeColorDark1"

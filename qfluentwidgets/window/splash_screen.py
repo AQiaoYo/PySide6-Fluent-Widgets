@@ -1,5 +1,9 @@
 # coding: utf-8
-"""提供启动画面功能的模块"""
+"""提供应用启动画面功能的模块
+
+在应用程序主界面就绪前显示过渡画面，用于展示品牌标识并提供加载进度反馈
+适用于需要较长初始化时间的 PyQt/PySide 桌面应用
+"""
 
 from typing import Union
 import sys

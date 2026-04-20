@@ -12,11 +12,19 @@ from .button import ToolButton
 
 
 class Indicator(ToolButton):
-    """开关按钮的指示器"""
+    """负责绘制开关按钮的圆形滑块并处理位置切换动画
+    
+    该类通常由 SwitchButton 内部自动创建和管理，一般不需要在外部直接实例化。指示器会在开关状态变化时通过动画平滑移动到目标位置，并提供悬停和按下等视觉反馈
+    """
 
     checkedChanged = Signal(bool)
 
     def __init__(self, parent):
+        """初始化指示器实例
+        
+        Args:
+            parent: 父级控件，通常为 SwitchButton 实例
+        """
         super().__init__(parent=parent)
         self.setCheckable(True)
         self.setFixedSize(42, 22)
@@ -139,13 +147,18 @@ class Indicator(ToolButton):
 
 
 class IndicatorPosition(Enum):
-    """指示器位置"""
+    """开关按钮指示器的位置枚举
+    
+    用于指定 SwitchButton 中圆形指示器相对于文本标签的摆放位置，可选左侧或右侧。在创建 SwitchButton 时通过 indicatorPos 参数传入以改变布局
+    """
     LEFT = 0
     RIGHT = 1
 
 
 class SwitchButton(QWidget):
-    """开关按钮类
+    """具有流畅设计风格的开关按钮控件，用于在两种互斥状态间切换
+    
+    适用于设置项的启用/禁用、功能的打开/关闭等需要即时反馈的二元选项场景。支持自定义开关文本、指示器位置以及状态切换动画，状态改变时会触发相应信号
     
     构造函数重载:
         * SwitchButton(parent: QWidget = None)

@@ -1,5 +1,10 @@
 # coding: utf-8
-"""组合框组件"""
+"""提供 Fluent Design 风格的组合框组件及其配套控件
+
+包含标准下拉选择框、可编辑组合框和下拉菜单等控件，支持选项高亮、占位文本、主题自动适配和动画效果，适用于设置面板、数据筛选、表单填写等需要用户从预设选项中选取内容的交互场景，建议在需要保持界面简洁的同时提供多项选择的场景中优先使用
+
+注意：可编辑组合框允许用户直接输入不在预设列表中的自定义内容，适合既有固定选项又需灵活输入的业务场景
+"""
 
 import sys
 from typing import Union, List, Iterable
@@ -63,6 +68,12 @@ class ComboBoxBase:
     textActivated = Signal(str)
 
     def __init__(self, parent=None, **kwargs):
+        """初始化组合框控件
+        
+        Args:
+            parent: 父级窗口或控件，用于构建控件层级关系并参与自动内存管理，未传入时默认为 None
+            **kwargs: 额外的关键字参数，用于向基类传递样式或行为配置，不传入时采用默认主题设置
+        """
         pass
 
     def _setUpUi(self):
@@ -439,6 +450,11 @@ class ComboBox(QPushButton, ComboBoxBase):
     textActivated = Signal(str)
 
     def __init__(self, parent=None):
+        """初始化可编辑组合框控件
+        
+        Args:
+            parent: 父级窗口或控件，用于构建控件层级关系并参与自动内存管理，未传入时默认为 None
+        """
         super().__init__(parent=parent)
         self.arrowAni = TranslateYAnimation(self)
         self._setUpUi()
@@ -512,6 +528,11 @@ class EditableComboBox(LineEdit, ComboBoxBase):
     textActivated = Signal(str)
 
     def __init__(self, parent=None):
+        """初始化组合框下拉菜单控件
+        
+        Args:
+            parent: 父级组合框控件，用于确定菜单弹出位置及样式继承，未传入时默认为 None
+        """
         super().__init__(parent=parent)
         self._setUpUi()
 
@@ -612,6 +633,11 @@ class ComboBoxMenu(RoundMenu):
     """
 
     def __init__(self, parent=None):
+        """初始化组合框选项条目控件
+        
+        Args:
+            parent: 所属菜单或列表控件，用于构建条目层级关系并参与自动内存管理，未传入时默认为 None
+        """
         super().__init__(title="", parent=parent)
 
         self.view.setViewportMargins(0, 2, 0, 6)

@@ -1,5 +1,9 @@
 # coding: utf-8
-"""循环列表部件"""
+"""提供循环列表部件，支持通过按钮或键盘循环浏览列表项
+
+ CycleListWidget 适用于需要无限循环滚动选择的场景，例如时间选择器、数值调节器等，
+ 配合 ScrollButton 可实现便捷的上下滚动交互
+"""
 
 from typing import Iterable
 
@@ -12,7 +16,11 @@ from ...common.icon import FluentIcon, isDarkTheme
 
 
 class ScrollButton(QToolButton):
-    """滚动按钮"""
+    """循环列表的滚动控制按钮
+    
+     用于在 CycleListWidget 中提供向上或向下滚动的触发区域，
+     通常作为列表的上下边界按钮，支持鼠标悬停和点击交互
+    """
 
     def __init__(self, icon: FluentIcon, parent=None):
         """初始化滚动按钮
@@ -71,7 +79,12 @@ class ScrollButton(QToolButton):
 
 
 class CycleListWidget(QListWidget):
-    """循环列表部件，支持通过上下按钮或键盘进行循环滚动选择"""
+    """支持循环滚动的列表部件
+    
+     当选择到达列表末尾时继续向下会回到顶部，到达顶部时继续向上会回到底部，
+     适用于时间选择、数值调节、轮播选项等需要循环浏览的场景，
+     可通过嵌入的 ScrollButton 或键盘方向键进行交互
+    """
 
     currentItemChanged = Signal(QListWidgetItem)
 
