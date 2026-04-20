@@ -399,9 +399,11 @@
         <file>qss/dark/combo_box.qss</file>
         <file>qss/dark/navigation_interface.qss</file>
         <file>qss/dark/button.qss</file>
+        <file>qss/dark/subtitle_radio_button.qss</file>
         <file>qss/dark/slider.qss</file>
         <file>qss/dark/line_edit.qss</file>
         <file>qss/dark/check_box.qss</file>
+        <file>qss/dark/subtitle_check_box.qss</file>
         <file>qss/dark/info_bar.qss</file>
         <file>qss/dark/spin_box.qss</file>
         <file>qss/dark/list_view.qss</file>
@@ -434,9 +436,11 @@
         <file>qss/light/combo_box.qss</file>
         <file>qss/light/navigation_interface.qss</file>
         <file>qss/light/button.qss</file>
+        <file>qss/light/subtitle_radio_button.qss</file>
         <file>qss/light/slider.qss</file>
         <file>qss/light/line_edit.qss</file>
         <file>qss/light/check_box.qss</file>
+        <file>qss/light/subtitle_check_box.qss</file>
         <file>qss/light/info_bar.qss</file>
         <file>qss/light/spin_box.qss</file>
         <file>qss/light/list_view.qss</file>

@@ -6,12 +6,12 @@
 """
 from enum import Enum
 
-from PySide6.QtCore import Qt
-from PySide6.QtGui import QPainter, QColor
+from PySide6.QtCore import Qt, QSize, QRect
+from PySide6.QtGui import QPainter, QColor, QFont, QFontMetrics
 from PySide6.QtWidgets import QCheckBox, QStyle, QStyleOptionButton, QWidget
 
 from ...common.icon import FluentIconBase, Theme, getIconColor
-from ...common.style_sheet import FluentStyleSheet, isDarkTheme, ThemeColor, themeColor, setCustomStyleSheet
+from ...common.style_sheet import FluentStyleSheet, addStyleSheet, isDarkTheme, ThemeColor, themeColor, setCustomStyleSheet
 from ...common.overload import singledispatchmethod
 from ...common.color import fallbackThemeColor, validColor
 from ...common.font import setFont
@@ -221,3 +221,167 @@ class CheckBox(QCheckBox):
             CheckBoxIcon.ACCEPT.render(painter, rect)
         elif self.checkState() == Qt.PartiallyChecked:
             CheckBoxIcon.PARTIAL_ACCEPT.render(painter, rect)
+
+
+class SubtitleCheckBox(CheckBox):
+    """带子标题的复选框，使用方式与 QCheckBox 相同
+
+    适用于设置面板、设备列表等需要同时展示主标题和辅助说明文字的场景，
+    左侧为 Fluent 风格的勾选指示器，右侧为主标题和灰色副标题的两行文字布局
+
+    构造函数重载:
+        * SubtitleCheckBox(parent: QWidget = None)
+        * SubtitleCheckBox(text: str, parent: QWidget = None)
+    """
+
+    # 指示器几何参数（与 QStyle SE_CheckBoxIndicator 对齐）
+    _INDICATOR_X = 1
+    _INDICATOR_SIZE = 20
+    _INDICATOR_SPACING = 8  # 指示器与文字间距
+
+    @singledispatchmethod
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._subtitle = ""
+        # 追加 QSS 覆盖 CheckBox 的 min-height 限制
+        addStyleSheet(self, FluentStyleSheet.SUBTITLE_CHECK_BOX)
+
+    @__init__.register
+    def _(self, text: str, parent=None):
+        self.__init__(parent)
+        self.setText(text)
+
+    def getSubtitle(self):
+        """获取副标题文字
+
+        Returns:
+            str: 副标题内容
+        """
+        return self._subtitle
+
+    def setSubtitle(self, text: str):
+        """设置副标题文字
+
+        Args:
+            text: 副标题内容，显示在主标题下方，使用较小的灰色字体
+        """
+        if self._subtitle != text:
+            self._subtitle = text
+            self.updateGeometry()
+            self.update()
+
+    subtitle = property(getSubtitle, setSubtitle)
+
+    def _subtitleColor(self):
+        """返回当前主题下的副标题颜色"""
+        if isDarkTheme():
+            return QColor(160, 160, 160)
+        return QColor(96, 96, 96)
+
+    def _textHeight(self):
+        """计算文字区域高度"""
+        fm = self.fontMetrics()
+        mainH = fm.height() + 2
+
+        if not self._subtitle:
+            return mainH
+
+        subFont = QFont(self.font())
+        subFont.setPixelSize(12)
+        subFm = QFontMetrics(subFont)
+        subH = subFm.height() + 2
+        return mainH + 1 + subH
+
+    def sizeHint(self):
+        """获取推荐尺寸
+
+        不依赖 QStyle 查询指示器位置（避免 sizeHint / paintEvent 中 ir 不一致），
+        使用固定指示器尺寸计算
+        """
+        fm = self.fontMetrics()
+        text = self.text()
+        mainW = fm.boundingRect(text).width() if text else 0
+
+        textW = mainW
+        if self._subtitle:
+            subFont = QFont(self.font())
+            subFont.setPixelSize(12)
+            subFm = QFontMetrics(subFont)
+            subW = subFm.boundingRect(self._subtitle).width()
+            textW = max(mainW, subW)
+
+        textH = self._textHeight()
+        indicatorRight = self._INDICATOR_X + self._INDICATOR_SIZE
+
+        # 内容区域（指示器 vs 文字）取较大者，上下留 2px padding
+        contentH = max(self._INDICATOR_SIZE, textH)
+        h = contentH + 4
+        # 宽度 = 指示器右边缘 + 间距 + 文字宽度 + 右侧余量
+        w = indicatorRight + self._INDICATOR_SPACING + textW + 16
+        return QSize(w, h)
+
+    def minimumSizeHint(self):
+        """获取最小尺寸"""
+        return self.sizeHint()
+
+    def paintEvent(self, e):
+        """自定义绘制事件
+
+        不复用 super().paintEvent() 的指示器定位（避免 QStyle 垂直居中导致顶部不对齐），
+        自行计算指示器和文字的布局：两者顶部对齐，整体垂直居中
+        """
+        text = self.text()
+
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing)
+
+        # 文字高度
+        textH = self._textHeight()
+        indicatorSize = self._INDICATOR_SIZE
+
+        # 内容区域（指示器 + 文字）整体垂直居中
+        contentH = max(indicatorSize, textH)
+        contentY = (self.height() - contentH) // 2
+
+        # 指示器位置：与 QStyle 对齐（x=1），与文字顶部对齐
+        ir = QRect(self._INDICATOR_X, contentY, indicatorSize, indicatorSize)
+
+        # 绘制指示器背景（复用 CheckBox 配色逻辑）
+        painter.setPen(self._borderColor())
+        painter.setBrush(self._backgroundColor())
+        painter.drawRoundedRect(ir, 4.5, 4.5)
+
+        # 绘制图标
+        if not self.isEnabled():
+            painter.setOpacity(0.8)
+
+        if self.checkState() == Qt.Checked:
+            CheckBoxIcon.ACCEPT.render(painter, ir)
+        elif self.checkState() == Qt.PartiallyChecked:
+            CheckBoxIcon.PARTIAL_ACCEPT.render(painter, ir)
+
+        # 恢复透明度
+        if not self.isEnabled():
+            painter.setOpacity(0.36)
+
+        # 绘制文字区域：主标题顶部与指示器顶部对齐
+        x = ir.right() + 1 + self._INDICATOR_SPACING
+        w = max(0, self.width() - x - 4)
+        textY = contentY
+
+        fm = self.fontMetrics()
+        mainH = fm.height() + 2
+
+        painter.setPen(self.lightTextColor if not isDarkTheme() else self.darkTextColor)
+        painter.setFont(self.font())
+        painter.drawText(x, textY, w, mainH, Qt.AlignLeft | Qt.AlignTop, text)
+
+        if self._subtitle:
+            subFont = QFont(self.font())
+            subFont.setPixelSize(12)
+            subFm = QFontMetrics(subFont)
+            subH = subFm.height() + 2
+
+            painter.setPen(self._subtitleColor())
+            painter.setFont(subFont)
+            painter.drawText(x, textY + mainH + 1, w, subH, Qt.AlignLeft | Qt.AlignTop, self._subtitle)

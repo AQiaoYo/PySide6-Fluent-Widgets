@@ -155,6 +155,8 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     TAB_VIEW = "tab_view"
     TOOL_TIP = "tool_tip"
     CHECK_BOX = "check_box"
+    SUBTITLE_CHECK_BOX = "subtitle_check_box"
+    SUBTITLE_RADIO_BUTTON = "subtitle_radio_button"
     COMBO_BOX = "combo_box"
     FLIP_VIEW = "flip_view"
     LINE_EDIT = "line_edit"
