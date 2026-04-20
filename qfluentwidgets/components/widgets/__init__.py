@@ -1,6 +1,7 @@
 from .button import *
 from .card_widget import *
 from .check_box import *
+from .chip import *
 from .combo_box import *
 from .model_combo_box import *
 from .command_bar import *
