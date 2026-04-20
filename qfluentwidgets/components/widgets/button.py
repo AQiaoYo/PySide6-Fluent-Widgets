@@ -7,14 +7,14 @@
 from typing import Union
 
 from PySide6.QtCore import Signal, QUrl, Qt, QRectF, QSize, QPoint, Property, QRect
-from PySide6.QtGui import QDesktopServices, QIcon, QPainter, QColor, QPainterPath
+from PySide6.QtGui import QDesktopServices, QFont, QFontMetrics, QIcon, QPainter, QColor, QPainterPath
 from PySide6.QtWidgets import QHBoxLayout, QPushButton, QRadioButton, QToolButton, QApplication, QWidget, QSizePolicy
 
 from ...common.animation import TranslateYAnimation
 from ...common.icon import FluentIconBase, drawIcon, isDarkTheme, Theme, toQIcon, Icon
 from ...common.icon import FluentIcon as FIF
 from ...common.font import setFont, getFont
-from ...common.style_sheet import FluentStyleSheet, themeColor, ThemeColor
+from ...common.style_sheet import FluentStyleSheet, addStyleSheet, themeColor, ThemeColor
 from ...common.color import autoFallbackThemeColor
 from ...common.overload import singledispatchmethod
 from .menu import RoundMenu, MenuAnimationType
@@ -473,6 +473,193 @@ class RadioButton(QRadioButton):
 
     lightTextColor = Property(QColor, getLightTextColor, setLightTextColor)
     darkTextColor = Property(QColor, getDarkTextColor, setDarkTextColor)
+
+
+class SubtitleRadioButton(RadioButton):
+    """带有标题和子标题的单选按钮，使用方式与 QRadioButton 相同
+
+    用于在一组备选项中进行单选，同时展示主标题和辅助说明文字，
+    适用于音频输出选择、网络配置等需要额外描述信息的场景
+
+    构造函数重载:
+        * SubtitleRadioButton(parent: QWidget = None)
+        * SubtitleRadioButton(text: str, parent: QWidget = None)
+    """
+
+    _INDICATOR_R = 10  # 指示器圆半径
+    _INDICATOR_CX = 11  # 指示器圆心 x 坐标
+    _TEXT_X = 29  # 文字起始 x（圆心 + 半径 + 间距）
+
+    @singledispatchmethod
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._subtitle = ""
+        # 追加 QSS 覆盖 RadioButton 的 max-height 限制
+        addStyleSheet(self, FluentStyleSheet.SUBTITLE_RADIO_BUTTON)
+        self._updateMinimumHeight()
+
+    @__init__.register
+    def _(self, text: str, parent=None):
+        self.__init__(parent)
+        self.setText(text)
+
+    def getSubtitle(self):
+        """获取副标题文字
+
+        Returns:
+            str: 副标题内容
+        """
+        return self._subtitle
+
+    def setSubtitle(self, text: str):
+        """设置副标题文字
+
+        Args:
+            text: 副标题内容，显示在主标题下方，使用较小的灰色字体
+        """
+        if self._subtitle != text:
+            self._subtitle = text
+            self._updateMinimumHeight()
+            self.update()
+
+    subtitle = property(getSubtitle, setSubtitle)
+
+    def setText(self, text: str):
+        """设置主标题文字"""
+        super().setText(text)
+        self._updateMinimumHeight()
+
+    def _updateMinimumHeight(self):
+        """同步 minimumHeight 与 sizeHint，覆盖 QSS 限制"""
+        self.setMinimumHeight(self.sizeHint().height())
+
+    def _subtitleColor(self):
+        """返回当前主题下的副标题颜色"""
+        if isDarkTheme():
+            return QColor(160, 160, 160)
+        return QColor(96, 96, 96)
+
+    def _textHeight(self):
+        """计算文字区域高度"""
+        fm = self.fontMetrics()
+        mainH = fm.height() + 1
+
+        if not self._subtitle:
+            return mainH
+
+        subFont = QFont(self.font())
+        subFont.setPixelSize(12)
+        subFm = QFontMetrics(subFont)
+        subH = subFm.height() + 1
+        return mainH + 1 + subH
+
+    def sizeHint(self):
+        """获取推荐尺寸"""
+        text = self.text()
+        fm = self.fontMetrics()
+        mainW = fm.boundingRect(text).width() if text else 0
+
+        textW = mainW
+        if self._subtitle:
+            subFont = QFont(self.font())
+            subFont.setPixelSize(12)
+            subFm = QFontMetrics(subFont)
+            subW = subFm.boundingRect(self._subtitle).width()
+            textW = max(mainW, subW)
+
+        textH = self._textHeight()
+        indicatorD = self._INDICATOR_R * 2
+
+        contentH = max(indicatorD, textH)
+        h = contentH + 2
+        w = self._TEXT_X + textW + 16
+        return QSize(w, h)
+
+    def minimumSizeHint(self):
+        """获取最小尺寸"""
+        return self.sizeHint()
+
+    def paintEvent(self, e):
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing | QPainter.TextAntialiasing)
+
+        textH = self._textHeight()
+        indicatorD = self._INDICATOR_R * 2
+
+        # 内容区域（指示器 + 文字）整体垂直居中
+        contentH = max(indicatorD, textH)
+        contentY = (self.height() - contentH) // 2
+
+        # 指示器圆心垂直居中于 content 区域
+        center = QPoint(self._INDICATOR_CX, contentY + self._INDICATOR_R)
+
+        # 绘制指示器（复用 RadioButton 配色逻辑，使用自定义圆心）
+        self._drawIndicatorAt(painter, center)
+
+        # 绘制文字区域
+        x = self._TEXT_X
+        w = max(0, self.width() - x - 4)
+        textY = contentY
+
+        if not self.isEnabled():
+            painter.setOpacity(0.36)
+
+        fm = self.fontMetrics()
+        mainH = fm.height() + 1
+
+        painter.setFont(self.font())
+        painter.setPen(self.textColor())
+        painter.drawText(x, textY, w, mainH, Qt.AlignLeft | Qt.AlignTop, self.text())
+
+        if self._subtitle:
+            subFont = QFont(self.font())
+            subFont.setPixelSize(12)
+            subFm = QFontMetrics(subFont)
+            subH = subFm.height() + 1
+
+            painter.setPen(self._subtitleColor())
+            painter.setFont(subFont)
+            painter.drawText(x, textY + mainH + 1, w, subH, Qt.AlignLeft | Qt.AlignTop, self._subtitle)
+
+    def _drawIndicatorAt(self, painter: QPainter, center: QPoint):
+        """在指定圆心位置绘制指示器
+
+        复用 RadioButton._drawIndicator 的配色逻辑
+        """
+        if self.isChecked():
+            if self.isEnabled():
+                borderColor = autoFallbackThemeColor(self.lightIndicatorColor, self.darkIndicatorColor)
+            else:
+                borderColor = QColor(255, 255, 255, 40) if isDarkTheme() else QColor(0, 0, 0, 55)
+
+            filledColor = Qt.black if isDarkTheme() else Qt.white
+
+            if self.isHover and not self.isDown():
+                self._drawCircle(painter, center, 10, 4, borderColor, filledColor)
+            else:
+                self._drawCircle(painter, center, 10, 5, borderColor, filledColor)
+        else:
+            if self.isEnabled():
+                if not self.isDown():
+                    borderColor = QColor(255, 255, 255, 153) if isDarkTheme() else QColor(0, 0, 0, 153)
+                else:
+                    borderColor = QColor(255, 255, 255, 40) if isDarkTheme() else QColor(0, 0, 0, 55)
+
+                if self.isDown():
+                    filledColor = Qt.black if isDarkTheme() else Qt.white
+                elif self.isHover:
+                    filledColor = QColor(255, 255, 255, 11) if isDarkTheme() else QColor(0, 0, 0, 15)
+                else:
+                    filledColor = QColor(0, 0, 0, 26) if isDarkTheme() else QColor(0, 0, 0, 6)
+            else:
+                filledColor = Qt.transparent
+                borderColor = QColor(255, 255, 255, 40) if isDarkTheme() else QColor(0, 0, 0, 55)
+
+            self._drawCircle(painter, center, 10, 1, borderColor, filledColor)
+
+            if self.isEnabled() and self.isDown():
+                borderColor = QColor(255, 255, 255, 40) if isDarkTheme() else QColor(0, 0, 0, 24)
+                self._drawCircle(painter, QPoint(center.x(), center.y()), 9, 4, borderColor, Qt.transparent)
 
 
 class ToolButton(QToolButton):

@@ -4,7 +4,7 @@ RadioButton 演示
 
 展示内容：
 - 单选按钮分组（同一组内互斥）
-- 多组单选按钮（组间独立）
+- SubtitleRadioButton（带子标题的单选按钮）
 - 禁用状态的单选按钮
 - 信号槽连接获取选中变化
 """
@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QButtonGroup,
 )
 
-from qfluentwidgets import RadioButton, BodyLabel
+from qfluentwidgets import RadioButton, SubtitleRadioButton, BodyLabel, CaptionLabel, setFont
 
 
 class Demo(QWidget):
@@ -24,71 +24,76 @@ class Demo(QWidget):
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('RadioButton - 演示')
-        self.resize(450, 350)
+        self.setWindowTitle("RadioButton - 演示")
+        self.resize(500, 520)
         self.initWidgets()
         self.initLayout()
 
     def initWidgets(self):
         """初始化单选按钮组件"""
-        # 第一组：主题选择
-        self.themeLabel = BodyLabel('选择主题:', self)
+        # RadioButton 区域
+        self.themeLabel = BodyLabel("RadioButton", self)
+        setFont(self.themeLabel, 16)
+
         self.group1 = QButtonGroup(self)
-        self.radioLight = RadioButton('浅色主题', self)
-        self.radioDark = RadioButton('深色主题', self)
-        self.radioAuto = RadioButton('自动跟随系统', self)
+        self.radioLight = RadioButton("浅色主题", self)
+        self.radioDark = RadioButton("深色主题", self)
+        self.radioAuto = RadioButton("自动跟随系统", self)
         self.radioLight.setChecked(True)
         self.group1.addButton(self.radioLight)
         self.group1.addButton(self.radioDark)
         self.group1.addButton(self.radioAuto)
-        self.group1.buttonClicked.connect(self.onSelectionChanged)
 
-        # 第二组：通知设置
-        self.notifyLabel = BodyLabel('通知设置:', self)
+        # SubtitleRadioButton 区域
+        self.subLabel = BodyLabel("SubtitleRadioButton", self)
+        setFont(self.subLabel, 16)
+
         self.group2 = QButtonGroup(self)
-        self.radioAll = RadioButton('接收所有通知', self)
-        self.radioMention = RadioButton('仅提及我的', self)
-        self.radioNone = RadioButton('关闭通知', self)
-        self.radioNone.setEnabled(False)  # 禁用状态
-        self.group2.addButton(self.radioAll)
-        self.group2.addButton(self.radioMention)
-        self.group2.addButton(self.radioNone)
-        self.group2.buttonClicked.connect(self.onSelectionChanged)
+        self.subRb1 = SubtitleRadioButton("扬声器", self)
+        self.subRb1.setSubtitle("Realtek(R) Audio")
+        self.subRb1.setChecked(True)
+
+        self.subRb2 = SubtitleRadioButton("耳机", self)
+        self.subRb2.setSubtitle("AirPods Pro 2")
+
+        self.subRb3 = SubtitleRadioButton("禁用设备", self)
+        self.subRb3.setSubtitle("此设备不可用")
+        self.subRb3.setEnabled(False)
+
+        self.group2.addButton(self.subRb1)
+        self.group2.addButton(self.subRb2)
+        self.group2.addButton(self.subRb3)
 
         # 状态显示
-        self.statusLabel = BodyLabel('请选择选项...', self)
+        self.statusLabel = BodyLabel("请选择选项...", self)
 
     def initLayout(self):
         """初始化布局"""
         mainLayout = QVBoxLayout(self)
-        mainLayout.setSpacing(16)
+        mainLayout.setSpacing(12)
         mainLayout.setContentsMargins(30, 30, 30, 30)
 
-        # 第一组布局
+        # RadioButton 区域
         mainLayout.addWidget(self.themeLabel)
         mainLayout.addWidget(self.radioLight)
         mainLayout.addWidget(self.radioDark)
         mainLayout.addWidget(self.radioAuto)
         mainLayout.addSpacing(20)
 
-        # 第二组布局
-        mainLayout.addWidget(self.notifyLabel)
-        mainLayout.addWidget(self.radioAll)
-        mainLayout.addWidget(self.radioMention)
-        mainLayout.addWidget(self.radioNone)
+        # SubtitleRadioButton 区域
+        mainLayout.addWidget(self.subLabel)
+        mainLayout.addWidget(
+            CaptionLabel("带有标题和子标题，使用方式与 QRadioButton 相同", self)
+        )
+        mainLayout.addWidget(self.subRb1)
+        mainLayout.addWidget(self.subRb2)
+        mainLayout.addWidget(self.subRb3)
         mainLayout.addStretch(1)
 
         mainLayout.addWidget(self.statusLabel)
 
-    def onSelectionChanged(self):
-        """选中变化时更新状态显示"""
-        sender = self.sender()
-        selected = sender.checkedButton()
-        if selected:
-            self.statusLabel.setText(f'已选择: {selected.text()}')
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app = QApplication(sys.argv)
     w = Demo()
     w.show()
