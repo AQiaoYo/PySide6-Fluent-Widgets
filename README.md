@@ -64,7 +64,7 @@ uv sync --extra full --group docs
 
 You can also work with the package directly after installing it from PyPI. For example:
 ```shell
-cd examples/gallery
+cd examples/apps/gallery
 python demo.py
 ```
 
@@ -89,7 +89,10 @@ uv run python scripts/bump_version.py --tag --push-tag  # bump + commit + tag + 
 ```
 
 ## Documentation
-Want to know more about this fork? Start with the repository docs and examples in this repo.
+
+- **[入门教程](docs/TUTORIAL.md)**：从零开始，15 分钟上手
+- **[组件索引](docs/COMPONENTS.md)**：全库组件速查表，附示例链接
+- **Sphinx 文档**：`docs/source/`，包含主题、导航、图标等主题文档
 
 
 ## License

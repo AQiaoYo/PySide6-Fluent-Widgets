@@ -10,7 +10,7 @@
    </p>
 
    <h1 align="center">
-      PyQt-Fluent-Widgets
+      PySide6-Fluent-Widgets-Qiao
    </h1>
 
    <hr/>
@@ -38,18 +38,21 @@
    </p>
 
 
-Welcome to PyQt-Fluent-Widgets's document!
-===============================================
-This document will show you all the features of PyQt-Fluent-Widgets and the best practice of it.
+Welcome to PySide6-Fluent-Widgets-Qiao's document!
+===================================================
+This document will show you all the features of PySide6-Fluent-Widgets-Qiao and the best practice of it.
+
+Quick links: `Tutorial <../TUTORIAL.md>`_ | `Components Index <../COMPONENTS.md>`_
+
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents
 
    quick-start
-   settings
    theme
    navigation
    icon
    gallery
+   settings
    see-also

@@ -48,7 +48,24 @@ If you already installed the package from PyPI, you can also run examples like t
 
 .. code:: shell
 
-   cd examples/gallery
+   cd examples/apps/gallery
    python demo.py
+
+Finding Components
+~~~~~~~~~~~~~~~~~~
+
+All components are organized under ``examples/`` by category:
+
+- ``examples/widgets/`` — Basic UI components (buttons, inputs, labels, views)
+- ``examples/navigation/`` — Navigation components and windows
+- ``examples/dialog_box/`` — Dialogs and message boxes
+- ``examples/layout/`` — Layout containers
+- ``examples/date_time/`` — Date and time pickers
+- ``examples/material/`` — Acrylic material effects
+- ``examples/apps/`` — Complete application demos
+
+Each subdirectory contains a runnable ``demo.py``. For a full component index, see `COMPONENTS.md <../COMPONENTS.md>`_.
+
+For a step-by-step tutorial, see `TUTORIAL.md <../TUTORIAL.md>`_.
 
 .. note:: If you encounter ``ImportError: cannot import name 'XXX' from 'qfluentwidgets'``, it indicates that the package version you installed is too low. You can replace the mirror source with https://pypi.org/simple and reinstall again.
