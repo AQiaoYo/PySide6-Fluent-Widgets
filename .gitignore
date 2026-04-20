@@ -1,6 +1,7 @@
 # 忽略.vscode文件夹
 .vscode/
 .VSCodeCounter
+outputs/*
 
 # 忽略工作区文件
 *.code-workspace
