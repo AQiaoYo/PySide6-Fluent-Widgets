@@ -158,6 +158,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     SUBTITLE_CHECK_BOX = "subtitle_check_box"
     SUBTITLE_RADIO_BUTTON = "subtitle_radio_button"
     COMBO_BOX = "combo_box"
+    MULTI_SELECTION_COMBO_BOX = "multi_selection_combo_box"
     FLIP_VIEW = "flip_view"
     LINE_EDIT = "line_edit"
     LIST_VIEW = "list_view"

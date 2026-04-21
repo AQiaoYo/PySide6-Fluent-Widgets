@@ -1,0 +1,64 @@
+MultiSelectionComboBox {
+    border: 1px solid rgba(0, 0, 0, 0.073);
+    border-radius: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.183);
+    background-color: rgba(255, 255, 255, 0.7);
+}
+
+MultiSelectionComboBox[isHover=true] {
+    background-color: rgba(249, 249, 249, 0.5);
+}
+
+MultiSelectionComboBox[isPressed=true] {
+    background-color: rgba(249, 249, 249, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.073);
+}
+
+MultiSelectionComboBox:disabled {
+    background-color: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+MultiSelectionComboBox QLabel[isPlaceholderText=true] {
+    color: rgba(0, 0, 0, 0.6063);
+    background: transparent;
+}
+
+/* QScrollArea viewport does not respond to ID selectors;
+   target QScrollArea by type and tokenContainer by ID */
+MultiSelectionComboBox QScrollArea,
+MultiSelectionComboBox QScrollArea > QWidget > QWidget,
+#tokenContainer {
+    background: transparent;
+    border: none;
+}
+
+MultiSelectionToken {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+}
+
+MultiSelectionToken QLabel {
+    color: black;
+    background: transparent;
+}
+
+MultiSelectionToken QToolButton {
+    border: none;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    border-radius: 4px;
+}
+
+MultiSelectionToken QToolButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+#comboListWidget::item {
+    margin-left: 4px;
+    margin-right: 0px;
+    padding-left: 0px;
+    padding-right: 4px;
+}
