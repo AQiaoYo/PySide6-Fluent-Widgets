@@ -181,6 +181,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     SETTING_CARD_GROUP = "setting_card_group"
     EXPAND_SETTING_CARD = "expand_setting_card"
     NAVIGATION_INTERFACE = "navigation_interface"
+    RANGE_SLIDER = "range_slider"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme

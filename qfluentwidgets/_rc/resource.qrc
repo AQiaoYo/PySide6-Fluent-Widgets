@@ -422,6 +422,7 @@
         <file>qss/dark/label.qss</file>
         <file>qss/dark/card_widget.qss</file>
         <file>qss/dark/media_player.qss</file>
+        <file>qss/dark/range_slider.qss</file>
 
         <file>qss/light/color_dialog.qss</file>
         <file>qss/light/dialog.qss</file>
@@ -460,6 +461,7 @@
         <file>qss/light/label.qss</file>
         <file>qss/light/card_widget.qss</file>
         <file>qss/light/media_player.qss</file>
+        <file>qss/light/range_slider.qss</file>
 
         <file>i18n/qfluentwidgets.zh_CN.qm</file>
         <file>i18n/qfluentwidgets.zh_HK.qm</file>
