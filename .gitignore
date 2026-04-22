@@ -8,6 +8,7 @@ outputs/*
 .DS_Store
 .nexus-map/
 .claude/
+.kiro/
 
 # 忽略 .idea
 .idea/
