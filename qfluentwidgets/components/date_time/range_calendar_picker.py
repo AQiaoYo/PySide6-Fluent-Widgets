@@ -15,7 +15,7 @@ from PySide6.QtCore import (
     Qt, Signal, QRectF, QDate, QPoint, QRect, QModelIndex,
     QPropertyAnimation, QParallelAnimationGroup, QEasingCurve, QCalendar
 )
-from PySide6.QtGui import QPainter, QColor
+from PySide6.QtGui import QPainter, QColor, QPainterPath
 from PySide6.QtWidgets import (
     QApplication, QPushButton, QWidget, QHBoxLayout,
     QStackedWidget, QStyle
@@ -129,13 +129,13 @@ class RangeFastDayScrollItemDelegate(FastDayScrollItemDelegate):
         self._drawText(painter, option, index)
 
     def _drawRangeBackground(self, painter: QPainter, option, date: QDate):
-        """Draw the continuous range highlight background strip.
+        """绘制连续范围高亮背景条带
 
-        - Middle cells: full-width rectangle, seamlessly connected
-        - Start endpoint: rounded-left half (semicircle on left) + rectangle extending right
-        - End endpoint: rectangle extending left + rounded-right half (semicircle on right)
+        - 中间格子: 整格宽度矩形，与相邻格子无缝拼接
+        - 起始端点: 左侧半圆 + 向右延伸到格子右边缘的矩形
+        - 结束端点: 从格子左边缘向左延伸的矩形 + 右侧半圆
         """
-        # Determine effective range (selected or preview)
+        # 确定有效范围（已选或悬停预览）
         if self._rangeStart.isValid() and self._rangeEnd.isValid():
             lo, hi = self._rangeStart, self._rangeEnd
             alpha = 15
@@ -147,19 +147,16 @@ class RangeFastDayScrollItemDelegate(FastDayScrollItemDelegate):
         else:
             return
 
+        # 不在范围内（含端点）则不绘制
         if not (lo <= date <= hi):
             return
 
         is_start = (date == lo)
         is_end = (date == hi)
 
-        # Single-day range: no background strip
+        # 单日范围不绘制背景条带
         if is_start and is_end:
             return
-
-        from PySide6.QtCore import Qt, QRectF
-        from PySide6.QtGui import QColor, QPainterPath
-        from ...common.style_sheet import isDarkTheme
 
         painter.save()
         painter.setPen(Qt.NoPen)
@@ -167,33 +164,31 @@ class RangeFastDayScrollItemDelegate(FastDayScrollItemDelegate):
         painter.setBrush(QColor(c, c, c, alpha))
 
         r = option.rect
-        # margin top/bottom: match the circle margin (3px from itemMargin=3)
-        m = self._itemMargin()   # 3
+        # 上下留 margin，与格子圆形的 itemMargin 保持一致
+        m = self._itemMargin()
         top = float(r.top() + m)
         bottom = float(r.bottom() - m)
         h = bottom - top
         left = float(r.left())
-        right = float(r.right() + 1)  # QRect.right() = left+width-1, +1 to get true boundary
-        # radius for the semicircle = half the strip height
+        # QRect.right() = left + width - 1，+1 得到真实右边界，消除相邻格子间的 1px 间隙
+        right = float(r.right() + 1)
+        # 半圆半径 = 条带高度的一半
         radius = h / 2.0
 
         if is_start:
-            # Left side: semicircle (rounded), right side: straight edge to cell right
+            # 起始端点: 左侧绘制半圆，右侧直角延伸到格子右边缘
             path = QPainterPath()
-            # Start from the center-left, draw a semicircle on the left, then rectangle to right
             cx = float(r.center().x())
-            # The semicircle is centered at (cx, top+radius), radius = radius
-            # Left arc: from top-center going left
             arc_rect = QRectF(cx - radius, top, radius * 2, h)
             path.moveTo(cx, top)
-            path.arcTo(arc_rect, 90, 180)   # left semicircle (top -> bottom going left)
+            path.arcTo(arc_rect, 90, 180)   # 左半圆（从顶部顺时针到底部）
             path.lineTo(right, bottom)
             path.lineTo(right, top)
             path.closeSubpath()
             painter.drawPath(path)
 
         elif is_end:
-            # Left side: straight edge from cell left, right side: semicircle (rounded)
+            # 结束端点: 左侧直角从格子左边缘延伸，右侧绘制半圆
             path = QPainterPath()
             cx = float(r.center().x())
             arc_rect = QRectF(cx - radius, top, radius * 2, h)
@@ -201,12 +196,12 @@ class RangeFastDayScrollItemDelegate(FastDayScrollItemDelegate):
             path.lineTo(left, top)
             path.lineTo(left, bottom)
             path.lineTo(cx, bottom)
-            path.arcTo(arc_rect, 270, 180)  # right semicircle (bottom -> top going right)
+            path.arcTo(arc_rect, 270, 180)  # 右半圆（从底部顺时针到顶部）
             path.closeSubpath()
             painter.drawPath(path)
 
         else:
-            # Middle cell: full width rectangle, no x margin
+            # 中间格子: 整格宽度矩形，x 方向不留 margin，与相邻格子无缝拼接
             painter.drawRect(QRectF(left, top, right - left, h))
 
         painter.restore()
