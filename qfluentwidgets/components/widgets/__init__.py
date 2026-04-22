@@ -16,6 +16,7 @@ from .info_badge import *
 from .multi_selection_combo_box import *
 from .scroll_area import *
 from .slider import *
+from .tooltip_slider import *
 from .spin_box import *
 from .stacked_widget import *
 from .state_tool_tip import *
