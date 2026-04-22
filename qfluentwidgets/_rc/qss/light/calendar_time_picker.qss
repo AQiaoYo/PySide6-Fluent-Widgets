@@ -1,0 +1,84 @@
+CalendarTimePicker {
+    color: rgba(0, 0, 0, 0.6063);
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(0, 0, 0, 0.073);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.183);
+    border-radius: 5px;
+    font: 14px --FontFamilies;
+    padding: 5px 32px 6px 12px;
+    outline: none;
+    text-align: left;
+}
+
+CalendarTimePicker:hover {
+    background: rgba(249, 249, 249, 0.5);
+}
+
+CalendarTimePicker:pressed {
+    background: rgba(249, 249, 249, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.073);
+}
+
+CalendarTimePicker:disabled {
+    color: rgba(0, 0, 0, 0.36);
+    background: rgba(249, 249, 249, 0.3);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+CalendarTimePicker[hasDateTime=true] {
+    color: black;
+}
+
+/* 面板整体：白色背景，圆角，边框 */
+CalendarTimePickerView > #view {
+    background-color: rgb(255, 255, 255);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* 覆盖 CalendarViewBase 的独立背景和边框，让日历区域与面板背景融合 */
+CalendarTimePickerView CalendarViewBase {
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+}
+
+/* ScrollViewBase 的上边框改为与面板背景融合的颜色 */
+CalendarTimePickerView ScrollViewBase {
+    border-top: 1px solid rgb(240, 240, 240);
+}
+
+/* weekDayGroup 背景透明，与面板融合 */
+CalendarTimePickerView #weekDayGroup {
+    background-color: transparent;
+}
+
+/* 时间滚轮列表项：去掉左右 margin，让 hover 背景与数字对齐 */
+CalendarTimePickerView CycleListWidget::item {
+    margin: 0;
+}
+
+/* 竖向分隔线 */
+CalendarTimePickerView SeparatorWidget[orientation="vertical"] {
+    background-color: rgb(234, 234, 234);
+}
+
+/* 水平分隔线 */
+CalendarTimePickerView SeparatorWidget[orientation="horizontal"] {
+    background-color: rgb(234, 234, 234);
+}
+
+/* 确认/取消按钮 */
+CalendarTimePickerView PickerToolButton {
+    border-radius: 5px;
+    background-color: transparent;
+}
+
+CalendarTimePickerView PickerToolButton:hover {
+    background-color: rgba(0, 0, 0, 9);
+}
+
+CalendarTimePickerView PickerToolButton:pressed {
+    background-color: rgba(0, 0, 0, 6);
+}

@@ -1,0 +1,84 @@
+CalendarTimePicker {
+    background: rgba(255, 255, 255, 0.0605);
+    border: 1px solid rgba(255, 255, 255, 0.053);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+    color: rgba(255, 255, 255, 0.6063);
+    font: 14px --FontFamilies;
+    padding: 5px 32px 6px 12px;
+    outline: none;
+    text-align: left;
+}
+
+CalendarTimePicker:hover {
+    background: rgba(255, 255, 255, 0.0837);
+}
+
+CalendarTimePicker:pressed {
+    background: rgba(255, 255, 255, 0.0326);
+    border-top: 1px solid rgba(255, 255, 255, 0.053);
+}
+
+CalendarTimePicker:disabled {
+    color: rgba(255, 255, 255, 0.3628);
+    background: rgba(255, 255, 255, 0.0419);
+    border: 1px solid rgba(255, 255, 255, 0.053);
+    border-top: 1px solid rgba(255, 255, 255, 0.053);
+}
+
+CalendarTimePicker[hasDateTime=true] {
+    color: white;
+}
+
+/* 面板整体：深色背景，圆角，边框 */
+CalendarTimePickerView > #view {
+    background-color: rgb(37, 37, 37);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+/* 覆盖 CalendarViewBase 的独立背景和边框，让日历区域与面板背景融合 */
+CalendarTimePickerView CalendarViewBase {
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+}
+
+/* ScrollViewBase 的上边框改为与深色面板融合的颜色 */
+CalendarTimePickerView ScrollViewBase {
+    border-top: 1px solid rgb(52, 52, 52);
+}
+
+/* weekDayGroup 背景与面板融合 */
+CalendarTimePickerView #weekDayGroup {
+    background-color: rgb(37, 37, 37);
+}
+
+/* 时间滚轮列表项：去掉左右 margin，让 hover 背景与数字对齐 */
+CalendarTimePickerView CycleListWidget::item {
+    margin: 0;
+}
+
+/* 竖向分隔线 */
+CalendarTimePickerView SeparatorWidget[orientation="vertical"] {
+    background-color: rgb(61, 61, 61);
+}
+
+/* 水平分隔线 */
+CalendarTimePickerView SeparatorWidget[orientation="horizontal"] {
+    background-color: rgb(61, 61, 61);
+}
+
+/* 确认/取消按钮 */
+CalendarTimePickerView PickerToolButton {
+    border-radius: 5px;
+    background-color: transparent;
+}
+
+CalendarTimePickerView PickerToolButton:hover {
+    background-color: rgba(255, 255, 255, 9);
+}
+
+CalendarTimePickerView PickerToolButton:pressed {
+    background-color: rgba(255, 255, 255, 6);
+}
