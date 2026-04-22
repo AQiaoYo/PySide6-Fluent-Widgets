@@ -33,3 +33,4 @@ from .flyout import *
 from .tab_view import *
 from .pips_pager import *
 from .separator import *
+from .range_slider import *
