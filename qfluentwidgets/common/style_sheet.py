@@ -183,6 +183,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     NAVIGATION_INTERFACE = "navigation_interface"
     RANGE_SLIDER = "range_slider"
     RANGE_CALENDAR_PICKER = "range_calendar_picker"
+    CALENDAR_TIME_PICKER = "calendar_time_picker"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
