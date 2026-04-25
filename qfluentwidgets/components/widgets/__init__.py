@@ -35,3 +35,4 @@ from .pips_pager import *
 from .separator import *
 from .range_slider import *
 from .shortcut_picker import *
+from .toast import *
