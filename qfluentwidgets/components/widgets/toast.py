@@ -14,7 +14,7 @@ from PySide6.QtCore import (
     QEasingCurve, QParallelAnimationGroup,
     QRectF, QSize, Signal, Property
 )
-from PySide6.QtGui import QColor, QPainter, QPen
+from PySide6.QtGui import QColor, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel,
     QVBoxLayout, QWidget
@@ -95,7 +95,6 @@ class Toast(QFrame):
 
     # 双层卡片相关常量
     ACCENT_OFFSET = 4       # 强调色卡片相对主体卡片向上外凸的像素数
-    BOTTOM_ACCENT_OFFSET = 0
     CARD_RADIUS = 8.0       # 卡片圆角半径（需与 QSS 中 border-radius 保持一致）
 
     # 主体卡片默认配色（与 QSS 中 Toast 选择器一致，便于无样式时直接绘制）
@@ -158,7 +157,7 @@ class Toast(QFrame):
     def _initLayout(self):
         # 顶层垂直布局：顶部预留 ACCENT_OFFSET 给后置强调色卡片露出的条纹
         self._outerLayout = QVBoxLayout(self)
-        self._outerLayout.setContentsMargins(0, self.ACCENT_OFFSET, 0, self._bottomAccentOffset())
+        self._outerLayout.setContentsMargins(0, self.ACCENT_OFFSET, 0, 0)
         self._outerLayout.setSpacing(0)
 
         # 内容区水平布局（位于主体卡片内部；保持透明，背景由 paintEvent 绘制）
@@ -220,12 +219,8 @@ class Toast(QFrame):
     # 内部方法
     # ------------------------------------------------------------------
 
-    def _bottomAccentOffset(self) -> int:
-        return self.BOTTOM_ACCENT_OFFSET
-
-    def _drawBottomAccent(self, painter: QPainter, rect: QRectF, radius: float):
-        painter.setBrush(_accentColor(self.toastType))
-        painter.drawRoundedRect(rect, radius, radius)
+    def _drawBottomAccent(self, painter: QPainter, rect: QRectF, radius: float, cardPath: QPainterPath):
+        pass
 
     def _adjustText(self):
         w = 360 if not self.parent() else min(self.parent().width() - 50, 360)
@@ -285,17 +280,13 @@ class Toast(QFrame):
         w, h = self.width(), self.height()
         R = self.CARD_RADIUS
         offset = self.ACCENT_OFFSET
-        bottomOffset = self._bottomAccentOffset()
-        mainHeight = max(0, h - offset - bottomOffset)
+        mainHeight = max(0, h - offset)
         dark = isDarkTheme()
 
         # 1) 后置强调色卡片：整体相对主体卡片向上外凸 offset，露出顶部一条带圆角条纹
         if offset > 0 and mainHeight > 0:
             painter.setBrush(_accentColor(self.toastType))
             painter.drawRoundedRect(QRectF(0, 0, w, mainHeight), R, R)
-
-        if bottomOffset > 0 and mainHeight > 0:
-            self._drawBottomAccent(painter, QRectF(0, offset + bottomOffset, w, mainHeight), R)
 
         # 2) 主体卡片：带 1px 描边的圆角矩形，位于下层强调卡片之上
         if self.lightBackgroundColor is not None:
@@ -306,15 +297,23 @@ class Toast(QFrame):
             border = self._DARK_CARD_BORDER if dark else self._LIGHT_CARD_BORDER
 
         main_rect = QRectF(0, offset, w, mainHeight)
+        main_path = QPainterPath()
+        main_path.addRoundedRect(main_rect, R, R)
+
         painter.setBrush(bg)
-        painter.drawRoundedRect(main_rect, R, R)
+        painter.setPen(Qt.NoPen)
+        painter.drawPath(main_path)
+
+        self._drawBottomAccent(painter, main_rect, R, main_path)
 
         if border is not None:
             painter.setBrush(Qt.NoBrush)
             pen = QPen(border, 1)
             painter.setPen(pen)
             # 1px 描边需向内缩 0.5px，避免抗锯齿溢出卡片外沿
-            painter.drawRoundedRect(main_rect.adjusted(0.5, 0.5, -0.5, -0.5), R, R)
+            border_path = QPainterPath()
+            border_path.addRoundedRect(main_rect.adjusted(0.5, 0.5, -0.5, -0.5), R, R)
+            painter.drawPath(border_path)
 
     # ------------------------------------------------------------------
     # 静态工厂方法
@@ -642,7 +641,6 @@ class ProgressToast(Toast):
 
     # 进度条本身承担底部视觉焦点，因此不再需要顶部外凸条纹
     ACCENT_OFFSET = 0
-    BOTTOM_ACCENT_OFFSET = _BAR_HEIGHT
 
     def _getProgress(self) -> float:
         return self._progress
@@ -694,21 +692,34 @@ class ProgressToast(Toast):
         # 只应用 PROGRESS_TOAST 的 QSS，不调用父类 _setQss（避免 TOAST QSS 冲突）
         FluentStyleSheet.PROGRESS_TOAST.apply(self)
 
-    def _bottomAccentOffset(self) -> int:
-        return self.BOTTOM_ACCENT_OFFSET if self.duration != 0 else 0
+    def _drawBottomAccent(self, painter: QPainter, rect: QRectF, radius: float, cardPath: QPainterPath):
+        if self.duration == 0:
+            return
 
-    def _drawBottomAccent(self, painter: QPainter, rect: QRectF, radius: float):
         painter.setBrush(_accentColor(self.toastType))
 
+        painter.save()
+        painter.setClipPath(cardPath)
+
+        # 2) 再裁剪到底部条带（与卡片圆角取交集）
+        painter.setClipRect(
+            QRectF(rect.x() - 1, rect.bottom() - _BAR_HEIGHT - 0.5, rect.width() + 2, _BAR_HEIGHT + 1.5),
+            Qt.IntersectClip,
+        )
+
+        # 用足够高的矩形填色，由双重裁剪决定最终形状，避免圆角处出现缝隙
         if self.duration < 0:
             bandWidth = rect.width() * 0.35
-            startX = (rect.width() + bandWidth) * self._indeterminateOffset - bandWidth
-            painter.drawRoundedRect(QRectF(startX, rect.y(), bandWidth, rect.height()), radius, radius)
+            startX = rect.x() + (rect.width() + bandWidth) * self._indeterminateOffset - bandWidth
+            painter.fillRect(QRectF(startX - 1, rect.bottom() - radius, bandWidth + 2, radius + 1), painter.brush())
+            painter.restore()
             return
 
         width = rect.width() * self._progress
         if width > 0:
-            painter.drawRoundedRect(QRectF(rect.x(), rect.y(), width, rect.height()), radius, radius)
+            painter.fillRect(QRectF(rect.x() - 1, rect.bottom() - radius, width + 1, radius + 1), painter.brush())
+
+        painter.restore()
 
     # ------------------------------------------------------------------
     # 进度条动画
