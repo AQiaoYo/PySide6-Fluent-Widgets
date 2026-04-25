@@ -1,0 +1,19 @@
+Toast {
+    /* 背景与边框由 Toast.paintEvent 绘制（双层卡片叠放），此处仅保留尺寸约束 */
+    background-color: transparent;
+    border: none;
+    min-width: 280px;
+    max-width: 400px;
+}
+
+Toast #titleLabel {
+    font: bold 14px --FontFamilies;
+    color: black;
+    background-color: transparent;
+}
+
+Toast #contentLabel {
+    font: 13px --FontFamilies;
+    color: rgba(0, 0, 0, 153);
+    background-color: transparent;
+}
