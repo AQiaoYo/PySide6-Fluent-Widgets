@@ -27,7 +27,6 @@ from .tree_view import *
 from .cycle_list_widget import *
 from .progress_bar import *
 from .progress_ring import *
-from .radial_gauge import *
 from .scroll_bar import *
 from .teaching_tip import *
 from .flyout import *
