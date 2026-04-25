@@ -164,7 +164,7 @@ class Toast(QFrame):
         self._contentWidget = QWidget(self)
         self._contentWidget.setObjectName('toastContentWidget')
         self._hLayout = QHBoxLayout(self._contentWidget)
-        self._hLayout.setContentsMargins(16, 10, 8, 12)
+        self._hLayout.setContentsMargins(16, 8, 8, 8)
         self._hLayout.setSpacing(0)
 
         # 文字垂直布局
@@ -188,7 +188,7 @@ class Toast(QFrame):
 
         # 额外部件区（addWidget 追加到此处）
         self._extraLayout = QVBoxLayout()
-        self._extraLayout.setContentsMargins(16, 0, 16, 8)
+        self._extraLayout.setContentsMargins(16, 0, 16, 4)
         self._extraLayout.setSpacing(6)
 
         self._outerLayout.addWidget(self._contentWidget)
