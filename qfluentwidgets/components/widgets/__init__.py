@@ -13,6 +13,7 @@ from .list_view import *
 from .menu import *
 from .info_bar import *
 from .info_badge import *
+from .progress_info_bar import *
 from .multi_selection_combo_box import *
 from .scroll_area import *
 from .slider import *

@@ -45,6 +45,7 @@
 - [progress_ring](progress_ring/) - 进度环
 - [info_badge](info_badge/) - 信息徽标
 - [info_bar](info_bar/) - 信息栏
+- [progress_info_bar](progress_info_bar/) - 带进度环的信息栏
 - [state_tool_tip](state_tool_tip/) - 状态提示
 - [tool_tip](tool_tip/) - 工具提示
 
