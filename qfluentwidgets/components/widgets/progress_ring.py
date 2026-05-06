@@ -1,11 +1,13 @@
 # coding: utf-8
 """进度环控件模块
-提供 ProgressRing 和 IndeterminateProgressRing 两类环形进度控件，适用于在紧凑布局中展示任务执行状态
-ProgressRing 用于显示可量化的完成百分比，IndeterminateProgressRing 则用于表示正在进行但无法预估剩余时间的后台操作
+提供 ProgressRing, MultiSegmentProgressRing 和 IndeterminateProgressRing 等环形进度控件, 适用于在紧凑布局中展示任务执行状态
+ProgressRing 用于显示可量化的完成百分比, MultiSegmentProgressRing 用于展示存储空间等分段状态, IndeterminateProgressRing 则用于表示正在进行但无法预估剩余时间的后台操作
 """
 
+from typing import Iterable, Tuple, Union
+
 from PySide6.QtCore import (Qt, QRectF, QSize, QEasingCurve, QPropertyAnimation, QParallelAnimationGroup,
-                          QSequentialAnimationGroup, Property)
+                           QSequentialAnimationGroup, Property)
 from PySide6.QtGui import QColor, QFontMetrics, QPen, QPainter, QFont
 from PySide6.QtWidgets import QProgressBar
 
@@ -97,6 +99,398 @@ class ProgressRing(ProgressBar):
             self._drawText(painter, self.valText())
 
     strokeWidth = Property(int, getStrokeWidth, setStrokeWidth)
+
+
+class MultiSegmentProgressRing(ProgressRing):
+    """分段环形进度条
+    以多个连续弧段展示不同类别的进度占比, 适用于存储空间可视化, 资源配额, 多阶段任务完成度等场景.
+    每个分段可以设置独立的亮色和暗色主题颜色, 未被分段占用的部分会显示为轨道背景.
+
+    Constructor overloads:
+        * MultiSegmentProgressRing(parent: QWidget = None, useAni: bool = True)
+    """
+
+    Segment = Tuple[float, QColor, QColor]
+
+    def __init__(self, parent=None, useAni=True):
+        """初始化分段环形进度条
+
+        Args:
+            parent: 父级控件.
+            useAni: 是否使用继承自 ProgressBar 的数值动画.
+        """
+        super().__init__(parent, useAni=useAni)
+        self._segments = []
+        self._gapAngle = 4
+        self._startAngle = 90
+        self._clockwise = True
+        self._capStyle = Qt.RoundCap
+        self._centerText = ""
+        self._trackVisible = True
+        self._minSegmentAngle = 0.5
+
+    def segments(self):
+        """获取当前分段数据
+
+        Returns:
+            分段数据副本, 每项为 (value, lightColor, darkColor).
+        """
+        return [(value, QColor(light), QColor(dark)) for value, light, dark in self._segments]
+
+    def setSegments(self, segments: Iterable[Union[Tuple[float, Union[str, QColor, Qt.GlobalColor]], Tuple[float, Union[str, QColor, Qt.GlobalColor], Union[str, QColor, Qt.GlobalColor]]]]):
+        """设置全部分段
+
+        Args:
+            segments: 分段列表, 支持 (value, color) 或 (value, lightColor, darkColor).
+        """
+        self._segments = [self._normalizeSegment(segment) for segment in segments]
+        self._syncValueWithSegments()
+        self.update()
+
+    def addSegment(self, value: float, lightColor, darkColor=None):
+        """添加一个分段
+
+        Args:
+            value: 分段数值.
+            lightColor: 亮色主题下的分段颜色, darkColor 为空时同时作为暗色主题颜色.
+            darkColor: 暗色主题下的分段颜色, 默认为 None.
+        """
+        self._segments.append(self._normalizeSegment((value, lightColor, darkColor or lightColor)))
+        self._syncValueWithSegments()
+        self.update()
+
+    def insertSegment(self, index: int, value: float, lightColor, darkColor=None):
+        """在指定位置插入一个分段
+
+        Args:
+            index: 插入位置, 负数从末尾计数.
+            value: 分段数值.
+            lightColor: 亮色主题下的分段颜色.
+            darkColor: 暗色主题下的分段颜色, 默认为 None.
+        """
+        self._segments.insert(index, self._normalizeSegment((value, lightColor, darkColor or lightColor)))
+        self._syncValueWithSegments()
+        self.update()
+
+    def removeSegment(self, index: int):
+        """删除指定索引的分段
+
+        Args:
+            index: 要删除的分段索引.
+        """
+        if -len(self._segments) <= index < len(self._segments):
+            del self._segments[index]
+            self._syncValueWithSegments()
+            self.update()
+
+    def clearSegments(self):
+        """清空所有分段"""
+        self._segments.clear()
+        self.setValue(self.minimum())
+        self.update()
+
+    def segmentCount(self):
+        """获取分段数量
+
+        Returns:
+            当前分段总数.
+        """
+        return len(self._segments)
+
+    def segmentAt(self, index: int):
+        """获取指定索引的分段副本
+
+        Args:
+            index: 分段索引.
+
+        Returns:
+            (value, lightColor, darkColor) 形式的分段副本.
+        """
+        value, lightColor, darkColor = self._segments[index]
+        return value, QColor(lightColor), QColor(darkColor)
+
+    def setSegmentValue(self, index: int, value: float):
+        """修改指定分段的数值
+
+        Args:
+            index: 分段索引.
+            value: 新的分段数值.
+        """
+        _, lightColor, darkColor = self._segments[index]
+        self._segments[index] = (max(0, float(value)), lightColor, darkColor)
+        self._syncValueWithSegments()
+        self.update()
+
+    def setSegmentColor(self, index: int, lightColor, darkColor=None):
+        """修改指定分段的颜色
+
+        Args:
+            index: 分段索引.
+            lightColor: 亮色主题颜色.
+            darkColor: 暗色主题颜色, 默认与 lightColor 相同.
+        """
+        value, _, _ = self._segments[index]
+        self._segments[index] = (
+            value,
+            QColor(lightColor),
+            QColor(darkColor if darkColor is not None else lightColor),
+        )
+        self.update()
+
+    def totalValue(self):
+        """获取所有分段的数值之和
+
+        Returns:
+            所有分段的数值之和.
+        """
+        return sum(value for value, _, _ in self._segments)
+
+    def _normalizeSegment(self, segment):
+        """标准化分段数据
+
+        Args:
+            segment: 原始分段数据.
+        """
+        if len(segment) == 2:
+            value, color = segment
+            lightColor = darkColor = color
+        elif len(segment) == 3:
+            value, lightColor, darkColor = segment
+        else:
+            raise ValueError("segment must be (value, color) or (value, lightColor, darkColor)")
+
+        return max(0, float(value)), QColor(lightColor), QColor(darkColor)
+
+    def _syncValueWithSegments(self):
+        """将进度值同步为分段数值总和"""
+        total = sum(value for value, _, _ in self._segments)
+        value = min(self.maximum(), self.minimum() + int(round(total)))
+        super().setValue(value)
+
+    def getGapAngle(self):
+        """获取分段间隔角度
+
+        Returns:
+            分段间隔角度.
+        """
+        return self._gapAngle
+
+    def setGapAngle(self, angle: int):
+        """设置分段间隔角度
+
+        Args:
+            angle: 间隔角度, 单位为度.
+        """
+        self._gapAngle = max(0, int(angle))
+        self.update()
+
+    def getStartAngle(self):
+        """获取起始角度
+
+        Returns:
+            起始角度.
+        """
+        return self._startAngle
+
+    def setStartAngle(self, angle: int):
+        """设置起始角度
+
+        Args:
+            angle: 起始角度, 单位为度.
+        """
+        self._startAngle = int(angle)
+        self.update()
+
+    def isClockwise(self):
+        """是否按顺时针方向绘制
+
+        Returns:
+            是否顺时针绘制.
+        """
+        return self._clockwise
+
+    def setClockwise(self, isClockwise: bool):
+        """设置绘制方向
+
+        Args:
+            isClockwise: 是否顺时针绘制.
+        """
+        self._clockwise = bool(isClockwise)
+        self.update()
+
+    def capStyle(self):
+        """获取线帽样式
+
+        Returns:
+            线帽样式.
+        """
+        return self._capStyle
+
+    def setCapStyle(self, style):
+        """设置线帽样式
+
+        Args:
+            style: Qt.PenCapStyle 线帽样式.
+        """
+        self._capStyle = style
+        self.update()
+
+    def isTrackVisible(self):
+        """是否显示背景轨道
+
+        Returns:
+            是否显示背景轨道.
+        """
+        return self._trackVisible
+
+    def setTrackVisible(self, visible: bool):
+        """设置是否显示背景轨道
+
+        Args:
+            visible: 是否显示轨道, False 时仅绘制分段, 适用于纯分段展示场景.
+        """
+        self._trackVisible = bool(visible)
+        self.update()
+
+    def trackColor(self):
+        """获取轨道颜色
+
+        Returns:
+            (lightColor, darkColor) 形式的轨道颜色副本.
+        """
+        return QColor(self.lightBackgroundColor), QColor(self.darkBackgroundColor)
+
+    def setTrackColor(self, light, dark=None):
+        """设置轨道颜色
+
+        Args:
+            light: 亮色主题下的轨道颜色.
+            dark: 暗色主题下的轨道颜色, 默认与 light 相同.
+        """
+        self.lightBackgroundColor = QColor(light)
+        self.darkBackgroundColor = QColor(dark if dark is not None else light)
+        self.update()
+
+    def getMinSegmentAngle(self):
+        """获取分段的最小绘制角度
+
+        Returns:
+            最小绘制角度, 决定较小分段是否能以圆点形式可见.
+        """
+        return self._minSegmentAngle
+
+    def setMinSegmentAngle(self, angle: float):
+        """设置分段的最小绘制角度
+
+        Args:
+            angle: 最小绘制角度, 单位为度, 取值越小小分段越接近圆点.
+        """
+        self._minSegmentAngle = max(0.0, float(angle))
+        self.update()
+
+    def getCenterText(self):
+        """获取中心文本
+
+        Returns:
+            中心文本.
+        """
+        return self._centerText
+
+    def setCenterText(self, text: str):
+        """设置中心文本
+
+        Args:
+            text: 中心文本, 支持换行.
+        """
+        self._centerText = str(text)
+        self.update()
+
+    def _segmentColor(self, segment: Segment):
+        """获取当前主题下的分段颜色
+
+        Args:
+            segment: 标准化分段.
+        """
+        _, lightColor, darkColor = segment
+        color = darkColor if isDarkTheme() else lightColor
+        fallback = lightColor if lightColor.isValid() else self.barColor()
+        return color if color.isValid() else fallback
+
+    def _drawText(self, painter: QPainter, text: str):
+        """绘制中心文本
+
+        Args:
+            painter: 绘制器.
+            text: 文本内容.
+        """
+        painter.setFont(self.font())
+        painter.setPen(Qt.white if isDarkTheme() else Qt.black)
+        painter.drawText(self.rect(), Qt.AlignCenter | Qt.TextWordWrap, self._centerText or text)
+
+    def paintEvent(self, e):
+        """绘制分段进度环
+
+        Args:
+            e: 绘制事件.
+        """
+        painter = QPainter(self)
+        painter.setRenderHints(QPainter.Antialiasing)
+
+        cw = self._strokeWidth
+        side = min(self.height(), self.width()) - cw
+        if side <= 0:
+            return
+
+        rc = QRectF(
+            (self.width() - side) / 2,
+            (self.height() - side) / 2,
+            side,
+            side,
+        )
+
+        bc = self.darkBackgroundColor if isDarkTheme() else self.lightBackgroundColor
+        pen = QPen(bc, cw, Qt.SolidLine, self._capStyle, Qt.RoundJoin)
+        if self._trackVisible:
+            painter.setPen(pen)
+            painter.drawArc(rc, 0, 360 * 16)
+
+        total = self.maximum() - self.minimum()
+        if total > 0:
+            angle = float(self._startAngle)
+            visibleSegments = [segment for segment in self._segments if segment[0] > 0]
+
+            remaining = total
+            for segment in visibleSegments:
+                value = min(segment[0], remaining)
+                if value <= 0:
+                    break
+
+                span = value / total * 360
+                gap = min(self._gapAngle, span * 0.45) if len(visibleSegments) > 1 else 0
+                drawSpan = max(self._minSegmentAngle, span - gap) if span > 0 else 0
+
+                pen.setColor(self._segmentColor(segment))
+                painter.setPen(pen)
+
+                if self._clockwise:
+                    painter.drawArc(rc, int(angle * 16), -int(drawSpan * 16))
+                    angle -= span
+                else:
+                    painter.drawArc(rc, int(angle * 16), int(drawSpan * 16))
+                    angle += span
+
+                remaining -= value
+
+        if self.isTextVisible():
+            self._drawText(painter, self.valText())
+
+    gapAngle = Property(int, getGapAngle, setGapAngle)
+    startAngle = Property(int, getStartAngle, setStartAngle)
+    clockwise = Property(bool, isClockwise, setClockwise)
+    capStyle = Property(Qt.PenCapStyle, capStyle, setCapStyle)
+    centerText = Property(str, getCenterText, setCenterText)
+    trackVisible = Property(bool, isTrackVisible, setTrackVisible)
+    minSegmentAngle = Property(float, getMinSegmentAngle, setMinSegmentAngle)
 
 
 class IndeterminateProgressRing(QProgressBar):

@@ -4,7 +4,8 @@ from PySide6.QtGui import QPixmap, QColor
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QVBoxLayout
 from qfluentwidgets import (StateToolTip, InfoBadge, ToolTipFilter, PushButton, PixmapLabel,
                             InfoBar, InfoBarIcon, FluentIcon, InfoBarPosition, ProgressBar,
-                            IndeterminateProgressBar, SpinBox, ProgressRing, IndeterminateProgressRing)
+                            IndeterminateProgressBar, SpinBox, ProgressRing, MultiSegmentProgressRing,
+                            IndeterminateProgressRing)
 
 from .gallery_interface import GalleryInterface
 from ..common.translator import Translator
@@ -193,6 +194,23 @@ class StatusInfoInterface(GalleryInterface):
             self.tr('An determinate progress ring'),
             ProgressWidget(ring, self),
             'https://github.com/zhiyiYo/PyQt-Fluent-Widgets/blob/PySide6/examples/widgets/progress_ring/demo.py',
+        )
+
+        # multi segment progress ring
+        ring = MultiSegmentProgressRing(self)
+        ring.setFixedSize(100, 100)
+        ring.setStrokeWidth(8)
+        ring.setTextVisible(True)
+        ring.setCenterText('1.1\nMB')
+        ring.setSegments([
+            (55, '#0F7BFF', '#4CC2FF'),
+            (22, '#3CB6F8', '#3CB6F8'),
+            (4, '#4CD964', '#4CD964'),
+        ])
+        self.addExampleCard(
+            self.tr('A multi segment progress ring'),
+            ring,
+            'https://github.com/zhiyiYo/PyQt-Fluent-Widgets/blob/PySide6/examples/widgets/multi_segment_progress_ring/demo.py',
         )
 
     def onStateButtonClicked(self):
