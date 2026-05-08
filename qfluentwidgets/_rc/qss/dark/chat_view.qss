@@ -1,0 +1,88 @@
+/* ChatView 容器自身透明，背景由父容器提供 */
+ChatView,
+ChatView > QWidget,
+ChatView #chatScrollContainer {
+    background: transparent;
+    border: none;
+}
+
+/* 用户消息气泡：偏冷蓝调，暗色下用半透明 */
+ChatBubble[role="user"] #bubbleBody {
+    background-color: rgba(96, 165, 250, 0.16);
+    border-radius: 8px;
+}
+
+/* Agent 消息：平铺式, 无气泡背景 (markdown 直接铺) */
+ChatBubble[role="agent"] #bubbleBody {
+    background: transparent;
+    border: none;
+    border-radius: 0px;
+}
+
+ChatBubble[role="system"] #bubbleBody {
+    background: transparent;
+    border-radius: 0px;
+}
+
+/* 平铺模式: 发送者名 (加粗) 颜色与正文同 */
+ChatBubble #senderName {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+}
+
+/* 平铺模式: 副标题 (供应商等) 弱化色 */
+ChatBubble #senderSubtitle {
+    color: rgba(255, 255, 255, 0.45);
+    background: transparent;
+}
+
+MarkdownView,
+MarkdownView > QWidget {
+    background: transparent;
+    border: none;
+}
+
+MarkdownView QTextBrowser {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    selection-background-color: rgba(96, 165, 250, 0.4);
+}
+
+/* 代码块卡片: 整体统一暗底, 卡片边框 + 极淡分割线划分 header/body */
+CodeBlock {
+    background-color: rgba(0, 0, 0, 0.32);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 8px;
+}
+
+CodeBlock #codeHeader {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+CodeBlock #codeLanguage {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+    padding-left: 2px;
+    font-weight: 400;
+}
+
+CodeBlock QPlainTextEdit {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+    selection-background-color: rgba(96, 165, 250, 0.3);
+}
+
+ChatBubble #timestampLabel {
+    color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+}
+
+ChatBubble #actionBar {
+    background: transparent;
+    border: none;
+}
