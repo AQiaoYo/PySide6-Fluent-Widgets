@@ -186,6 +186,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     CALENDAR_TIME_PICKER = "calendar_time_picker"
     TOAST = "toast"
     PROGRESS_TOAST = "progress_toast"
+    CHAT_VIEW = "chat_view"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
