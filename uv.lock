@@ -11660,6 +11660,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+chat = [
+    { name = "pygments" },
+]
 full = [
     { name = "colorthief" },
     { name = "pillow", version = "10.4.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.9'" },
@@ -11696,11 +11699,12 @@ requires-dist = [
     { name = "colorthief", marker = "extra == 'full'" },
     { name = "darkdetect" },
     { name = "pillow", marker = "extra == 'full'" },
+    { name = "pygments", marker = "extra == 'chat'", specifier = ">=2.10" },
     { name = "pyside6", specifier = ">=6.4.2" },
     { name = "pysidesix-frameless-window", specifier = ">=0.8.0" },
     { name = "scipy", marker = "extra == 'full'" },
 ]
-provides-extras = ["full"]
+provides-extras = ["full", "chat"]
 
 [package.metadata.requires-dev]
 docs = [

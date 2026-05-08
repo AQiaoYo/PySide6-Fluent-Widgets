@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 full = ["colorthief", "pillow", "scipy"]
+chat = ["pygments>=2.10"]
 
 [project.scripts]
 preview = "devtools.preview:main"
