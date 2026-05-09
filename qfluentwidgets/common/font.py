@@ -1,9 +1,9 @@
 # coding: utf-8
 """字体工具模块"""
 
+import logging
 from typing import List
-from PySide6.QtGui import QFont
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QFont, QFontDatabase, QGuiApplication
 from PySide6.QtWidgets import QWidget
 
 from .config import qconfig
@@ -78,3 +78,65 @@ def _logical_dpi() -> float:
     screen = app.primaryScreen() if app is not None else None
     dpi = screen.logicalDotsPerInchY() if screen is not None else 96.0
     return dpi or 96.0
+
+
+logger = logging.getLogger(__name__)
+
+
+class FontManager:
+    """字体管理器，用于加载和管理通过 QRC 内嵌的自定义字体"""
+
+    _font_loaded = False
+    _loaded_families: list[str] = []
+
+    @classmethod
+    def initialize_fonts(cls) -> None:
+        """初始化内嵌字体，仅在首次调用时加载"""
+        if not cls._font_loaded:
+            cls._load_single_font(":/qfluentwidgets/font/JB-MAPLE.ttf")
+            cls._font_loaded = True
+
+    @classmethod
+    def _load_single_font(cls, font_path: str) -> str:
+        """加载单个字体并返回字体家族"""
+        if (font_id := QFontDatabase.addApplicationFont(font_path)) == -1:
+            logger.error(f"字体加载失败: {font_path}")
+            return ""
+
+        if font_families := QFontDatabase.applicationFontFamilies(font_id):
+            for family in font_families:
+                if family not in cls._loaded_families:
+                    cls._loaded_families.append(family)
+            logger.debug(f"字体加载成功: {font_families[0]}")
+            return font_families[0]
+
+        logger.error(f"未找到字体家族: {font_path}")
+        return ""
+
+    @classmethod
+    def code_font_families(cls) -> list[str]:
+        """返回代码编辑器优先使用的等宽字体栈"""
+        cls.initialize_fonts()
+        preferred = [
+            family for family in cls._loaded_families
+            if "maple" in family.lower() or "mono" in family.lower()
+        ]
+        fallback = [
+            "Cascadia Mono",
+            "Cascadia Code",
+            "JetBrains Mono",
+            "Consolas",
+            "Microsoft YaHei UI",
+        ]
+
+        result: list[str] = []
+        for family in preferred + fallback:
+            if family not in result:
+                result.append(family)
+
+        return result
+
+    @classmethod
+    def loaded_families(cls) -> list[str]:
+        """返回所有已加载的自定义字体家族名称"""
+        return cls._loaded_families.copy()
