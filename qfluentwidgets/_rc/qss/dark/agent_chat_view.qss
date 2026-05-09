@@ -1,7 +1,7 @@
-/* ChatView 容器自身透明，背景由父容器提供 */
-ChatView,
-ChatView > QWidget,
-ChatView #chatScrollContainer {
+/* AgentChatView 容器自身透明，背景由父容器提供 */
+AgentChatView,
+AgentChatView > QWidget,
+AgentChatView #chatScrollContainer {
     background: transparent;
     border: none;
 }
@@ -140,45 +140,325 @@ ThinkingCard #thinkingContentWrap {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* ----------------------------- ToolCallCard ---------------------------- */
+/* ----------------------------- ToolCallCard (基类与全部特化子类) ---- */
 
-ToolCallCard {
+#toolCallCard {
     background-color: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 8px;
 }
 
-ToolCallCard #toolCallHeader {
+#toolCallCard #toolCallHeader {
     background: transparent;
     border: none;
     border-radius: 8px;
 }
 
-ToolCallCard #toolCallHeader:hover {
+#toolCallCard #toolCallHeader:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-ToolCallCard #toolCallName {
+#toolCallCard #toolCallName {
     color: rgba(255, 255, 255, 0.88);
     background: transparent;
     border: none;
     font-weight: 600;
 }
 
-ToolCallCard #toolCallDuration {
+#toolCallCard #toolCallDuration {
     color: rgba(255, 255, 255, 0.45);
     background: transparent;
     border: none;
 }
 
-ToolCallCard #toolCallContentWrap {
+#toolCallCard #toolCallStatusText {
+    color: rgba(248, 81, 73, 0.92);
+    background: transparent;
+    border: none;
+    font-weight: 500;
+}
+
+#toolCallCard #toolCallContentWrap {
     background: transparent;
     border: none;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-ToolCallCard #toolCallSectionLabel {
+#toolCallCard #toolCallSectionLabel {
     color: rgba(255, 255, 255, 0.5);
     background: transparent;
     border: none;
+}
+
+/* 审批按钮区 (PENDING_APPROVAL) */
+#toolCallCard #toolCallApproval {
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- DiffView ----------------------------- */
+
+#diffView {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 6px;
+}
+
+#diffLineAdd,
+#diffLineRemove,
+#diffLineContext,
+#diffLineHunk {
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+    padding: 2px 8px;
+    border: none;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+#diffLineAdd {
+    background-color: rgba(63, 185, 80, 0.18);
+    color: rgba(165, 230, 175, 1.0);
+}
+
+#diffLineRemove {
+    background-color: rgba(248, 81, 73, 0.18);
+    color: rgba(255, 170, 175, 1.0);
+}
+
+#diffLineContext {
+    background: transparent;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+#diffLineHunk {
+    background-color: rgba(96, 165, 250, 0.12);
+    color: rgba(160, 200, 255, 0.92);
+    font-weight: 500;
+}
+
+/* ----------------------------- FileReadCard ------------------------- */
+
+#toolCallCard #lineRangeLabel {
+    color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- BashCard ----------------------------- */
+
+BashCard #bashOutputView {
+    background-color: rgb(18, 18, 22);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    border-radius: 6px;
+}
+
+BashCard #bashOutputText {
+    background: transparent;
+    border: none;
+    color: rgba(230, 230, 230, 1.0);
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+BashCard #bashExitBadge {
+    border: none;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 500;
+    font-size: 11px;
+    color: white;
+}
+
+BashCard #bashExitBadge[ok="true"] {
+    background-color: rgba(63, 185, 80, 0.85);
+}
+
+BashCard #bashExitBadge[ok="false"] {
+    background-color: rgba(248, 81, 73, 0.85);
+}
+
+/* ----------------------------- WebSearchCard ------------------------ */
+
+WebSearchCard #webResultList {
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultRow {
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultTitle {
+    color: rgba(110, 175, 255, 0.95);
+    background: transparent;
+    border: none;
+    font-weight: 600;
+}
+
+WebSearchCard #webResultTitle:hover {
+    color: rgba(150, 200, 255, 1.0);
+    text-decoration: underline;
+}
+
+WebSearchCard #webResultUrl {
+    color: rgba(110, 200, 130, 0.85);
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultSnippet {
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- GrepSearchCard ----------------------- */
+
+GrepSearchCard #grepHitList {
+    background: transparent;
+    border: none;
+}
+
+/* 一条命中 = 一张独立小卡片. */
+GrepSearchCard #grepHitRow {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+}
+
+GrepSearchCard #grepHitPath {
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 11px;
+}
+
+GrepSearchCard #grepHitPreview {
+    color: rgba(255, 255, 255, 0.85);
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+/* ----------------------------- GenerationStatusBar ------------------ */
+
+/* 默认: 顶栏式 (浮动在 viewport 顶部, AgentChatView standalone 用法). */
+#generationStatusBar {
+    background-color: rgba(28, 28, 32, 0.96);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* AgentChatPanel 把状态条 reparent 到输入框上方做成 "小卡片",
+   与输入框等圆角 (line_edit 5px). */
+#chatGenBarCard {
+    background-color: rgba(40, 40, 44, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 5px;
+}
+
+#generationStatusBar #generationStatusText,
+#chatGenBarCard #generationStatusText {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    border: none;
+}
+
+#generationStatusBar #generationStatusTokens,
+#chatGenBarCard #generationStatusTokens {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+}
+
+#generationStatusBar #generationStatusElapsed,
+#chatGenBarCard #generationStatusElapsed {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+}
+
+/* "已停止" 提示行 */
+ChatBubble #bubbleStoppedLabel {
+    color: rgba(255, 255, 255, 0.5);
+    background: transparent;
+    border: none;
+    font-style: italic;
+}
+
+/* USER 气泡内联编辑器 + 版本选页器 (对话分叉) */
+#bubbleInlineEditor {
+    background-color: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+
+#bubbleVersionPager {
+    background: transparent;
+}
+
+#bubbleVersionLabel {
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    font-size: 12px;
+}
+
+/* ============================================================
+   ChatInputEdit (dark) — Agent 聊天输入框
+   ============================================================ */
+
+#chatInputEdit {
+    padding: 12px 14px;
+    font-size: 15px;
+}
+
+/* 圆形发送按钮: 浅色填充 + 深色箭头 */
+#chatSendButton {
+    background-color: rgba(255, 255, 255, 0.85);
+    border-radius: 16px;
+    border: none;
+}
+#chatSendButton:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+}
+#chatSendButton:pressed {
+    background-color: rgba(255, 255, 255, 0.7);
+}
+#chatSendButton:disabled {
+    background-color: rgba(255, 255, 255, 0.18);
+}
+
+#chatAttachButton {
+    background: transparent;
+    border-radius: 8px;
+    border: none;
+}
+#chatAttachButton:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+#chatAttachButton:pressed {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* Token 预估指示器 (右下, 发送按钮左侧) — 紧凑文字 + 图标. */
+#chatTokenIndicator {
+    background: transparent;
+}
+#chatContextLabel,
+#chatTokenCountLabel,
+#chatTokenSeparator {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    font-size: 12px;
+}
+#chatTokenSeparator {
+    padding: 0 2px;
+    color: rgba(255, 255, 255, 0.3);
 }

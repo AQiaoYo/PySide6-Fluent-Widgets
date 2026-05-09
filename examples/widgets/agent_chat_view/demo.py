@@ -17,16 +17,18 @@ AgentChatView Demo (Enhanced)
 跟随系统亚克力 / 云母效果一并刷新, 是验证组件主题适配的最直观方式.
 """
 import sys
+from datetime import datetime
 from typing import List
 
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
 
 from qfluentwidgets import (
-    AgentChatPanel, AgentChatView, BodyLabel, ChatMessage, ChatRole,
-    FluentIcon, FluentWindow, InfoBar, InfoBarPosition, PrimaryPushButton,
-    PushButton, Theme, TextSegment, ThinkingSegment, ToolCallSegment,
-    ToolCallStatus, ToolTipFilter, ToolTipPosition, setTheme,
+    AgentChatPanel, AgentChatView, ApprovalPolicy, BodyLabel, ChatMessage,
+    ChatRole, FluentIcon, FluentWindow, InfoBar, InfoBarPosition,
+    PrimaryPushButton, PushButton, TaskItem, TaskStatus, Theme,
+    TextSegment, ThinkingSegment, ToolCallSegment, ToolCallStatus,
+    ToolTipFilter, ToolTipPosition, setTheme,
 )
 
 
@@ -217,6 +219,14 @@ class ChatInterface(QWidget):
             PushButton, FluentIcon.DEVELOPER_TOOLS, "特化工具集",
             tip="一次性插入 6 种特化工具卡片 (read/write/edit-diff/bash/web/grep)",
         )
+        self.taskListBtn = self._mkToolbarBtn(
+            PushButton, FluentIcon.MENU, "任务列表",
+            tip="演示 TaskListSegment: 3 项任务 ☐→⟳→✓ 状态翻转 (P2d)",
+        )
+        self.resumeBtn = self._mkToolbarBtn(
+            PushButton, FluentIcon.PAUSE, "Stop+Resume",
+            tip="模拟流式生成 1.2s 后被打断, 然后用户点 [继续生成] 续写 (P2c)",
+        )
         self.clearBtn = self._mkToolbarBtn(
             PushButton, FluentIcon.DELETE, "清空",
             tip="重置消息流, 还原到初始示例",
@@ -232,6 +242,8 @@ class ChatInterface(QWidget):
         toolbar.addWidget(self.agentBtn)
         toolbar.addWidget(self.approvalBtn)
         toolbar.addWidget(self.toolsBtn)
+        toolbar.addWidget(self.taskListBtn)
+        toolbar.addWidget(self.resumeBtn)
         toolbar.addStretch(1)
         toolbar.addWidget(self.clearBtn)
         toolbar.addWidget(self.themeBtn)
@@ -260,6 +272,8 @@ class ChatInterface(QWidget):
         self.chat.toolCallApprovalRequested.connect(self._onApprovalRequested)
         self.chat.toolCallApproved.connect(self._onToolApproved)
         self.chat.toolCallRejected.connect(self._onToolRejected)
+        # 对话分叉: 用户内联编辑保存后, 触发 AI 重新生成回复
+        self.chat.userMessageEdited.connect(self._onUserMessageEdited)
         # 消息流变化 -> 刷新 token 预估
         self.chat.lastMessageChanged.connect(self._refreshTokenInfo)
         self.chat.messageRemoved.connect(lambda _mid: self._refreshTokenInfo())
@@ -269,8 +283,12 @@ class ChatInterface(QWidget):
         self.agentBtn.clicked.connect(self._startInterleavedAgent)
         self.approvalBtn.clicked.connect(self._startApprovalDemo)
         self.toolsBtn.clicked.connect(self._showSpecializedTools)
+        self.taskListBtn.clicked.connect(self._startTaskListDemo)
+        self.resumeBtn.clicked.connect(self._startResumeDemo)
         self.clearBtn.clicked.connect(self._reset)
         self.themeBtn.clicked.connect(self._toggleTheme)
+        # P2c Resume: 用户点 [继续生成] -> 续写
+        self.chat.resumeRequested.connect(self._onResumeRequested)
 
         # --- 布局 ---
         rootLayout = QVBoxLayout(self)
@@ -331,13 +349,15 @@ class ChatInterface(QWidget):
             subtitle="刚刚",
         ))
 
-        # 2. 创建空的 agent 消息, 准备流式追加
+        # 2. 创建空的 agent 消息, 准备流式追加.
+        # subtitle 不传: AgentChatView 默认 provider 会填 HH:MM:SS;
+        # 流式结束后 本 demo 会追加 · N tokens.
         agent = ChatMessage(
             role=ChatRole.AGENT, content="",
             sender_name="DeepSeek V4",
-            subtitle="刚刚",
         )
         self.chat.addMessage(agent)
+        agent_id = agent.id
 
         # 3. 模拟 200ms 后开始流式追加 echo 回复
         reply = (
@@ -356,8 +376,10 @@ class ChatInterface(QWidget):
             if not tokens:
                 timer.stop()
                 timer.deleteLater()
+                # 流式结束: 把 subtitle 改成 HH:MM:SS · N tokens, 跟其它路径一致
+                self._refreshAgentSubtitleWithTokens(agent_id)
                 return
-            self.chat.appendDelta(agent.id, tokens.pop(0))
+            self.chat.appendDelta(agent_id, tokens.pop(0))
 
         timer.timeout.connect(tick)
         timer.start()
@@ -370,11 +392,10 @@ class ChatInterface(QWidget):
         self.chat.clear()
         self.chat.addMessage(ChatMessage(
             role=ChatRole.USER, content=SAMPLE_USER,
-            subtitle="Tokens: 18  |  05/09 15:00",
         ))
         self.chat.addMessage(ChatMessage(
             role=ChatRole.AGENT, content=SAMPLE_AGENT,
-            subtitle="05/09 15:00  |  Tokens: 1432 ↑128 ↓1304",
+            sender_name="DeepSeek V4",
         ))
 
     def _reset(self):
@@ -399,7 +420,7 @@ class ChatInterface(QWidget):
         ))
         agent = ChatMessage(
             role=ChatRole.AGENT, content="",
-            sender_name="GPT-4o", subtitle="OpenAI",
+            sender_name="GPT-4o",
         )
         self.chat.addMessage(agent)
         self._streamMsgId = agent.id
@@ -410,9 +431,23 @@ class ChatInterface(QWidget):
     def _streamTick(self):
         if not self._streamTokens:
             self._streamTimer.stop()
+            # 流式结束: 在 subtitle 末尾追加 token 数 (粗略 4 字符/token)
+            self._refreshAgentSubtitleWithTokens(self._streamMsgId)
             return
         token = self._streamTokens.pop(0)
         self.chat.appendDelta(self._streamMsgId, token)
+
+    def _refreshAgentSubtitleWithTokens(self, msg_id: str) -> None:
+        """生成结束后把 subtitle 改成 ``HH:MM:SS · {N} tokens`` 形式.
+
+        覆盖默认 provider 写入的 ``HH:MM:SS``, 让用户能直观看到 token 数.
+        """
+        msg = self.chat.message(msg_id)
+        if msg is None:
+            return
+        est_tokens = max(0, len(msg.content) // 4)
+        ts = datetime.now().strftime("%H:%M:%S")
+        self.chat.setMessageSubtitle(msg_id, f"{ts} · {est_tokens} tokens")
 
     # ------------------------------------------------------------------
     # 2) 交错 Agent 运行 (think -> tool -> think -> tool -> answer)
@@ -428,7 +463,7 @@ class ChatInterface(QWidget):
         ))
         agent = ChatMessage(
             role=ChatRole.AGENT, content="",
-            sender_name="DeepSeek-R1", subtitle="深度求索 · 推理模式",
+            sender_name="DeepSeek-R1",
         )
         self.chat.addMessage(agent)
         self._iaMsgId = agent.id
@@ -559,6 +594,8 @@ class ChatInterface(QWidget):
         # ph >= 11: 收尾
         self._agentTimer.stop()
         self.chat.endGeneration(mid)
+        # 把 subtitle 改成 HH:MM:SS · N tokens, 跟 _streamTick 收尾保持一致
+        self._refreshAgentSubtitleWithTokens(mid)
 
     def _bumpTokens(self, char_count: int):
         # 粗略: 4 字符 ~= 1 token
@@ -581,7 +618,7 @@ class ChatInterface(QWidget):
         ))
         agent = ChatMessage(
             role=ChatRole.AGENT, content="",
-            sender_name="DeepSeek V4", subtitle="深度求索",
+            sender_name="DeepSeek V4",
         )
         self.chat.addMessage(agent)
 
@@ -608,7 +645,7 @@ class ChatInterface(QWidget):
         InfoBar.warning(
             title="等待审批",
             content=f"工具 write_file 等待批准 (call={call_id[:6]}...)",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=2000,
         )
@@ -618,7 +655,7 @@ class ChatInterface(QWidget):
         InfoBar.success(
             title="已批准",
             content="开始执行 write_file...",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=1500,
         )
@@ -641,7 +678,7 @@ class ChatInterface(QWidget):
         InfoBar.error(
             title="已拒绝",
             content="操作已被拒绝, 不会写入文件",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=2000,
         )
@@ -750,7 +787,6 @@ class ChatInterface(QWidget):
         agent = ChatMessage(
             role=ChatRole.AGENT,
             sender_name="Agent (Tool Showcase)",
-            subtitle="特化渲染器静态展示",
             segments=segs,
         )
         self.chat.addMessage(agent)
@@ -764,25 +800,64 @@ class ChatInterface(QWidget):
         InfoBar.success(
             title="已复制",
             content=f"消息 {message_id[:8]}... 已复制到剪贴板",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=1500,
         )
 
     def _onEditRequested(self, message_id: str):
+        # USER 消息: ChatBubble 默认会自动进入内联编辑模式 (无需 demo 干预).
+        # 这里只在 InfoBar 里反馈一下信号到达, 帮助调试.
         InfoBar.info(
-            title="编辑请求",
-            content=f"宿主应在此弹出编辑 UI (id={message_id[:8]}...)",
-            parent=self,
+            title="编辑模式",
+            content=f"已进入气泡内联编辑 (id={message_id[:8]}...)",
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
-            duration=1800,
+            duration=1500,
         )
+
+    def _onUserMessageEdited(self, new_user_msg_id: str, new_content: str):
+        """用户消息被编辑保存 (走 editAndFork 后 AgentChatView 发出本信号).
+
+        编辑流程:
+        1. ChatBubble 内联编辑器 用户点 保存 -> ``editConfirmed(msg_id, new_text)``
+        2. ``AgentChatView._onEditConfirmed`` -> ``editAndFork`` 创建新分支
+        3. ``editAndFork`` emit ``userMessageEdited(new_user_msg_id, new_content)``
+        4. **本方法** 负责模拟 LLM 调用, 给新分支补一条 AGENT 回复
+
+        真实应用应在这里把 ``new_content`` 提交后端, 通过 ``appendDelta``
+        增量追加 AI 流式回复 (如 _startStreaming 中的做法).
+        """
+        InfoBar.info(
+            title="新分支已创建",
+            content=f"基于编辑后的消息生成新 AI 回复... (msg={new_user_msg_id[:8]}...)",
+            parent=self.window(),
+            position=InfoBarPosition.TOP_RIGHT,
+            duration=1500,
+        )
+
+        # 模拟 LLM 流式回复: 复用既有 _streamTimer / _streamTokens 状态机
+        agent = ChatMessage(
+            role=ChatRole.AGENT, content="",
+            sender_name="DeepSeek V4",
+        )
+        self.chat.addMessage(agent)
+        self._streamMsgId = agent.id
+        # 简易模拟: 用一段固定 markdown 表示新分支的 AI 回复
+        reply_text = (
+            f"**已收到您编辑后的消息**:\n\n> {new_content}\n\n"
+            "下面给出针对编辑后内容的新一轮回复 (这是 demo 文本):\n\n"
+            "```python\n# 新的代码片段, 仅作示意\nresult = 1 + 1\n```\n\n"
+            "在真实应用里, 这条回复来自 LLM 的流式输出."
+        )
+        self._streamTokens = self._chunk(reply_text, 3, 5)
+        self._streamTimer.start(30)
 
     def _onRegenerateRequested(self, message_id: str):
         InfoBar.info(
             title="重新生成",
             content=f"宿主应在此重新调用 LLM (id={message_id[:8]}...)",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=1800,
         )
@@ -795,10 +870,146 @@ class ChatInterface(QWidget):
         InfoBar.warning(
             title="已停止",
             content="生成已被用户中断",
-            parent=self,
+            parent=self.window(),
             position=InfoBarPosition.TOP_RIGHT,
             duration=1500,
         )
+
+    # ------------------------------------------------------------------
+    # 5) 任务列表演示 (P2d TaskListSegment)
+    # ------------------------------------------------------------------
+
+    def _startTaskListDemo(self):
+        """演示 TaskListSegment 状态翻转: ☐→⟳→✓.
+
+        模拟 Agent 接到长任务时先列出 TODO list, 然后逐项完成.
+        """
+        if self._anyTimerActive():
+            return
+
+        # 先 USER 消息说明意图, 再 AGENT 消息附带任务列表
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.USER,
+            content="帮我重构一下 chat 模块, 列个计划",
+        ))
+        agent = ChatMessage(
+            role=ChatRole.AGENT,
+            content="好的, 我把工作拆成 3 步:",
+            sender_name="DeepSeek V4",
+        )
+        self.chat.addMessage(agent)
+        agent_id = agent.id
+
+        # 创建任务列表 (3 项 todo)
+        items = [
+            TaskItem(text="P0a: 提取共享 ClickableFrame"),
+            TaskItem(text="P1a: ChatBubble 拆三个 body"),
+            TaskItem(text="P2a: Segment 渲染注册表"),
+        ]
+        seg_id = self.chat.addTaskList(
+            agent_id, items, title="重构计划",
+        )
+        if seg_id is None:
+            return
+
+        item_ids = [it.id for it in items]
+
+        # 1.0s -> item 0 进入 in_progress
+        # 2.0s -> item 0 done; item 1 in_progress
+        # 3.0s -> item 1 done; item 2 in_progress
+        # 4.0s -> item 2 done
+        timeline = [
+            (1000, item_ids[0], TaskStatus.IN_PROGRESS),
+            (2000, item_ids[0], TaskStatus.DONE),
+            (2000, item_ids[1], TaskStatus.IN_PROGRESS),
+            (3000, item_ids[1], TaskStatus.DONE),
+            (3000, item_ids[2], TaskStatus.IN_PROGRESS),
+            (4000, item_ids[2], TaskStatus.DONE),
+        ]
+        for delay, iid, status in timeline:
+            QTimer.singleShot(
+                delay,
+                lambda mid=agent_id, sid=seg_id, iid=iid, st=status:
+                self.chat.updateTaskItem(mid, sid, iid, st),
+            )
+
+    # ------------------------------------------------------------------
+    # 6) Stop + Resume 演示 (P2c)
+    # ------------------------------------------------------------------
+
+    def _startResumeDemo(self):
+        """模拟流式生成 1.2s 后被打断, 然后用户点 [继续生成] 续写."""
+        if self._anyTimerActive():
+            return
+
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.USER,
+            content="解释一下 Python 的 GIL",
+        ))
+        agent = ChatMessage(
+            role=ChatRole.AGENT, content="",
+            sender_name="DeepSeek V4",
+        )
+        self.chat.addMessage(agent)
+        agent_id = agent.id
+
+        # Part 1: 流式输出前半段 (~1.2s)
+        part1 = (
+            "GIL (Global Interpreter Lock) 是 CPython 的"
+            "全局解释器锁, 同一时刻只允许一个线程执行 Python 字节码. "
+        )
+        # Part 2: Resume 后续写
+        self._resumeDemoPart2 = (
+            "这意味着多线程在 CPU 密集型任务上无法真正并行, "
+            "但对 I/O 密集型任务仍然有效 (释放 GIL). "
+            "想绕开 GIL 可以用 multiprocessing 或 C 扩展."
+        )
+        self._resumeDemoMsgId = agent_id
+
+        self.chat.beginGeneration(agent_id, "正在生成...")
+        tokens = self._chunk(part1, 2, 4)
+        timer = QTimer(self)
+        timer.setInterval(40)
+
+        def tick():
+            if not tokens:
+                timer.stop()
+                timer.deleteLater()
+                # 模拟用户点 Stop
+                self.chat.endGeneration(agent_id, stopped=True)
+                return
+            self.chat.appendDelta(agent_id, tokens.pop(0))
+
+        timer.timeout.connect(tick)
+        timer.start()
+
+    def _onResumeRequested(self, msg_id: str):
+        """用户点 [继续生成] -> 把缓存的 part2 流式追加上去."""
+        if not getattr(self, "_resumeDemoMsgId", None):
+            return
+        if msg_id != self._resumeDemoMsgId:
+            return
+        part2 = getattr(self, "_resumeDemoPart2", "")
+        if not part2:
+            return
+        self._resumeDemoPart2 = ""  # 防止重复 resume
+
+        self.chat.beginGeneration(msg_id, "继续生成...")
+        tokens = self._chunk(part2, 2, 4)
+        timer = QTimer(self)
+        timer.setInterval(40)
+
+        def tick():
+            if not tokens:
+                timer.stop()
+                timer.deleteLater()
+                self.chat.endGeneration(msg_id, stopped=False)
+                self._refreshAgentSubtitleWithTokens(msg_id)
+                return
+            self.chat.appendDelta(msg_id, tokens.pop(0))
+
+        timer.timeout.connect(tick)
+        timer.start()
 
     # ------------------------------------------------------------------
     # 主题切换

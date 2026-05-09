@@ -1,7 +1,7 @@
-/* ChatView 容器自身透明，背景由父容器提供 */
-ChatView,
-ChatView > QWidget,
-ChatView #chatScrollContainer {
+/* AgentChatView 容器自身透明，背景由父容器提供 */
+AgentChatView,
+AgentChatView > QWidget,
+AgentChatView #chatScrollContainer {
     background: transparent;
     border: none;
 }
@@ -146,45 +146,339 @@ ThinkingCard #thinkingContentWrap {
     border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-/* ----------------------------- ToolCallCard ---------------------------- */
+/* ----------------------------- ToolCallCard (基类与全部特化子类) ---- */
 
-ToolCallCard {
+/* 使用 #toolCallCard objectName 选择器: 基类 ToolCallCardBase 与所有特化
+   子类 (FileReadCard / BashCard / WebSearchCard / ...) 都共享该 objectName,
+   避免使用 Qt QSS 类名选择器 (不匹配子类) 造成样式丢失. */
+
+#toolCallCard {
     background-color: rgba(0, 0, 0, 0.035);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 8px;
 }
 
-ToolCallCard #toolCallHeader {
+#toolCallCard #toolCallHeader {
     background: transparent;
     border: none;
     border-radius: 8px;
 }
 
-ToolCallCard #toolCallHeader:hover {
+#toolCallCard #toolCallHeader:hover {
     background-color: rgba(0, 0, 0, 0.04);
 }
 
-ToolCallCard #toolCallName {
+#toolCallCard #toolCallName {
     color: rgba(0, 0, 0, 0.85);
     background: transparent;
     border: none;
     font-weight: 600;
 }
 
-ToolCallCard #toolCallDuration {
+#toolCallCard #toolCallDuration {
     color: rgba(0, 0, 0, 0.45);
     background: transparent;
     border: none;
 }
 
-ToolCallCard #toolCallContentWrap {
+#toolCallCard #toolCallStatusText {
+    color: rgba(220, 53, 69, 0.85);
+    background: transparent;
+    border: none;
+    font-weight: 500;
+}
+
+#toolCallCard #toolCallContentWrap {
     background: transparent;
     border: none;
     border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
-ToolCallCard #toolCallSectionLabel {
+#toolCallCard #toolCallSectionLabel {
     color: rgba(0, 0, 0, 0.5);
     background: transparent;
     border: none;
+}
+
+/* 审批按钮区 (PENDING_APPROVAL 状态) */
+#toolCallCard #toolCallApproval {
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- DiffView ----------------------------- */
+
+#diffView {
+    background-color: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 6px;
+}
+
+#diffLineAdd,
+#diffLineRemove,
+#diffLineContext,
+#diffLineHunk {
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+    padding: 2px 8px;
+    border: none;
+    color: rgba(0, 0, 0, 0.85);
+}
+
+#diffLineAdd {
+    background-color: rgba(40, 167, 69, 0.14);
+    color: rgba(0, 100, 30, 0.92);
+}
+
+#diffLineRemove {
+    background-color: rgba(220, 53, 69, 0.12);
+    color: rgba(140, 20, 30, 0.92);
+}
+
+#diffLineContext {
+    background: transparent;
+    color: rgba(0, 0, 0, 0.65);
+}
+
+#diffLineHunk {
+    background-color: rgba(0, 120, 212, 0.08);
+    color: rgba(0, 60, 120, 0.85);
+    font-weight: 500;
+}
+
+/* ----------------------------- FileReadCard ------------------------- */
+
+#toolCallCard #lineRangeLabel {
+    color: rgba(0, 0, 0, 0.5);
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- BashCard ----------------------------- */
+
+/* 浅色主题: 终端框使用浅灰底 + 深色等宽文字, 跟整张卡片亮色背景协调,
+   不再用真黑底 (那个跟亮色卡片对比太强, 像贴了一块深色补丁). */
+BashCard #bashOutputView {
+    background-color: rgba(0, 0, 0, 0.045);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 6px;
+}
+
+BashCard #bashOutputText {
+    background: transparent;
+    border: none;
+    color: rgba(20, 20, 24, 0.92);
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+BashCard #bashExitBadge {
+    border: none;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-weight: 500;
+    font-size: 11px;
+    color: white;
+}
+
+BashCard #bashExitBadge[ok="true"] {
+    background-color: rgba(40, 167, 69, 0.9);
+}
+
+BashCard #bashExitBadge[ok="false"] {
+    background-color: rgba(220, 53, 69, 0.9);
+}
+
+/* ----------------------------- WebSearchCard ------------------------ */
+
+WebSearchCard #webResultList {
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultRow {
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultTitle {
+    color: rgba(0, 90, 180, 0.95);
+    background: transparent;
+    border: none;
+    font-weight: 600;
+}
+
+WebSearchCard #webResultTitle:hover {
+    color: rgba(0, 60, 140, 1.0);
+    text-decoration: underline;
+}
+
+WebSearchCard #webResultUrl {
+    color: rgba(0, 110, 50, 0.85);
+    background: transparent;
+    border: none;
+}
+
+WebSearchCard #webResultSnippet {
+    color: rgba(0, 0, 0, 0.75);
+    background: transparent;
+    border: none;
+}
+
+/* ----------------------------- GrepSearchCard ----------------------- */
+
+GrepSearchCard #grepHitList {
+    background: transparent;
+    border: none;
+}
+
+/* 一条命中 = 一张独立小卡片 (1px 边框 + 浅灰底), 让 path 头 + preview
+   正文视觉上是同一段, 而不是两块独立内容. */
+GrepSearchCard #grepHitRow {
+    background-color: rgba(0, 0, 0, 0.018);
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 6px;
+}
+
+GrepSearchCard #grepHitPath {
+    color: rgba(0, 0, 0, 0.55);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 11px;
+}
+
+/* preview 直接铺在卡片内, 不再嵌套二级 box. */
+GrepSearchCard #grepHitPreview {
+    color: rgba(0, 0, 0, 0.85);
+    background: transparent;
+    border: none;
+    padding: 0;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+/* ----------------------------- GenerationStatusBar ------------------ */
+
+/* 默认: 顶栏式 (浮动在 viewport 顶部, AgentChatView standalone 用法). */
+#generationStatusBar {
+    background-color: rgba(245, 245, 245, 0.96);
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+/* AgentChatPanel 把状态条 reparent 到输入框上方做成 "小卡片", 用单独
+   ObjectName ``chatGenBarCard`` 覆盖默认顶栏样式: 与输入框等圆角 (line_edit
+   的 5px) + 1px 边框 + 不要底部分割线 (它不再是 viewport 顶栏, 不需要划
+   分边). */
+#chatGenBarCard {
+    background-color: rgba(255, 255, 255, 0.92);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 5px;
+}
+
+#generationStatusBar #generationStatusText,
+#chatGenBarCard #generationStatusText {
+    color: rgba(0, 0, 0, 0.85);
+    background: transparent;
+    border: none;
+}
+
+#generationStatusBar #generationStatusTokens,
+#chatGenBarCard #generationStatusTokens {
+    color: rgba(0, 0, 0, 0.55);
+    background: transparent;
+    border: none;
+}
+
+#generationStatusBar #generationStatusElapsed,
+#chatGenBarCard #generationStatusElapsed {
+    color: rgba(0, 0, 0, 0.55);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+}
+
+/* "已停止" 提示行 */
+ChatBubble #bubbleStoppedLabel {
+    color: rgba(0, 0, 0, 0.5);
+    background: transparent;
+    border: none;
+    font-style: italic;
+}
+
+/* USER 气泡内联编辑器 + 版本选页器 (对话分叉) */
+#bubbleInlineEditor {
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(0, 0, 0, 0.10);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 14px;
+}
+
+#bubbleVersionPager {
+    background: transparent;
+}
+
+#bubbleVersionLabel {
+    color: rgba(0, 0, 0, 0.55);
+    background: transparent;
+    font-size: 12px;
+}
+
+/* ============================================================
+   ChatInputEdit (light) — Agent 聊天输入框
+   ============================================================ */
+
+/* 输入框本体: 沿用 PlainTextEdit 的圆角 + 边框 (line_edit.qss 已定义),
+   这里只调内边距 / 字号. 视觉上是一个 "带圆角的输入框", 不是 "卡片+输入"
+   两层结构. 按钮通过 setViewportMargins 在 widget 内部叠加. */
+#chatInputEdit {
+    padding: 12px 14px;
+    font-size: 15px;
+}
+
+/* 圆形发送按钮 (右下) — 深色填充 + 白色箭头 */
+#chatSendButton {
+    background-color: rgba(0, 0, 0, 0.85);
+    border-radius: 16px;            /* = _BUTTON_SIZE / 2 */
+    border: none;
+}
+#chatSendButton:hover {
+    background-color: rgba(0, 0, 0, 0.95);
+}
+#chatSendButton:pressed {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+#chatSendButton:disabled {
+    background-color: rgba(0, 0, 0, 0.18);
+}
+
+/* 附件按钮 (左下) — 透明圆角小方块 */
+#chatAttachButton {
+    background: transparent;
+    border-radius: 8px;
+    border: none;
+}
+#chatAttachButton:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+#chatAttachButton:pressed {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Token 预估指示器 (右下, 发送按钮左侧) — 紧凑文字 + 图标. */
+#chatTokenIndicator {
+    background: transparent;
+}
+#chatContextLabel,
+#chatTokenCountLabel,
+#chatTokenSeparator {
+    color: rgba(0, 0, 0, 0.45);
+    background: transparent;
+    font-size: 12px;
+}
+#chatTokenSeparator {
+    padding: 0 2px;
+    color: rgba(0, 0, 0, 0.25);
 }
