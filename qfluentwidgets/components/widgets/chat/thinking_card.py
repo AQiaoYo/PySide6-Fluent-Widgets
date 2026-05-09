@@ -12,34 +12,19 @@
 from typing import Optional
 
 from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QCursor, QMouseEvent
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget,
 )
 
 from ....common.icon import FluentIcon
 from ....common.style_sheet import FluentStyleSheet
+from .._clickable import ClickableFrame
 from ..label import BodyLabel
 from .chat_message import ThinkingSegment
 from .markdown_view import MarkdownView
 
 
 __all__ = ['ThinkingCard']
-
-
-class _ClickableFrame(QFrame):
-    """可点击 QFrame, 鼠标进入显示手型, 点击发出 clicked 信号."""
-
-    clicked = Signal()
-
-    def __init__(self, parent: Optional[QWidget] = None):
-        super().__init__(parent)
-        self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-
-    def mousePressEvent(self, e: QMouseEvent):
-        if e.button() == Qt.MouseButton.LeftButton:
-            self.clicked.emit()
-        super().mousePressEvent(e)
 
 
 class ThinkingCard(QFrame):
@@ -76,7 +61,7 @@ class ThinkingCard(QFrame):
 
         self._setupUi()
         self._refreshHeader()
-        FluentStyleSheet.CHAT_VIEW.apply(self)
+        FluentStyleSheet.AGENT_CHAT_VIEW.apply(self)
 
     # ------------------------------------------------------------------
     # UI
@@ -88,7 +73,7 @@ class ThinkingCard(QFrame):
         rootLayout.setSpacing(0)
 
         # ---- header (可点击) ----
-        self._header = _ClickableFrame(self)
+        self._header = ClickableFrame(self)
         self._header.setObjectName("thinkingHeader")
         self._header.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
         self._header.setFixedHeight(40)

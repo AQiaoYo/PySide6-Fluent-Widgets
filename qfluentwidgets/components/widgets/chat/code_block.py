@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QPlainTextEdit, QVBoxLayout, QWidget,
 )
 
+from ....common.font import FontManager
 from ....common.icon import FluentIcon, FluentIconBase
 from ....common.style_sheet import FluentStyleSheet, isDarkTheme
 from ..button import TransparentToolButton
@@ -49,14 +50,14 @@ except Exception:  # pragma: no cover - 缺失时优雅降级
 def _monospace_font(size: int = 13) -> QFont:
     """按优先级返回可用的等宽字体.
 
-    优先级: Cascadia Code > JetBrains Mono > Consolas > Courier New > 系统默认等宽.
+    优先级: FontManager 内嵌字体 > Cascadia Code > JetBrains Mono > Consolas > Courier New > 系统默认等宽.
     """
-    families = QFontDatabase.families()
-    for name in ("Cascadia Code", "JetBrains Mono", "Consolas", "Courier New"):
-        if name in families:
-            f = QFont(name, size)
-            f.setStyleHint(QFont.StyleHint.Monospace)
-            return f
+    code_families = FontManager.code_font_families()
+    if code_families:
+        f = QFont(code_families[0], size)
+        f.setFamilies(code_families)
+        f.setStyleHint(QFont.StyleHint.Monospace)
+        return f
     f = QFontDatabase.systemFont(QFontDatabase.SystemFont.FixedFont)
     f.setPointSize(size)
     return f
@@ -251,7 +252,7 @@ class CodeBlock(QFrame):
 
         self._setupUi()
         self._setupHighlighter()
-        FluentStyleSheet.CHAT_VIEW.apply(self)
+        FluentStyleSheet.AGENT_CHAT_VIEW.apply(self)
         self._applyCode()
 
     # ------------------------------------------------------------------
@@ -284,7 +285,7 @@ class CodeBlock(QFrame):
         self._languageLabel = BodyLabel(self._language, self._header)
         self._languageLabel.setObjectName("codeLanguage")
         # 语言名: 等宽 12pt, 不加粗 (粗细由 QSS 控制)
-        self._languageLabel.setFont(_monospace_font(12))
+        self._languageLabel.setFont(_monospace_font(11))
 
         # 右侧: 工具按钮组 (换行切换 + 复制)
         self._wrapButton = TransparentToolButton(FluentIcon.ALIGNMENT, self._header)
@@ -311,7 +312,7 @@ class CodeBlock(QFrame):
         self._editor.setReadOnly(True)
         self._editor.setFrameShape(QFrame.Shape.NoFrame)
         self._editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        self._editor.setFont(_monospace_font(13))
+        self._editor.setFont(_monospace_font(12))
         self._editor.setTabStopDistance(QFontMetrics(self._editor.font()).horizontalAdvance(' ') * 4)
         self._editor.setContentsMargins(14, 10, 14, 10)
         self._editor.setStyleSheet("QPlainTextEdit { padding: 10px 14px; }")
