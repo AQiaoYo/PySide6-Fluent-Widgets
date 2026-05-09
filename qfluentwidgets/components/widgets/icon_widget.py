@@ -10,6 +10,7 @@ from PySide6.QtCore import Property
 from PySide6.QtGui import QIcon, QPainter
 from PySide6.QtWidgets import QWidget
 
+from ...common.config import qconfig
 from ...common.icon import FluentIconBase, drawIcon, toQIcon
 from ...common.overload import singledispatchmethod
 
@@ -33,6 +34,10 @@ class IconWidget(QWidget):
         """
         super().__init__(parent)
         self.setIcon(QIcon())
+        # 主题切换时主动重绘: paintEvent 通过 ``Theme.AUTO`` 读 qconfig.theme
+        # 选黑/白 svg, 但若没有外部触发 update(), QSS 不变的纯图标 widget
+        # 不会自动重绘. 监听 themeChanged 强制 update().
+        qconfig.themeChanged.connect(self.update)
 
     @__init__.register
     def _(self, icon: FluentIconBase, parent: QWidget = None):
