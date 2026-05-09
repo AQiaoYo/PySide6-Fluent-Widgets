@@ -23,6 +23,7 @@ from ....common.style_sheet import FluentStyleSheet, isDarkTheme
 from ..button import TransparentToolButton
 from ..icon_widget import IconWidget
 from ..label import BodyLabel
+from ..scroll_bar import SmoothScrollDelegate
 
 
 __all__ = ['CodeBlock']
@@ -183,9 +184,10 @@ class CodeBlock(QFrame):
     """
 
     copied = Signal(str)
+    expandedChanged = Signal(bool)
 
     _COPY_FEEDBACK_MS = 1200
-    _MAX_VISIBLE_LINES = 24
+    _DEFAULT_MAX_VISIBLE_LINES = 5
     _MIN_WIDTH = 560
 
     # 语言名 -> FluentIcon 映射. 未命中时 fallback 到 CODE.
@@ -240,6 +242,12 @@ class CodeBlock(QFrame):
         super().__init__(parent)
         self._code = code
         self._language = language or "plaintext"
+        # 代码区最大可见行数; 实际行数超过此值时:
+        #   - 折叠态: 高度卡在 maxLines 行 + 垂直滚动条 + 底部展开按钮
+        #   - 展开态: 全部代码可见 + 底部折叠按钮
+        # 实际行数 ≤ maxLines: 完全展开, 无滚动条, 无展开按钮.
+        self._maxVisibleLines = self._DEFAULT_MAX_VISIBLE_LINES
+        self._expanded = False  # 展开按钮的状态
 
         self._setupUi()
         self._setupHighlighter()
@@ -303,16 +311,60 @@ class CodeBlock(QFrame):
         self._editor.setReadOnly(True)
         self._editor.setFrameShape(QFrame.Shape.NoFrame)
         self._editor.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        self._editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
-        self._editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self._editor.setFont(_monospace_font(13))
         self._editor.setTabStopDistance(QFontMetrics(self._editor.font()).horizontalAdvance(' ') * 4)
         self._editor.setContentsMargins(14, 10, 14, 10)
         self._editor.setStyleSheet("QPlainTextEdit { padding: 10px 14px; }")
         self._editor.textChanged.connect(self._adjustHeight)
 
+        # 用 fluent 风格 SmoothScrollBar 替换原生 QScrollBar (圆角、半透明、
+        # hover 动画), 保持与组件库整体设计语言一致.
+        # 注意: SmoothScrollDelegate 会 monkey-patch
+        # _editor.setHorizontalScrollBarPolicy / setVerticalScrollBarPolicy,
+        # 因此 policy 设定必须放在 delegate 创建之后, 否则不会同步到
+        # SmoothScrollBar 的 forceHidden 状态.
+        self._scrollDelegate = SmoothScrollDelegate(self._editor)
+        # SmoothScrollBar 默认在 hover 时 fadeIn 显示一个偏白的 groove + 两端
+        # 箭头按钮, 这套样式针对纯色背景的 QScrollArea 设计, 出现在 CodeBlock
+        # 浅灰卡片背景上会显得突兀. 这里:
+        # 1) 把 groove 背景色改透明 -> hover 时也不会出现白底
+        # 2) 隐藏 upButton / downButton -> 只保留 3px handle 细线
+        # 这样既保留了 fluent 风格滚动 (handle 可见 + smooth 动画), 又跟
+        # CodeBlock 卡片融为一体.
+        for sb in (self._scrollDelegate.hScrollBar, self._scrollDelegate.vScrollBar):
+            sb.groove.setLightBackgroundColor(QColor(0, 0, 0, 0))
+            sb.groove.setDarkBackgroundColor(QColor(255, 255, 255, 0))
+            sb.groove.upButton.hide()
+            sb.groove.downButton.hide()
+        self._editor.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        # 垂直滚动条: 行数 ≤ maxVisibleLines 时由 _adjustHeight 关闭,
+        # 超过时由 _adjustHeight 切回 AsNeeded.
+        self._editor.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+
+        # 底部展开/折叠行 (溢出时才显示)
+        self._expandRow = QWidget(self)
+        self._expandRow.setObjectName("codeExpandRow")
+        exLayout = QHBoxLayout(self._expandRow)
+        exLayout.setContentsMargins(0, 0, 0, 4)
+        exLayout.setSpacing(0)
+
+        self._expandButton = TransparentToolButton(
+            FluentIcon.CHEVRON_DOWN_MED, self._expandRow,
+        )
+        self._expandButton.setObjectName("codeExpandButton")
+        self._expandButton.setFixedSize(72, 24)
+        self._expandButton.setIconSize(QSize(14, 14))
+        self._expandButton.setToolTip(self.tr("展开"))
+        self._expandButton.clicked.connect(self.toggleExpanded)
+
+        exLayout.addStretch(1)
+        exLayout.addWidget(self._expandButton)
+        exLayout.addStretch(1)
+        self._expandRow.hide()
+
         self._mainLayout.addWidget(self._header)
         self._mainLayout.addWidget(self._editor)
+        self._mainLayout.addWidget(self._expandRow)
 
         self._copyResetTimer = QTimer(self)
         self._copyResetTimer.setSingleShot(True)
@@ -368,14 +420,100 @@ class CodeBlock(QFrame):
         self._adjustHeight()
 
     def _adjustHeight(self):
-        """根据内容行数自适应代码区高度"""
+        """根据内容行数 + 展开状态自适应代码区高度, 同步底部按钮显隐.
+
+        三种情况:
+
+        - 实际行数 ≤ ``maxVisibleLines`` (不溢出): 按实际行数铺开,
+          关闭垂直滚动条, 底部按钮隐藏.
+        - 实际行数 > ``maxVisibleLines``  (溢出, 折叠态): 高度卡在
+          maxVisibleLines 行, 垂直滚动条 AsNeeded, 底部显示 ↓ 展开按钮.
+        - 实际行数 > ``maxVisibleLines``  (溢出, 展开态): 全部代码铺开,
+          关闭垂直滚动条, 底部显示 ↑ 折叠按钮.
+
+        高度算式考虑了横向滚动条占用 (lineWrapMode=NoWrap 时长行可能触发):
+        预留 hscrollbar.sizeHint().height() 避免挤压垂直空间产生意外滚动.
+        """
         doc = self._editor.document()
-        line_count = max(1, doc.blockCount())
-        line_count = min(line_count, self._MAX_VISIBLE_LINES)
+        actual_lines = max(1, doc.blockCount())
+        max_lines = max(1, self._maxVisibleLines)
+        overflow = actual_lines > max_lines
+
+        if not overflow:
+            visible_lines = actual_lines
+        elif self._expanded:
+            visible_lines = actual_lines
+        else:
+            visible_lines = max_lines
+
         line_height = QFontMetrics(self._editor.font()).lineSpacing()
-        # 上下 padding 共 20, 边框/滚动条留 6
-        height = line_height * line_count + 26
+        # 上下 padding 共 20 (qss padding: 10px 14px)
+        height = line_height * visible_lines + 20
+        # 不换行时长行会触发横向滚动条, 预留其高度避免内容被挤压
+        if self._editor.lineWrapMode() == QPlainTextEdit.LineWrapMode.NoWrap:
+            height += self._editor.horizontalScrollBar().sizeHint().height()
         self._editor.setFixedHeight(int(height))
+
+        # 垂直滚动条: 仅折叠态溢出时启用
+        if overflow and not self._expanded:
+            new_v = Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        else:
+            new_v = Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        if self._editor.verticalScrollBarPolicy() != new_v:
+            self._editor.setVerticalScrollBarPolicy(new_v)
+
+        # 底部按钮显隐 + 图标方向
+        self._expandRow.setVisible(overflow)
+        if overflow:
+            icon = FluentIcon.UP if self._expanded else FluentIcon.CHEVRON_DOWN_MED
+            self._expandButton.setIcon(icon)
+            self._expandButton.setToolTip(
+                self.tr("折叠") if self._expanded else self.tr("展开")
+            )
+
+    # ------------------------------------------------------------------
+    # 公共 API
+    # ------------------------------------------------------------------
+
+    def maxVisibleLines(self) -> int:
+        """获取代码区最大可见行数. 默认 5."""
+        return self._maxVisibleLines
+
+    def setMaxVisibleLines(self, n: int):
+        """设置代码区最大可见行数.
+
+        Args:
+            n: 最大可见行数 (≥ 1). 实际行数 > n 时:
+               - 折叠态: 高度卡在 n 行, 垂直滚动条 + 底部展开按钮
+               - 展开态: 全部代码铺开, 底部折叠按钮
+               实际行数 ≤ n: 完全展开, 无滚动条, 无按钮.
+        """
+        n = max(1, int(n))
+        if n == self._maxVisibleLines:
+            return
+        self._maxVisibleLines = n
+        self._adjustHeight()
+
+    def isExpanded(self) -> bool:
+        """是否处于展开态 (仅在溢出时有意义)."""
+        return self._expanded
+
+    def setExpanded(self, expanded: bool):
+        """显式设置展开 / 折叠状态.
+
+        实际行数未溢出 (≤ maxVisibleLines) 时此方法仍会更新内部状态,
+        但视觉上不会出现展开按钮. 状态变化时发出 ``expandedChanged``.
+        """
+        expanded = bool(expanded)
+        if expanded == self._expanded:
+            return
+        self._expanded = expanded
+        self._adjustHeight()
+        self.expandedChanged.emit(expanded)
+
+    def toggleExpanded(self):
+        """切换展开 / 折叠. 由底部按钮 click 调用, 也可外部手动调."""
+        self.setExpanded(not self._expanded)
 
     def _onCopyClicked(self):
         clipboard: QClipboard = QGuiApplication.clipboard()

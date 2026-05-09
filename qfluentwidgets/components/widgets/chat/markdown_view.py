@@ -215,6 +215,9 @@ class MarkdownView(QWidget):
         # 上一次渲染时各 block 的 (kind, lang, content) 元数据
         # 用于判断结构是否变化, 决定增量更新还是全重建
         self._blocksMeta: List[Tuple[str, str, str]] = []
+        # 内部 CodeBlock 的最大可见行数 (默认 10); 通过
+        # ``setCodeBlockMaxVisibleLines`` 修改, 新创建及现有 CodeBlock 都会同步
+        self._codeMaxVisibleLines = CodeBlock._DEFAULT_MAX_VISIBLE_LINES
 
         self._layout = QVBoxLayout(self)
         self._layout.setContentsMargins(0, 0, 0, 0)
@@ -257,6 +260,26 @@ class MarkdownView(QWidget):
         self._raw = ""
         self._scheduleRender(immediate=True)
 
+    def codeBlockMaxVisibleLines(self) -> int:
+        """获取内部 CodeBlock 的最大可见行数."""
+        return self._codeMaxVisibleLines
+
+    def setCodeBlockMaxVisibleLines(self, n: int):
+        """设置内部 CodeBlock 的最大可见行数.
+
+        新创建的 CodeBlock 以此为初值; 已存在的 CodeBlock 同步更新.
+
+        Args:
+            n: 最大可见行数 (≥ 1). 详见 ``CodeBlock.setMaxVisibleLines``.
+        """
+        n = max(1, int(n))
+        if n == self._codeMaxVisibleLines:
+            return
+        self._codeMaxVisibleLines = n
+        for w in self._blockWidgets:
+            if isinstance(w, CodeBlock):
+                w.setMaxVisibleLines(n)
+
     # ------------------------------------------------------------------
     # 渲染流程
     # ------------------------------------------------------------------
@@ -278,7 +301,9 @@ class MarkdownView(QWidget):
 
     def _createBlockWidget(self, kind: str, lang: str, content: str) -> QWidget:
         if kind == "code":
-            return CodeBlock(content, lang, self)
+            cb = CodeBlock(content, lang, self)
+            cb.setMaxVisibleLines(self._codeMaxVisibleLines)
+            return cb
         w = _TextBlock(self)
         w.setMarkdown(content)
         return w

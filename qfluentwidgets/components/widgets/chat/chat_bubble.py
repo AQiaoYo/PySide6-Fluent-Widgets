@@ -6,7 +6,7 @@ USER 角色靠右布局, AGENT 角色靠左布局, SYSTEM 角色居中弱化.
 操作栏 (复制/编辑/删除) 默认隐藏, 鼠标进入气泡时淡入显示.
 """
 
-from typing import Optional, Union
+from typing import Dict, Optional, Union
 
 from PySide6.QtCore import QPropertyAnimation, QSize, Qt, Signal
 from PySide6.QtGui import QIcon
@@ -20,8 +20,13 @@ from ....common.style_sheet import FluentStyleSheet
 from ..button import TransparentToolButton
 from ..label import BodyLabel, CaptionLabel, StrongBodyLabel
 from .chat_avatar import ChatAvatar
-from .chat_message import ChatMessage, ChatRole
+from .chat_message import (
+    ChatMessage, ChatRole, ThinkingSegment, ToolCallSegment, ToolCallStatus,
+)
+from .code_block import CodeBlock
 from .markdown_view import MarkdownView
+from .thinking_card import ThinkingCard
+from .tool_call_card import ToolCallCard
 
 
 __all__ = ['ChatBubble']
@@ -68,6 +73,20 @@ class ChatBubble(QFrame):
         self._timestamp: Optional[CaptionLabel] = None
         self._senderLabel: Optional[StrongBodyLabel] = None
         self._subtitleLabel: Optional[BodyLabel] = None
+        # AGENT 模式下用于装 thinking / tool call 子卡片的容器与索引
+        self._segmentsLayout: Optional[QVBoxLayout] = None
+        self._thinkingCard: Optional[ThinkingCard] = None
+        self._toolCallCards: Dict[str, ToolCallCard] = {}
+        # CodeBlock 最大可见行数 (默认与 CodeBlock 自身默认一致, 可由
+        # ChatView 注入). 新建 markdown view / thinking / tool call 时
+        # 都会以此为初值.
+        self._codeMaxVisibleLines = CodeBlock._DEFAULT_MAX_VISIBLE_LINES
+
+        # 横向 Expanding: bubble 整体宽度跟随父级 layout (inner) 提供的可用
+        # 宽度, 不让内部子项 (如 ThinkingCard 展开后的 MarkdownView) 通过
+        # sizeHint 反向撑大 bubble. 否则展开/折叠 thinking 时 bubble 会忽宽
+        # 忽窄, 视觉上不稳定.
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
 
         self._setupUi()
         self._applyMessage()
@@ -238,6 +257,22 @@ class ChatBubble(QFrame):
         headerLayout.addWidget(textCol, 0, Qt.AlignmentFlag.AlignVCenter)
         headerLayout.addStretch(1)
 
+        # ---- segments 容器 (thinking + tool calls) ----
+        # 没有任何 segment 时整体隐藏不占位.
+        # 横向 Expanding: 整链路 (bubble -> segmentsWrap -> ThinkingCard /
+        # ToolCallCard -> MarkdownView) 宽度都跟随上层提供的可用空间, 子项
+        # sizeHint 不能反向撑大父级.
+        self._segmentsWrap = QWidget(self)
+        self._segmentsWrap.setObjectName("segmentsWrap")
+        self._segmentsLayout = QVBoxLayout(self._segmentsWrap)
+        self._segmentsLayout.setContentsMargins(0, 0, 0, 0)
+        self._segmentsLayout.setSpacing(8)
+        self._segmentsWrap.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Maximum,
+        )
+        self._segmentsWrap.setMaximumWidth(self._MAX_CONTENT_WIDTH)
+        self._segmentsWrap.hide()
+
         # 内容区: 直接占满整行宽度, 不缩进
         self._body = QFrame(self)
         self._body.setObjectName("bubbleBody")  # QSS 中 agent role 设为 transparent
@@ -260,6 +295,7 @@ class ChatBubble(QFrame):
         actionRowLayout.addStretch(1)
 
         rootLayout.addWidget(headerRow)
+        rootLayout.addWidget(self._segmentsWrap)
         rootLayout.addWidget(self._body)
         rootLayout.addWidget(actionRow)
 
@@ -318,6 +354,15 @@ class ChatBubble(QFrame):
             else:
                 self._subtitleLabel.hide()
 
+        # 同步 thinking / tool_calls (仅 AGENT 模式存在 segmentsLayout)
+        if self._segmentsLayout is not None:
+            if self._message.thinking is not None:
+                self._ensureThinkingCard().setSegment(self._message.thinking)
+            for tc in self._message.tool_calls:
+                if tc.id not in self._toolCallCards:
+                    self._appendToolCallCard(tc)
+            self._refreshSegmentsVisibility()
+
     # ------------------------------------------------------------------
     # 公共 API
     # ------------------------------------------------------------------
@@ -341,6 +386,31 @@ class ChatBubble(QFrame):
         if self._message.avatar is None:
             self._avatar.setAvatar(avatar)
 
+    def setCodeBlockMaxVisibleLines(self, n: int):
+        """统一设置本气泡内所有 CodeBlock 的最大可见行数.
+
+        作用范围:
+        - 正文 ``MarkdownView`` 的内嵌代码块
+        - AGENT 模式下 ``ThinkingCard`` 的思考内容代码块
+        - AGENT 模式下所有 ``ToolCallCard`` 的参数区代码块与结果代码块
+
+        新值会持久保存, 后续懒加载创建的 ``ThinkingCard`` /
+        ``ToolCallCard`` 也会以此为初值. 通常由
+        ``ChatView.setCodeBlockMaxVisibleLines`` 注入. 详见
+        ``CodeBlock.setMaxVisibleLines``.
+        """
+        n = max(1, int(n))
+        self._codeMaxVisibleLines = n
+        self._content.setCodeBlockMaxVisibleLines(n)
+        if self._thinkingCard is not None:
+            self._thinkingCard.setCodeBlockMaxVisibleLines(n)
+        for card in self._toolCallCards.values():
+            card.setCodeBlockMaxVisibleLines(n)
+
+    def codeBlockMaxVisibleLines(self) -> int:
+        """获取当前 CodeBlock 最大可见行数."""
+        return self._codeMaxVisibleLines
+
     def setDefaultSenderName(self, name: Optional[str]):
         """设置 fallback 显示名 (仅当 message.sender_name 为空时生效).
 
@@ -350,6 +420,90 @@ class ChatBubble(QFrame):
         self._defaultSenderName = name
         if self._senderLabel is not None and not self._message.sender_name:
             self._senderLabel.setText(self._displayName())
+
+    # ------------------------------------------------------------------
+    # Thinking / Tool call 公共 API (仅 AGENT 模式有效, 其它角色返回 None / 抛异常)
+    # ------------------------------------------------------------------
+
+    def thinkingCard(self) -> Optional[ThinkingCard]:
+        """返回当前 ThinkingCard (尚未创建则返回 None). 仅 AGENT 有效."""
+        return self._thinkingCard
+
+    def ensureThinking(self) -> ThinkingCard:
+        """获取或创建 ThinkingCard 并确保 message.thinking 存在.
+
+        通常由 ChatView 的 ``beginThinking(msg_id)`` 调用. 仅 AGENT 有效.
+
+        Returns:
+            ThinkingCard 实例
+        """
+        if self._segmentsLayout is None:
+            raise RuntimeError("ThinkingCard 仅在 AGENT 角色消息上可用")
+        if self._message.thinking is None:
+            self._message.thinking = ThinkingSegment()
+        card = self._ensureThinkingCard()
+        card.setSegment(self._message.thinking)
+        self._refreshSegmentsVisibility()
+        return card
+
+    def addToolCall(self, segment: ToolCallSegment) -> ToolCallCard:
+        """添加一次工具调用并显示对应卡片.
+
+        ``segment`` 会被 append 到 ``message.tool_calls`` 中.
+        如果 segment.id 已存在则直接返回已有卡片 (幂等).
+
+        Returns:
+            ToolCallCard 实例
+        """
+        if self._segmentsLayout is None:
+            raise RuntimeError("ToolCallCard 仅在 AGENT 角色消息上可用")
+        existing = self._toolCallCards.get(segment.id)
+        if existing is not None:
+            return existing
+        # 同步到 message.tool_calls (避免重复 append)
+        if segment not in self._message.tool_calls:
+            self._message.tool_calls.append(segment)
+        card = self._appendToolCallCard(segment)
+        self._refreshSegmentsVisibility()
+        return card
+
+    def toolCallCard(self, call_id: str) -> Optional[ToolCallCard]:
+        """根据 ToolCallSegment.id 查找对应卡片."""
+        return self._toolCallCards.get(call_id)
+
+    def toolCallCards(self) -> Dict[str, ToolCallCard]:
+        """返回所有 ToolCallCard 的 {id: card} 映射 (副本)."""
+        return dict(self._toolCallCards)
+
+    # ------------------------------------------------------------------
+    # 内部: segments 管理
+    # ------------------------------------------------------------------
+
+    def _ensureThinkingCard(self) -> ThinkingCard:
+        """惰性创建 ThinkingCard, 永远 insert 到 segmentsLayout 第 0 位
+        (确保 thinking 总位于 tool calls 之前)."""
+        if self._thinkingCard is None:
+            self._thinkingCard = ThinkingCard(self._segmentsWrap)
+            self._thinkingCard.setCodeBlockMaxVisibleLines(self._codeMaxVisibleLines)
+            self._segmentsLayout.insertWidget(0, self._thinkingCard)
+        return self._thinkingCard
+
+    def _appendToolCallCard(self, segment: ToolCallSegment) -> ToolCallCard:
+        """追加 ToolCallCard 到 segmentsLayout 末尾, 并记入索引."""
+        card = ToolCallCard(self._segmentsWrap)
+        card.setCodeBlockMaxVisibleLines(self._codeMaxVisibleLines)
+        card.setSegment(segment)
+        self._toolCallCards[segment.id] = card
+        self._segmentsLayout.addWidget(card)
+        return card
+
+    def _refreshSegmentsVisibility(self):
+        """根据是否存在 thinking / tool calls 切换 segmentsWrap 显隐."""
+        has_any = (
+            self._thinkingCard is not None
+            or len(self._toolCallCards) > 0
+        )
+        self._segmentsWrap.setVisible(has_any)
 
     # ------------------------------------------------------------------
     # 操作栏 hover 显隐 (USER 与 AGENT 都启用)

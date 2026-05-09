@@ -9,19 +9,30 @@ Markdown 内容渲染 (含独立卡片化代码块), 流式追加输出以及消
     * ChatAvatar     — 聊天头像组件 (基于 AvatarWidget, 角色感知默认色)
     * CodeBlock      — 独立代码块卡片 (带语言头与复制按钮)
     * MarkdownView   — Markdown 渲染视图 (代码块切片 + 文本段)
+    * ThinkingCard   — 思考过程卡片 (可折叠, 配合推理模型)
+    * ToolCallCard   — 工具调用卡片 (状态指示 + 可折叠)
     * ChatBubble     — 单条消息气泡
     * ChatView       — 聊天消息容器
 """
 
-from .chat_message import ChatRole, ChatMessage
+from .chat_message import (
+    ChatRole, ChatMessage,
+    ThinkingSegment, ToolCallStatus, ToolCallSegment,
+)
 from .chat_avatar import ChatAvatar
 from .code_block import CodeBlock
 from .markdown_view import MarkdownView
+from .thinking_card import ThinkingCard
+from .tool_call_card import ToolCallCard
 from .chat_bubble import ChatBubble
 from .chat_view import ChatView
 
 
 __all__ = [
-    'ChatRole', 'ChatMessage', 'ChatAvatar',
-    'CodeBlock', 'MarkdownView', 'ChatBubble', 'ChatView',
+    'ChatRole', 'ChatMessage',
+    'ThinkingSegment', 'ToolCallStatus', 'ToolCallSegment',
+    'ChatAvatar',
+    'CodeBlock', 'MarkdownView',
+    'ThinkingCard', 'ToolCallCard',
+    'ChatBubble', 'ChatView',
 ]
