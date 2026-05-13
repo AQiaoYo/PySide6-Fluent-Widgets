@@ -8,7 +8,10 @@ AgentChatView Demo (Enhanced)
 - 交错 Agent 运行: think -> tool(read_file) -> think -> tool(bash) -> final answer
   + 顶部 GenerationStatusBar (spinner + 状态 + token 数 + 计时 + Stop)
 - 审批闸门: write_file 调用 PENDING_APPROVAL, 用户点 [批准]/[拒绝] 后流程继续
-- 特化工具集: 一次性插入 6 种特化工具卡片 (read/write/edit-diff/bash/web/grep)
+- 特化工具集: 一次性插入 10 种特化工具卡片 (read/write/edit-diff/bash/web/grep/mcp/skill)
+- MCP 工具卡片: 显示 server 名 + 参数 JSON + Markdown 结果
+- Skill/Plugin 卡片: 显示技能名 + 分类 + 参数列表 + Markdown 结果
+- 便利 API: messageCount/lastMessage/findMessages/scrollToMessage/exportAsMarkdown 等
 - 重新生成 / 编辑 / 删除消息 信号
 - Token 预估指示器 (上下文数 / 估算 token 数), 跟随输入框文本与历史动态更新
 - 亮色 / 暗色主题切换 (FluentWindow Mica 背景适配)
@@ -20,8 +23,8 @@ import sys
 from datetime import datetime
 from typing import List
 
-from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, QTimer, QPoint
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QVBoxLayout, QWidget, QSizePolicy
 
 from qfluentwidgets import (
     AgentChatPanel, AgentChatView, ApprovalPolicy, BodyLabel, ChatMessage,
@@ -29,6 +32,15 @@ from qfluentwidgets import (
     PrimaryPushButton, PushButton, TaskItem, TaskStatus, Theme,
     TextSegment, ThinkingSegment, ToolCallSegment, ToolCallStatus,
     ToolTipFilter, ToolTipPosition, setTheme,
+    # P0 + P1 新组件
+    PermissionDock, QuestionDock, FollowupDock, RevertDock, TodoDock,
+    MessageNav, SessionRetryCard, ToolErrorCard,
+    ContextUsageIndicator, SessionReviewPanel,
+    # P2 视觉动效组件
+    InlineSpinner, AnimatedNumber, TextShimmer, TextReveal,
+    ToolStatusTitle, KeybindLabel,
+    # P3 输入框增强
+    AttachmentPreview, SlashCommandPopover, MentionPopover, MentionItem,
 )
 
 
@@ -202,66 +214,81 @@ class ChatInterface(QWidget):
         super().__init__(parent)
         self.setObjectName("agentChatInterface")
 
-        # --- 工具栏: 各按钮统一安装 Fluent ToolTipFilter ---
-        self.streamBtn = self._mkToolbarBtn(
-            PrimaryPushButton, FluentIcon.SEND, "流式回复",
-            tip="模拟一次 token 级流式输出",
-        )
-        self.agentBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.ROBOT, "交错 Agent 运行",
-            tip="演示 think -> tool -> think -> tool -> answer 完整链路",
-        )
-        self.approvalBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.ACCEPT, "审批闸门",
-            tip="演示 write_file 工具的批准 / 拒绝交互",
-        )
-        self.toolsBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.DEVELOPER_TOOLS, "特化工具集",
-            tip="一次性插入 6 种特化工具卡片 (read/write/edit-diff/bash/web/grep)",
-        )
-        self.taskListBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.MENU, "任务列表",
-            tip="演示 TaskListSegment: 3 项任务 ☐→⟳→✓ 状态翻转 (P2d)",
-        )
-        self.resumeBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.PAUSE, "Stop+Resume",
-            tip="模拟流式生成 1.2s 后被打断, 然后用户点 [继续生成] 续写 (P2c)",
-        )
-        self.clearBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.DELETE, "清空",
-            tip="重置消息流, 还原到初始示例",
-        )
-        self.themeBtn = self._mkToolbarBtn(
-            PushButton, FluentIcon.CONSTRACT, "切换主题",
-            tip="在亮色 / 暗色主题之间切换, 验证组件主题适配",
-        )
-
-        toolbar = QHBoxLayout()
-        toolbar.setSpacing(8)
-        toolbar.addWidget(self.streamBtn)
-        toolbar.addWidget(self.agentBtn)
-        toolbar.addWidget(self.approvalBtn)
-        toolbar.addWidget(self.toolsBtn)
-        toolbar.addWidget(self.taskListBtn)
-        toolbar.addWidget(self.resumeBtn)
-        toolbar.addStretch(1)
-        toolbar.addWidget(self.clearBtn)
-        toolbar.addWidget(self.themeBtn)
-
         # --- AgentChatPanel: 消息流 + 输入区 一体化 ---
-        # ``chatPanel`` 是面向应用方的容器, ``chatPanel.chatView()`` 拿到
-        # 内部的 AgentChatView. 下方所有 ``self.chat.xxx`` 调用沿用之前
-        # 的代码, 不需改动.
         self.chatPanel = AgentChatPanel(self)
         self.chat: AgentChatView = self.chatPanel.chatView()
         self.chat.setAgentDisplayName("DeepSeek V4")
         self.chat.setUserDisplayName("您")
         self.chat.setRegenerateEnabled(True)
         self.chat.requireApproval("write_file", "edit_file", "bash")
-        self.chatPanel.setInputPlaceholder("输入消息... (Enter 发送, Shift+Enter 换行)")
+        self.chatPanel.setInputPlaceholder(
+            "输入消息, 或 /help 查看命令 (Enter 发送)"
+        )
         self.chatPanel.sendRequested.connect(self._onUserSent)
         # 输入框文本变化 -> 实时刷新 token 预估指示器
         self.chatPanel.inputEdit().textChanged.connect(self._refreshTokenInfo)
+
+        # P3: 注入 SlashCommandPopover (输入 / 自动弹出)
+        self._slashPopover = SlashCommandPopover(self.chatPanel)
+        self._slashPopover.addCommand("/help", "显示帮助", FluentIcon.HELP)
+        self._slashPopover.addCommand("/stream", "流式回复", FluentIcon.SEND)
+        self._slashPopover.addCommand("/agent", "Agent 运行", FluentIcon.ROBOT)
+        self._slashPopover.addCommand("/approval", "审批闸门", FluentIcon.ACCEPT)
+        self._slashPopover.addCommand("/tools", "工具集", FluentIcon.DEVELOPER_TOOLS)
+        self._slashPopover.addCommand("/tasklist", "任务列表", FluentIcon.MENU)
+        self._slashPopover.addCommand("/api", "便利 API 演示", FluentIcon.LINK)
+        self._slashPopover.addCommand("/dock", "Dock 组件", FluentIcon.COMMAND_PROMPT)
+        self._slashPopover.addCommand("/attach", "附件预览", FluentIcon.PHOTO)
+        self._slashPopover.addCommand("/p2", "动效组件", FluentIcon.PALETTE)
+        self._slashPopover.addCommand("/clear", "清空消息", FluentIcon.DELETE)
+        self._slashPopover.addCommand("/theme", "切换主题", FluentIcon.CONSTRACT)
+        self._slashPopover.addCommand("/all", "运行所有演示", FluentIcon.PLAY)
+        self._slashPopover.commandSelected.connect(self._onSlashSelected)
+        self.chatPanel.inputEdit().setSlashPopover(self._slashPopover)
+
+        # P3: 注入 MentionPopover (输入 @ 自动弹出)
+        self._mentionPopover = MentionPopover(self.chatPanel)
+        self._mentionPopover.setItems([
+            MentionItem("src/main.py", "file", FluentIcon.DOCUMENT),
+            MentionItem("src/utils/helper.py", "file", FluentIcon.DOCUMENT),
+            MentionItem("tests/test_main.py", "file", FluentIcon.DOCUMENT),
+            MentionItem("MyClass", "class", FluentIcon.CODE),
+            MentionItem("process()", "function", FluentIcon.CODE),
+            MentionItem("README.md", "file", FluentIcon.DOCUMENT),
+        ])
+        self._mentionPopover.itemSelected.connect(self._onMentionSelected)
+        self.chatPanel.inputEdit().setMentionPopover(self._mentionPopover)
+
+        # 把 popover 插入 chatPanel layout (在 inputRow 之前, 跟 genBarRow 同级)
+        # 用居中容器包裹, 宽度跟输入框对齐
+        panelLayout = self.chatPanel.layout()
+        insertIdx = panelLayout.count() - 1  # inputRow 是最后一个
+
+        self._slashPopover.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Maximum,
+        )
+        self._mentionPopover.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Maximum,
+        )
+
+        self._slashRow = QWidget(self.chatPanel)
+        slashRowLayout = QHBoxLayout(self._slashRow)
+        slashRowLayout.setContentsMargins(0, 0, 0, 0)
+        slashRowLayout.setSpacing(0)
+        slashRowLayout.addStretch(1)
+        slashRowLayout.addWidget(self._slashPopover)
+        slashRowLayout.addStretch(1)
+
+        self._mentionRow = QWidget(self.chatPanel)
+        mentionRowLayout = QHBoxLayout(self._mentionRow)
+        mentionRowLayout.setContentsMargins(0, 0, 0, 0)
+        mentionRowLayout.setSpacing(0)
+        mentionRowLayout.addStretch(1)
+        mentionRowLayout.addWidget(self._mentionPopover)
+        mentionRowLayout.addStretch(1)
+
+        panelLayout.insertWidget(insertIdx, self._slashRow)
+        panelLayout.insertWidget(insertIdx, self._mentionRow)
 
         # --- 信号 ---
         self.chat.messageCopied.connect(self._onCopied)
@@ -272,34 +299,98 @@ class ChatInterface(QWidget):
         self.chat.toolCallApprovalRequested.connect(self._onApprovalRequested)
         self.chat.toolCallApproved.connect(self._onToolApproved)
         self.chat.toolCallRejected.connect(self._onToolRejected)
-        # 对话分叉: 用户内联编辑保存后, 触发 AI 重新生成回复
         self.chat.userMessageEdited.connect(self._onUserMessageEdited)
-        # 消息流变化 -> 刷新 token 预估
         self.chat.lastMessageChanged.connect(self._refreshTokenInfo)
         self.chat.messageRemoved.connect(lambda _mid: self._refreshTokenInfo())
         self.chat.messagesCleared.connect(self._refreshTokenInfo)
-
-        self.streamBtn.clicked.connect(self._startStreaming)
-        self.agentBtn.clicked.connect(self._startInterleavedAgent)
-        self.approvalBtn.clicked.connect(self._startApprovalDemo)
-        self.toolsBtn.clicked.connect(self._showSpecializedTools)
-        self.taskListBtn.clicked.connect(self._startTaskListDemo)
-        self.resumeBtn.clicked.connect(self._startResumeDemo)
-        self.clearBtn.clicked.connect(self._reset)
-        self.themeBtn.clicked.connect(self._toggleTheme)
-        # P2c Resume: 用户点 [继续生成] -> 续写
         self.chat.resumeRequested.connect(self._onResumeRequested)
 
-        # --- 布局 ---
+        # --- 布局 (无工具栏, 纯聊天面板) ---
         rootLayout = QVBoxLayout(self)
-        rootLayout.setContentsMargins(20, 20, 20, 20)
-        rootLayout.setSpacing(12)
-        rootLayout.addLayout(toolbar)
-        rootLayout.addWidget(BodyLabel(
-            "AgentChatView 增强 Demo: Segment 化数据模型, 交错 think/tool/think, "
-            "生成状态条 + Stop, 审批闸门 + 特化工具卡片",
-            self,
-        ))
+        rootLayout.setContentsMargins(0, 0, 0, 0)
+        rootLayout.setSpacing(0)
+
+        # --- P0 Dock 组件 (注入到 chatPanel 内部, 贴在输入框上方) ---
+        # 创建 dock 组件, 但不加到 ChatInterface 的 layout 里,
+        # 而是插入到 chatPanel 内部 layout 的 genBarRow 下方.
+        self._permDock = PermissionDock(self.chatPanel)
+        self._permDock.approved.connect(
+            lambda: self._showDockInfo("PermissionDock: 已批准")
+        )
+        self._permDock.rejected.connect(
+            lambda: self._showDockInfo("PermissionDock: 已拒绝")
+        )
+        self._permDock.alwaysAllowed.connect(
+            lambda: self._showDockInfo("PermissionDock: 总是允许")
+        )
+
+        self._questDock = QuestionDock(self.chatPanel)
+        self._questDock.submitted.connect(
+            lambda ans: self._showDockInfo(f"QuestionDock: 选择了 {ans}")
+        )
+
+        self._followDock = FollowupDock(self.chatPanel)
+        self._followDock.itemSendRequested.connect(
+            lambda id_: self._showDockInfo(f"FollowupDock: 发送 {id_}")
+        )
+
+        self._revertDock = RevertDock(self.chatPanel)
+        self._revertDock.restoreRequested.connect(
+            lambda id_: self._showDockInfo(f"RevertDock: 回滚到 {id_}")
+        )
+
+        self._todoDock = TodoDock(self.chatPanel)
+
+        # P1: ContextUsageIndicator 嵌入输入框内部 (+ 号旁边)
+        self._ctxIndicator = ContextUsageIndicator(self.chatPanel.inputEdit())
+        self._ctxIndicator.setUsage(
+            used_tokens=45000, max_tokens=200000,
+            breakdown={"system": 5000, "user": 12000, "assistant": 20000, "tool": 8000},
+        )
+        # 定位: 在 _attachBtn 右侧, 通过 hook resizeEvent 保持位置
+        self._positionCtxIndicator()
+        # 保存原始 resizeEvent 并 monkey-patch 追加定位逻辑
+        _origResize = self.chatPanel.inputEdit().resizeEvent
+        def _patchedResize(event, orig=_origResize):
+            orig(event)
+            self._positionCtxIndicator()
+        self.chatPanel.inputEdit().resizeEvent = _patchedResize
+
+        # 把 dock 组件插入 chatPanel 的内部 layout (在 genBarRow 和 inputRow 之间)
+        # chatPanel 的 layout 结构: chatView(stretch=1) -> genBarRow -> inputRow
+        # 我们在 genBarRow 后面插入 dock 组件
+        panelLayout = self.chatPanel.layout()
+        # genBarRow 是 index 1, inputRow 是 index 2
+        # 插入到 inputRow 之前 (即 genBarRow 之后)
+        insertIdx = panelLayout.count() - 1  # inputRow 是最后一个
+
+        # 用一个居中容器包裹所有 dock, 跟 genBarRow / inputRow 对齐
+        from PySide6.QtWidgets import QFrame
+        self._dockRow = QWidget(self.chatPanel)
+        self._dockRow.setObjectName("chatDockRow")
+        self._dockRow.setSizePolicy(
+            QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Maximum,
+        )
+        dockRowLayout = QVBoxLayout(self._dockRow)
+        dockRowLayout.setContentsMargins(0, 4, 0, 0)
+        dockRowLayout.setSpacing(4)
+        dockRowLayout.addWidget(self._permDock)
+        dockRowLayout.addWidget(self._questDock)
+        dockRowLayout.addWidget(self._followDock)
+        dockRowLayout.addWidget(self._revertDock)
+        dockRowLayout.addWidget(self._todoDock)
+
+        # 用 HBox stretch+dock+stretch 实现居中 (跟 inputRow 同策略)
+        self._dockCenterRow = QWidget(self.chatPanel)
+        dockCenterLayout = QHBoxLayout(self._dockCenterRow)
+        dockCenterLayout.setContentsMargins(0, 0, 0, 0)
+        dockCenterLayout.setSpacing(0)
+        dockCenterLayout.addStretch(1)
+        dockCenterLayout.addWidget(self._dockRow)
+        dockCenterLayout.addStretch(1)
+
+        panelLayout.insertWidget(insertIdx, self._dockCenterRow)
+
         rootLayout.addWidget(self.chatPanel, 1)
 
         # --- 流式状态 ---
@@ -339,19 +430,64 @@ class ChatInterface(QWidget):
     def _onUserSent(self, text: str):
         """用户在 AgentChatPanel 输入框按 Enter / 点发送 触发.
 
-        真实应用里应该把 ``text`` 提交给后端 LLM, 拿流式 token 通过
-        ``self.chat.appendDelta(msg_id, token)`` 增量追加. 这里 demo
-        用一个简单的 echo 模拟.
+        支持 slash 命令:
+            /help       — 显示所有可用命令
+            /stream     — 流式回复演示
+            /agent      — 交错 Agent 运行 (think->tool->think->tool->answer)
+            /approval   — 审批闸门演示
+            /tools      — 特化工具集 (6 种工具卡片)
+            /tasklist   — 任务列表演示
+            /resume     — Stop + Resume 演示
+            /clear      — 清空消息流
+            /theme      — 切换亮色/暗色主题
+            /dock       — 轮换展示 Dock 组件
+            /perm       — PermissionDock
+            /quest      — QuestionDock
+            /follow     — FollowupDock
+            /revert     — RevertDock
+            /todo       — TodoDock
+
+        其它文本走 echo 回复.
         """
-        # 1. 把用户消息加入流
+        stripped = text.strip().lower()
+
+        cmds = {
+            "/help": self._showHelp,
+            "/stream": self._startStreaming,
+            "/agent": self._startInterleavedAgent,
+            "/approval": self._startApprovalDemo,
+            "/tools": self._showSpecializedTools,
+            "/tasklist": self._startTaskListDemo,
+            "/resume": self._startResumeDemo,
+            "/api": self._showConvenienceApiDemo,
+            "/clear": self._reset,
+            "/theme": self._toggleTheme,
+            "/dock": self._startDockDemo,
+            "/perm": self._showPermDock,
+            "/permission": self._showPermDock,
+            "/quest": self._showQuestDock,
+            "/question": self._showQuestDock,
+            "/follow": self._showFollowDock,
+            "/followup": self._showFollowDock,
+            "/revert": self._showRevertDock,
+            "/todo": self._showTodoDock,
+            "/p2": self._showP2Demo,
+            "/attach": self._showAttachDemo,
+            "/attch": self._showAttachDemo,
+            "/slash": self._showSlashDemo,
+            "/mention": self._showMentionDemo,
+            "/all": self._runAllDemos,
+        }
+        if stripped in cmds:
+            cmds[stripped]()
+            return
+
+        # 正常消息流程
         self.chat.addMessage(ChatMessage(
             role=ChatRole.USER, content=text,
             subtitle="刚刚",
         ))
 
-        # 2. 创建空的 agent 消息, 准备流式追加.
-        # subtitle 不传: AgentChatView 默认 provider 会填 HH:MM:SS;
-        # 流式结束后 本 demo 会追加 · N tokens.
         agent = ChatMessage(
             role=ChatRole.AGENT, content="",
             sender_name="DeepSeek V4",
@@ -359,14 +495,9 @@ class ChatInterface(QWidget):
         self.chat.addMessage(agent)
         agent_id = agent.id
 
-        # 3. 模拟 200ms 后开始流式追加 echo 回复
         reply = (
             f"收到: **{text}**\n\n"
-            f"这是 demo 的 echo 回复. 真实应用里这里应该接 LLM 流式 API:\n\n"
-            f"```python\n"
-            f"async for token in llm.stream(text):\n"
-            f"    chat.appendDelta(msg_id, token)\n"
-            f"```\n"
+            f"这是 demo 的 echo 回复. 输入 `/help` 查看所有演示命令.\n"
         )
         tokens = self._chunk(reply, 2, 4)
         timer = QTimer(self)
@@ -376,13 +507,44 @@ class ChatInterface(QWidget):
             if not tokens:
                 timer.stop()
                 timer.deleteLater()
-                # 流式结束: 把 subtitle 改成 HH:MM:SS · N tokens, 跟其它路径一致
                 self._refreshAgentSubtitleWithTokens(agent_id)
                 return
             self.chat.appendDelta(agent_id, tokens.pop(0))
 
         timer.timeout.connect(tick)
         timer.start()
+
+    def _showHelp(self):
+        """显示帮助信息."""
+        help_text = (
+            "**可用命令:**\n\n"
+            "| 命令 | 功能 |\n"
+            "|------|------|\n"
+            "| `/stream` | 流式回复演示 |\n"
+            "| `/agent` | 交错 Agent 运行 |\n"
+            "| `/approval` | 审批闸门演示 |\n"
+            "| `/tools` | 特化工具集 (含 MCP/Skill) |\n"
+            "| `/tasklist` | 任务列表 |\n"
+            "| `/resume` | Stop + Resume |\n"
+            "| `/api` | 便利 API 演示 |\n"
+            "| `/dock` | 轮换 Dock 组件 |\n"
+            "| `/perm` | 权限审批 Dock |\n"
+            "| `/quest` | 问答选择 Dock |\n"
+            "| `/follow` | 排队消息 Dock |\n"
+            "| `/revert` | 回滚点 Dock |\n"
+            "| `/todo` | Todo 进度 Dock |\n"
+            "| `/p2` | P2 视觉动效组件 |\n"
+            "| `/attach` | 附件预览区演示 |\n"
+            "| `/slash` | Slash 命令弹窗 |\n"
+            "| `/mention` | @ Mention 弹窗 |\n"
+            "| `/all` | **依次运行所有演示** |\n"
+            "| `/clear` | 清空消息 |\n"
+            "| `/theme` | 切换主题 |\n"
+        )
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.AGENT, content=help_text,
+            sender_name="System",
+        ))
 
     # ------------------------------------------------------------------
     # 内容填充
@@ -405,6 +567,290 @@ class ChatInterface(QWidget):
         if hasattr(self, "_agentTimer"):
             self._agentTimer.stop()
         self._populate()
+
+    # ------------------------------------------------------------------
+    # Dock & P1 演示
+    # ------------------------------------------------------------------
+
+    def _startDockDemo(self):
+        """轮换展示 P0 Dock 组件 (每次点击/输入 /dock 切换到下一个)."""
+        # 同步 dock 容器宽度与输入框对齐
+        inputW = self.chatPanel.inputEdit().width()
+        if inputW > 0:
+            self._dockRow.setFixedWidth(inputW)
+
+        # 轮换: 每次切换到下一个 dock
+        docks = [
+            self._showPermDock, self._showQuestDock,
+            self._showFollowDock, self._showRevertDock, self._showTodoDock,
+        ]
+        if not hasattr(self, "_dockDemoIdx"):
+            self._dockDemoIdx = -1
+        self._dockDemoIdx = (self._dockDemoIdx + 1) % len(docks)
+        docks[self._dockDemoIdx]()
+
+    def _hideAllDocks(self):
+        for d in (self._permDock, self._questDock, self._followDock,
+                  self._revertDock, self._todoDock):
+            d.hide()
+
+    def _syncDockWidth(self):
+        inputW = self.chatPanel.inputEdit().width()
+        if inputW > 0:
+            self._dockRow.setFixedWidth(inputW)
+
+    def _showPermDock(self):
+        self._hideAllDocks()
+        self._syncDockWidth()
+        self._permDock.setRequest(
+            tool_name="bash",
+            description="执行命令: rm -rf /tmp/build_cache",
+            patterns=["rm *", "/tmp/*"],
+        )
+
+    def _showQuestDock(self):
+        self._hideAllDocks()
+        self._syncDockWidth()
+        self._questDock.setQuestion(
+            question="选择要使用的测试框架:",
+            options=["pytest", "unittest", "nose2"],
+            multi=False,
+        )
+
+    def _showFollowDock(self):
+        self._hideAllDocks()
+        self._syncDockWidth()
+        self._followDock.clear()
+        self._followDock.addItem("f1", "请帮我加上错误处理")
+        self._followDock.addItem("f2", "还有单元测试也要写")
+
+    def _showRevertDock(self):
+        self._hideAllDocks()
+        self._syncDockWidth()
+        self._revertDock.clear()
+        self._revertDock.addCheckpoint("cp1", "修改了 src/main.py (+12 -3)")
+        self._revertDock.addCheckpoint("cp2", "新建了 tests/test_main.py (+45)")
+
+    def _showTodoDock(self):
+        self._hideAllDocks()
+        self._syncDockWidth()
+        self._todoDock.clear()
+        self._todoDock.addTodo("t1", "分析需求", "completed")
+        self._todoDock.addTodo("t2", "编写代码", "in_progress")
+        self._todoDock.addTodo("t3", "测试验证", "pending")
+        QTimer.singleShot(2000, self._advanceTodoDock)
+
+    def _advanceTodoDock(self):
+        self._todoDock.setTodoStatus("t2", "completed")
+        self._todoDock.setTodoStatus("t3", "in_progress")
+
+    def _showDockInfo(self, text: str):
+        """Dock 操作反馈: 用 InfoBar 显示."""
+        InfoBar.success(
+            title="Dock 操作",
+            content=text,
+            parent=self,
+            position=InfoBarPosition.TOP,
+            duration=2000,
+        )
+
+    def _positionCtxIndicator(self):
+        """把 ContextUsageIndicator 定位到输入框内 _attachBtn 右侧."""
+        edit = self.chatPanel.inputEdit()
+        attach = edit._attachBtn
+        x = attach.x() + attach.width() + 6
+        y = attach.y() + (attach.height() - self._ctxIndicator.height()) // 2
+        self._ctxIndicator.move(x, y)
+
+    def _onSlashSelected(self, command: str):
+        """Slash 弹窗选中命令: 清空输入框, 执行命令."""
+        self.chatPanel.inputEdit().clear()
+        # 直接执行对应命令
+        self._onUserSent(command)
+
+    def _onMentionSelected(self, item):
+        """Mention 弹窗选中: 把 @xxx 替换成选中的文本."""
+        edit = self.chatPanel.inputEdit()
+        text = edit.toPlainText()
+        # 找到最后一个 @ 并替换
+        at_idx = text.rfind("@")
+        if at_idx >= 0:
+            new_text = text[:at_idx] + f"@{item.text} "
+            edit.setPlainText(new_text)
+            # 光标移到末尾
+            cursor = edit.textCursor()
+            cursor.movePosition(cursor.MoveOperation.End)
+            edit.setTextCursor(cursor)
+        self._showDockInfo(f"引用: @{item.text}")
+
+    # ------------------------------------------------------------------
+    # P2 视觉动效组件演示
+    # ------------------------------------------------------------------
+
+    def _showP2Demo(self):
+        """在消息流中插入一条 AGENT 消息, 内嵌 P2 组件展示."""
+        from PySide6.QtWidgets import QFrame, QGridLayout
+
+        # 创建一个容器 widget 来展示 P2 组件
+        container = QFrame()
+        container.setObjectName("p2DemoContainer")
+        containerLayout = QVBoxLayout(container)
+        containerLayout.setContentsMargins(0, 8, 0, 8)
+        containerLayout.setSpacing(12)
+
+        # 1. InlineSpinner
+        row1 = QHBoxLayout()
+        row1.setSpacing(8)
+        spinner = InlineSpinner(14, container)
+        row1.addWidget(spinner)
+        row1.addWidget(BodyLabel("InlineSpinner (14px, 主题色旋转)", container))
+        row1.addStretch(1)
+        containerLayout.addLayout(row1)
+
+        # 2. AnimatedNumber
+        row2 = QHBoxLayout()
+        row2.setSpacing(8)
+        row2.addWidget(BodyLabel("AnimatedNumber:", container))
+        animNum = AnimatedNumber(container)
+        animNum.setValue(0, animated=False)
+        row2.addWidget(animNum)
+        row2.addStretch(1)
+        containerLayout.addLayout(row2)
+        # 动画: 500ms 后跳到 12345, 再 1500ms 后跳到 67890
+        QTimer.singleShot(500, lambda: animNum.setValue(12345))
+        QTimer.singleShot(2000, lambda: animNum.setValue(67890))
+
+        # 3. TextShimmer
+        row3 = QHBoxLayout()
+        row3.setSpacing(8)
+        shimmer = TextShimmer("正在生成回复...", container)
+        shimmer.start()
+        row3.addWidget(shimmer)
+        row3.addStretch(1)
+        containerLayout.addLayout(row3)
+
+        # 4. TextReveal
+        row4 = QHBoxLayout()
+        row4.setSpacing(8)
+        reveal = TextReveal("Hello, this is TextReveal!", container)
+        row4.addWidget(reveal)
+        row4.addStretch(1)
+        containerLayout.addLayout(row4)
+        QTimer.singleShot(300, reveal.start)
+
+        # 5. ToolStatusTitle
+        row5 = QHBoxLayout()
+        row5.setSpacing(8)
+        statusTitle = ToolStatusTitle("Reading file...", "Read file", container)
+        row5.addWidget(statusTitle)
+        row5.addStretch(1)
+        containerLayout.addLayout(row5)
+        # 2 秒后切换到 done
+        QTimer.singleShot(2000, lambda: statusTitle.setActive(False))
+
+        # 6. KeybindLabel
+        row6 = QHBoxLayout()
+        row6.setSpacing(12)
+        row6.addWidget(KeybindLabel("Ctrl+K", container))
+        row6.addWidget(KeybindLabel("Shift+Enter", container))
+        row6.addWidget(KeybindLabel("Alt+F4", container))
+        row6.addStretch(1)
+        containerLayout.addLayout(row6)
+
+        # 把容器作为 AGENT 消息的自定义 widget 插入
+        # 由于 AgentChatView 不直接支持自定义 widget 消息,
+        # 我们用一条 AGENT 消息 + 在其后手动插入 widget 的方式
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.AGENT,
+            content="**P2 视觉动效组件演示:**",
+            sender_name="System",
+        ))
+
+        # 直接把 container 加到 chatView 的 _inner layout 末尾
+        # (这是 demo 专用的 hack, 正式使用应通过自定义 segment renderer)
+        inner_layout = self.chat._vLayout
+        container.setParent(self.chat._inner)
+        inner_layout.addWidget(container)
+
+    # ------------------------------------------------------------------
+    # P3 输入框增强演示
+    # ------------------------------------------------------------------
+
+    def _showAttachDemo(self):
+        """演示 AttachmentPreview: 在输入框上方显示附件缩略图."""
+        if not hasattr(self, '_attachPreview'):
+            self._attachPreview = AttachmentPreview(self.chatPanel)
+            self._attachPreview.setSizePolicy(
+                QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed,
+            )
+            self._attachPreview.itemRemoved.connect(
+                lambda id_: self._showDockInfo(f"附件已删除: {id_}")
+            )
+            # 居中容器
+            self._attachRow = QWidget(self.chatPanel)
+            attachRowLayout = QHBoxLayout(self._attachRow)
+            attachRowLayout.setContentsMargins(0, 0, 0, 0)
+            attachRowLayout.setSpacing(0)
+            attachRowLayout.addStretch(1)
+            attachRowLayout.addWidget(self._attachPreview)
+            attachRowLayout.addStretch(1)
+            # 插入到 chatPanel layout 的 inputRow 之前
+            panelLayout = self.chatPanel.layout()
+            insertIdx = panelLayout.count() - 1
+            panelLayout.insertWidget(insertIdx, self._attachRow)
+
+        # 同步宽度
+        inputW = self.chatPanel.inputEdit().width()
+        if inputW > 0:
+            self._attachPreview.setFixedWidth(inputW)
+
+        # 清空旧的, 添加新的
+        self._attachPreview.clear()
+        from PySide6.QtGui import QPixmap, QColor as _QC, QPainter as _QP
+        # 生成带渐变的示例图
+        for color, name in [(_QC(70, 150, 255), "screenshot.png"),
+                            (_QC(255, 100, 80), "error.png"),
+                            (_QC(80, 200, 130), "chart.svg")]:
+            pm = QPixmap(96, 96)
+            pm.fill(_QC(0, 0, 0, 0))
+            p = _QP(pm)
+            p.setRenderHint(_QP.RenderHint.Antialiasing)
+            p.setPen(Qt.PenStyle.NoPen)
+            p.setBrush(color)
+            p.drawRoundedRect(4, 4, 88, 88, 12, 12)
+            p.end()
+            self._attachPreview.addImage(pm, name)
+
+        self._attachPreview.addFile("/workspace/docs/README.md", "README.md")
+
+    def _showSlashDemo(self):
+        """Slash 弹窗现在通过输入 / 自动触发, 此方法仅作兼容."""
+        self.chatPanel.inputEdit().setPlainText("/")
+
+    def _showMentionDemo(self):
+        """Mention 弹窗现在通过输入 @ 自动触发, 此方法仅作兼容."""
+        self.chatPanel.inputEdit().setPlainText("@")
+
+    def _runAllDemos(self):
+        """依次运行所有演示 (每个间隔 3 秒)."""
+        demos = [
+            self._startStreaming,
+            self._startInterleavedAgent,
+            self._startApprovalDemo,
+            self._showSpecializedTools,
+            self._startTaskListDemo,
+            self._startResumeDemo,
+            self._startDockDemo,
+            self._showAttachDemo,
+            self._showP2Demo,
+        ]
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.SYSTEM,
+            content="开始依次运行所有演示, 每个间隔 3 秒...",
+        ))
+
+        for i, fn in enumerate(demos):
+            QTimer.singleShot(3000 * (i + 1), fn)
 
     # ------------------------------------------------------------------
     # 1) 流式回复
@@ -775,11 +1221,88 @@ class ChatInterface(QWidget):
                 },
             ),
             TextSegment(
+                content="\n\n---\n\n**MCP / Skill 特化卡片:**\n\n",
+            ),
+            ToolCallSegment(
+                tool_name="mcp_tool",
+                arguments='{"query": "PySide6 QPropertyAnimation usage"}',
+                result=(
+                    "# QPropertyAnimation\n\n"
+                    "Use `QPropertyAnimation` to animate any Q_PROPERTY:\n\n"
+                    "```python\nanim = QPropertyAnimation(widget, b'opacity')\n"
+                    "anim.setDuration(300)\nanim.setStartValue(0.0)\n"
+                    "anim.setEndValue(1.0)\nanim.start()\n```\n"
+                ),
+                status=ToolCallStatus.SUCCESS,
+                duration_ms=1200,
+                metadata={
+                    "server_name": "qt-docs",
+                    "description": "Search Qt/PySide6 documentation",
+                },
+            ),
+            ToolCallSegment(
+                tool_name="mcp",
+                arguments='{"repo": "AQiaoYo/PySide6-Fluent-Widgets", "query": "chat module"}',
+                result=(
+                    "Found 3 relevant files:\n"
+                    "- `components/widgets/chat/__init__.py` (exports)\n"
+                    "- `components/widgets/chat/agent_chat_view.py` (main view)\n"
+                    "- `components/widgets/chat/tool_renderers.py` (card registry)\n"
+                ),
+                status=ToolCallStatus.SUCCESS,
+                duration_ms=650,
+                metadata={
+                    "server_name": "github",
+                    "description": "Search GitHub repository",
+                },
+            ),
+            ToolCallSegment(
+                tool_name="skill",
+                arguments='{"text": "Hello World", "target": "zh-CN"}',
+                result="**翻译结果:** 你好, 世界",
+                status=ToolCallStatus.SUCCESS,
+                duration_ms=320,
+                metadata={
+                    "skill_name": "Translate",
+                    "category": "text",
+                    "description": "Translate text between languages using DeepL API",
+                    "input_params": {
+                        "text": "Hello World",
+                        "target": "zh-CN",
+                        "source": "auto",
+                    },
+                },
+            ),
+            ToolCallSegment(
+                tool_name="plugin",
+                arguments='{"code": "def fib(n): ..."}',
+                result=(
+                    "## Code Review\n\n"
+                    "- **Style**: Missing type hints\n"
+                    "- **Performance**: O(2^n) recursive, suggest DP\n"
+                    "- **Score**: 6/10\n"
+                ),
+                status=ToolCallStatus.SUCCESS,
+                duration_ms=1800,
+                metadata={
+                    "skill_name": "Code Review",
+                    "category": "code",
+                    "description": "AI-powered code review with style and performance analysis",
+                    "input_params": {
+                        "code": "def fib(n): ...",
+                        "language": "python",
+                        "focus": "performance",
+                    },
+                },
+            ),
+            TextSegment(
                 content=(
-                    "\n\n上面 6 张卡片分别由 `FileReadCard` / `FileWriteCard` / "
+                    "\n\n上面 10 张卡片分别由 `FileReadCard` / `FileWriteCard` / "
                     "`FileEditCard` (DiffView) / `BashCard` (终端样式 + 退出码) / "
-                    "`WebSearchCard` (链接) / `GrepSearchCard` (path:line + 预览) "
-                    "渲染, 全部由 `tool_renderers` 注册表自动解析."
+                    "`WebSearchCard` (链接) / `GrepSearchCard` (path:line + 预览) / "
+                    "`McpToolCard` (MCP server 调用) / `SkillCard` (Skill/Plugin) "
+                    "渲染, 全部由 `tool_renderers` 注册表自动解析.\n\n"
+                    "用户可通过 `registerToolRenderer('my_tool', MyCard)` 注册自定义卡片."
                 ),
             ),
         ]
@@ -791,6 +1314,110 @@ class ChatInterface(QWidget):
         )
         self.chat.addMessage(agent)
         # 默认所有卡片折叠; 用户点击展开. (不主动 setExpanded, 让 UI 干净)
+
+    # ------------------------------------------------------------------
+    # 便利 API 演示
+    # ------------------------------------------------------------------
+
+    def _showConvenienceApiDemo(self):
+        """演示新增的便利 API: messageCount, lastMessage, addSystemMessage,
+        beginAgentResponse, scrollToMessage, setInputEnabled, findMessages,
+        exportAsMarkdown, exportAsDict.
+        """
+        # 1. addSystemMessage
+        self.chat.addSystemMessage("=== 便利 API 演示开始 ===")
+
+        # 2. 添加几条消息用于后续演示
+        self.chat.addMessage(ChatMessage(
+            role=ChatRole.USER, content="这是一条用于搜索的测试消息: PySide6",
+        ))
+
+        # 3. beginAgentResponse (一步创建 + 开始生成)
+        agent_id = self.chat.beginAgentResponse("正在演示便利 API...")
+
+        # 模拟流式追加
+        demo_text = (
+            "## 便利 API 演示\n\n"
+            "以下 API 已在本次调用中使用:\n\n"
+            "| API | 说明 |\n"
+            "|-----|------|\n"
+            "| `addSystemMessage(text)` | 快速插入系统消息 |\n"
+            "| `beginAgentResponse(status)` | 一步创建 + 开始生成 |\n"
+            "| `messageCount()` | 当前消息总数 |\n"
+            "| `lastMessage()` | 最后一条消息 |\n"
+            "| `lastMessageByRole(role)` | 按角色查最后一条 |\n"
+            "| `findMessages(query)` | 文本搜索 |\n"
+            "| `scrollToMessage(id, highlight)` | 平滑滚动 + 高亮 |\n"
+            "| `setInputEnabled(bool)` | 禁用/启用输入 |\n"
+            "| `exportAsMarkdown()` | 导出 Markdown |\n"
+            "| `exportAsDict()` | 导出字典列表 |\n"
+        )
+        tokens = self._chunk(demo_text, 3, 6)
+        timer = QTimer(self)
+        timer.setInterval(30)
+
+        def tick():
+            if not tokens:
+                timer.stop()
+                timer.deleteLater()
+                self.chat.endGeneration(agent_id)
+                # 演示完成后展示各 API 结果
+                QTimer.singleShot(300, self._showApiResults)
+                return
+            self.chat.appendDelta(agent_id, tokens.pop(0))
+
+        timer.timeout.connect(tick)
+        timer.start()
+
+    def _showApiResults(self):
+        """展示便利 API 的调用结果."""
+        # messageCount
+        count = self.chat.messageCount()
+
+        # lastMessage
+        last = self.chat.lastMessage()
+        last_preview = last.content[:50] + "..." if last and len(last.content) > 50 else (last.content if last else "None")
+
+        # lastMessageByRole
+        last_user = self.chat.lastMessageByRole(ChatRole.USER)
+        user_preview = last_user.content[:40] if last_user else "None"
+
+        # findMessages
+        found = self.chat.findMessages("PySide6")
+        found_count = len(found)
+
+        # exportAsDict
+        data = self.chat.exportAsDict()
+
+        result_text = (
+            f"**API 调用结果:**\n\n"
+            f"- `messageCount()` = **{count}**\n"
+            f"- `lastMessage().content[:50]` = \"{last_preview}\"\n"
+            f"- `lastMessageByRole(USER).content[:40]` = \"{user_preview}\"\n"
+            f"- `findMessages('PySide6')` = **{found_count} 条匹配**\n"
+            f"- `exportAsDict()` = **{len(data)} 条记录**\n"
+        )
+        self.chat.addSystemMessage(result_text)
+
+        # 演示 setInputEnabled: 禁用 2 秒后恢复
+        self.chatPanel.setInputEnabled(False)
+        self.chat.addSystemMessage(
+            "输入框已禁用 (2 秒后自动恢复)..."
+        )
+        QTimer.singleShot(2000, self._restoreInput)
+
+    def _restoreInput(self):
+        """恢复输入框."""
+        self.chatPanel.setInputEnabled(True)
+        self.chat.addSystemMessage("输入框已恢复!")
+
+        # 演示 scrollToMessage: 滚动到第一条消息并高亮
+        if self.chat.messageCount() > 3:
+            first_id = self.chat.messages()[0].id
+            QTimer.singleShot(500, lambda: self.chat.scrollToMessage(first_id, highlight=True))
+            self.chat.addSystemMessage(
+                "已平滑滚动到第一条消息并高亮闪烁."
+            )
 
     # ------------------------------------------------------------------
     # 信号回调
