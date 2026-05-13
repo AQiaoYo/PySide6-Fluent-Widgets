@@ -330,6 +330,8 @@ class CodeBlock(QFrame):
         self._editor.setFont(_monospace_font(12))
         self._editor.setTabStopDistance(QFontMetrics(self._editor.font()).horizontalAdvance(' ') * 4)
         self._editor.setContentsMargins(14, 10, 14, 10)
+        # NOTE: QPlainTextEdit 的 padding 无法通过外部 QSS 文件生效 (Qt 限制:
+        # 需要 stylesheet 直接设在 widget 上), 此处属于已知例外.
         self._editor.setStyleSheet("QPlainTextEdit { padding: 10px 14px; }")
         self._editor.textChanged.connect(self._adjustHeight)
 

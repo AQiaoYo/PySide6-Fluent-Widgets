@@ -200,6 +200,26 @@ class ChatInputEdit(PlainTextEdit):
         """设置输入框文本"""
         self.setPlainText(text)
 
+    def setInputEnabled(self, enabled: bool) -> None:
+        """设置输入是否可用.
+
+        禁用时: 文本区只读, 发送按钮禁用, Enter 不触发发送.
+        启用时: 恢复正常交互.
+
+        与 ``setEnabled(False)`` 的区别: 不会让整个 widget 变灰,
+        只是阻止发送行为, 视觉上更柔和.
+
+        Args:
+            enabled: True 启用, False 禁用
+        """
+        self._inputEnabled = bool(enabled)
+        self.setReadOnly(not enabled)
+        self._sendBtn.setEnabled(enabled and bool(self.toPlainText().strip()))
+
+    def isInputEnabled(self) -> bool:
+        """输入是否可用."""
+        return getattr(self, '_inputEnabled', True)
+
     def attachButton(self) -> TransparentToolButton:
         """返回附件按钮 (供应用方改图标 / 隐藏)."""
         return self._attachBtn
@@ -249,6 +269,35 @@ class ChatInputEdit(PlainTextEdit):
     def clearTokenInfo(self) -> None:
         """隐藏 token 预估指示器 (与未调用 ``setTokenInfo`` 时等价)."""
         self._tokenIndicator.hide()
+
+    def setSlashPopover(self, popover) -> None:
+        """注入 SlashCommandPopover, 输入 / 时自动弹出.
+
+        自动连接 ``tabCompleted`` 信号实现 Tab 补全: 按 Tab 时把选中命令
+        文本填入输入框 (替换当前输入), 光标移到末尾, 弹窗保持打开.
+
+        Args:
+            popover: SlashCommandPopover 实例 (或 None 禁用)
+        """
+        self._slashPopover = popover
+        if popover is not None:
+            popover.tabCompleted.connect(self._onSlashTabComplete)
+
+    def _onSlashTabComplete(self, command: str) -> None:
+        """Slash Tab 补全: 替换输入框文本为完整命令."""
+        self.setPlainText(command)
+        # 光标移到末尾
+        cursor = self.textCursor()
+        cursor.movePosition(cursor.MoveOperation.End)
+        self.setTextCursor(cursor)
+
+    def setMentionPopover(self, popover) -> None:
+        """注入 MentionPopover, 输入 @ 时自动弹出.
+
+        Args:
+            popover: MentionPopover 实例 (或 None 禁用)
+        """
+        self._mentionPopover = popover
 
     # ------------------------------------------------------------------
     # 内部
@@ -319,17 +368,57 @@ class ChatInputEdit(PlainTextEdit):
         )
 
     def _onTextChanged(self):
-        """根据 document size 自适应高度 + 更新发送按钮 enabled 状态"""
+        """根据 document size 自适应高度 + 更新发送按钮 enabled 状态 + 触发弹窗"""
         doc = self.document()
         # document 内容高度 + 底部按钮区预留 + 上下边距
         natural_h = int(doc.size().height()) + self._BOTTOM_RESERVE + 8
         clamped = max(self._MIN_HEIGHT, min(natural_h, self._MAX_HEIGHT))
         if self.height() != clamped:
             self.setFixedHeight(clamped)
-        self._sendBtn.setEnabled(bool(self.toPlainText().strip()))
+        has_text = bool(self.toPlainText().strip())
+        self._sendBtn.setEnabled(has_text and self.isInputEnabled())
+
+        # Slash / Mention 弹窗触发
+        self._checkPopoverTrigger()
+
+    def _checkPopoverTrigger(self):
+        """检测当前输入是否应该触发 slash 或 mention 弹窗."""
+        text = self.toPlainText()
+        cursor = self.textCursor()
+        pos = cursor.position()
+
+        # 取光标前的文本
+        before = text[:pos] if pos <= len(text) else text
+
+        # Slash: 行首输入 "/" 开头 (整行只有 /xxx)
+        current_line = before.split("\n")[-1] if before else ""
+        if current_line.startswith("/") and " " not in current_line:
+            if hasattr(self, '_slashPopover') and self._slashPopover is not None:
+                # 同步宽度跟输入框对齐
+                self._slashPopover.setFixedWidth(self.width())
+                self._slashPopover.popup(current_line)
+                return
+
+        # Mention: "@" 后面跟非空格字符
+        at_idx = current_line.rfind("@")
+        if at_idx >= 0:
+            after_at = current_line[at_idx + 1:]
+            if " " not in after_at:
+                if hasattr(self, '_mentionPopover') and self._mentionPopover is not None:
+                    self._mentionPopover.setFixedWidth(self.width())
+                    self._mentionPopover.popup(after_at)
+                    return
+
+        # 都不匹配: 收起弹窗 (带动画)
+        if hasattr(self, '_slashPopover') and self._slashPopover and self._slashPopover.isVisible():
+            self._slashPopover._animateClose()
+        if hasattr(self, '_mentionPopover') and self._mentionPopover and self._mentionPopover.isVisible():
+            self._mentionPopover._animateClose()
 
     def _emitSend(self):
         """Enter / 点发送触发: 文本非空时 emit + 清空输入"""
+        if not self.isInputEnabled():
+            return
         text = self.toPlainText().strip()
         if not text:
             return
@@ -337,13 +426,19 @@ class ChatInputEdit(PlainTextEdit):
         self.clear()
 
     def keyPressEvent(self, event: QKeyEvent):
-        """Enter 发送, Shift+Enter 换行"""
+        """Enter 发送, Shift+Enter 换行, 方向键转发给弹窗"""
+        # 优先让弹窗处理
+        if hasattr(self, '_slashPopover') and self._slashPopover and self._slashPopover.isVisible():
+            if self._slashPopover.handleKeyPress(event):
+                return
+        if hasattr(self, '_mentionPopover') and self._mentionPopover and self._mentionPopover.isVisible():
+            if self._mentionPopover.handleKeyPress(event):
+                return
+
         if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             if event.modifiers() & Qt.KeyboardModifier.ShiftModifier:
-                # Shift+Enter -> 让 super 处理 (插入换行)
                 super().keyPressEvent(event)
                 return
-            # 纯 Enter -> 发送
             self._emitSend()
             return
         super().keyPressEvent(event)
@@ -590,6 +685,21 @@ class AgentChatPanel(QWidget):
     def focusInput(self):
         self._inputEdit.setFocus()
 
+    def setInputEnabled(self, enabled: bool) -> None:
+        """设置输入框是否可用 (代理 ``ChatInputEdit.setInputEnabled``).
+
+        禁用时文本区只读, 发送按钮禁用, Enter 不触发发送.
+        典型场景: Agent 生成中禁止用户发送新消息.
+
+        Args:
+            enabled: True 启用, False 禁用
+        """
+        self._inputEdit.setInputEnabled(enabled)
+
+    def isInputEnabled(self) -> bool:
+        """输入框是否可用."""
+        return self._inputEdit.isInputEnabled()
+
     def setTokenInfo(self, context_used: int, context_max: int,
                      tokens_used: int, tokens_max: int) -> None:
         """更新输入区 token 预估指示器 (代理 ``ChatInputEdit.setTokenInfo``).
@@ -619,6 +729,34 @@ class AgentChatPanel(QWidget):
 
     def clear(self):
         return self._chatView.clear()
+
+    def messageCount(self) -> int:
+        """返回当前消息总数 (代理 ``AgentChatView.messageCount``)."""
+        return self._chatView.messageCount()
+
+    def lastMessage(self) -> 'Optional[ChatMessage]':
+        """返回最后一条消息 (代理 ``AgentChatView.lastMessage``)."""
+        return self._chatView.lastMessage()
+
+    def addSystemMessage(self, text: str) -> str:
+        """快速插入系统消息 (代理 ``AgentChatView.addSystemMessage``)."""
+        return self._chatView.addSystemMessage(text)
+
+    def beginAgentResponse(self, status_text=None, **msg_kwargs) -> str:
+        """一步创建空 AGENT 消息并开始生成 (代理 ``AgentChatView.beginAgentResponse``)."""
+        return self._chatView.beginAgentResponse(status_text, **msg_kwargs)
+
+    def scrollToMessage(self, message_id: str, highlight: bool = False) -> None:
+        """平滑滚动到指定消息 (代理 ``AgentChatView.scrollToMessage``)."""
+        self._chatView.scrollToMessage(message_id, highlight)
+
+    def exportAsMarkdown(self) -> str:
+        """导出对话为 Markdown (代理 ``AgentChatView.exportAsMarkdown``)."""
+        return self._chatView.exportAsMarkdown()
+
+    def exportAsDict(self) -> 'List[dict]':
+        """导出对话为字典列表 (代理 ``AgentChatView.exportAsDict``)."""
+        return self._chatView.exportAsDict()
 
     # ------------------------------------------------------------------
     # 发送消息 hook + 动画总开关

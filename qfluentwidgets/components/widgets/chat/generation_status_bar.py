@@ -34,6 +34,8 @@ from ..button import TransparentToolButton
 from ..label import BodyLabel, CaptionLabel
 from ..progress_ring import IndeterminateProgressRing
 from ._collapse_anim import animations_enabled_root
+from .inline_spinner import InlineSpinner
+from .text_shimmer import TextShimmer
 
 
 __all__ = ['GenerationStatusBar']
@@ -109,14 +111,14 @@ class GenerationStatusBar(QFrame):
         layout.setSpacing(8)
 
         # spinner
-        self._spinner = IndeterminateProgressRing(self, start=False)
-        self._spinner.setFixedSize(self._SPINNER_SIZE, self._SPINNER_SIZE)
-        self._spinner.setStrokeWidth(2)
-        self._spinner.setTextVisible(False)
+        self._spinner = InlineSpinner(self._SPINNER_SIZE, self, start=False)
 
-        # 主状态文本
-        self._statusLabel = BodyLabel(self.tr("正在生成..."), self)
-        self._statusLabel.setObjectName("generationStatusText")
+        # 主状态文本 (带 shimmer 效果)
+        self._statusShimmer = TextShimmer(self.tr("正在生成..."), self)
+        self._statusShimmer.setObjectName("generationStatusText")
+        self._statusShimmer.setFixedHeight(20)
+        # 保留 _statusLabel 引用兼容现有 API
+        self._statusLabel = self._statusShimmer
 
         # token 信息
         self._tokensLabel = CaptionLabel("", self)
@@ -135,7 +137,7 @@ class GenerationStatusBar(QFrame):
         self._stopBtn.clicked.connect(self.stopRequested)
 
         layout.addWidget(self._spinner, 0, Qt.AlignmentFlag.AlignVCenter)
-        layout.addWidget(self._statusLabel, 1, Qt.AlignmentFlag.AlignVCenter)
+        layout.addWidget(self._statusShimmer, 1, Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(self._tokensLabel, 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(self._elapsedLabel, 0, Qt.AlignmentFlag.AlignVCenter)
         layout.addWidget(self._stopBtn, 0, Qt.AlignmentFlag.AlignVCenter)
@@ -145,10 +147,10 @@ class GenerationStatusBar(QFrame):
     # ------------------------------------------------------------------
 
     def setStatusText(self, text: str) -> None:
-        self._statusLabel.setText(text or "")
+        self._statusShimmer.setText(text or "")
 
     def statusText(self) -> str:
-        return self._statusLabel.text()
+        return self._statusShimmer.text()
 
     def setTokens(self, total: int,
                   rate: Optional[float] = None) -> None:
@@ -171,8 +173,9 @@ class GenerationStatusBar(QFrame):
         self._stopBtn.setVisible(bool(visible))
 
     def start(self) -> None:
-        """启动 spinner + 自动计时."""
+        """启动 spinner + shimmer + 自动计时."""
         self._spinner.start()
+        self._statusShimmer.start()
         if not self._elapsed.isValid():
             self._elapsed.start()
         else:
@@ -180,14 +183,15 @@ class GenerationStatusBar(QFrame):
         self._timer.start()
 
     def stop(self) -> None:
-        """停止 spinner + 自动计时. 不重置显示."""
+        """停止 spinner + shimmer + 自动计时. 不重置显示."""
         self._spinner.stop()
+        self._statusShimmer.stop()
         self._timer.stop()
 
     def reset(self) -> None:
         """还原为初始状态: 文本默认, token 隐藏, 计时归零."""
         self.stop()
-        self._statusLabel.setText(self.tr("正在生成..."))
+        self._statusShimmer.setText(self.tr("正在生成..."))
         self._tokensLabel.hide()
         self._tokensLabel.setText("")
         self._elapsedLabel.setText("00:00")

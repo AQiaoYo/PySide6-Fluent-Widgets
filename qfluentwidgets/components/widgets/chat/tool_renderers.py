@@ -12,6 +12,8 @@
 - ``bash`` / ``run_command`` / ``shell``            -> ``BashCard``
 - ``web_search`` / ``search_web``                   -> ``WebSearchCard``
 - ``grep_search`` / ``grep`` / ``rg``               -> ``GrepSearchCard``
+- ``mcp_tool`` / ``mcp``                            -> ``McpToolCard``
+- ``skill`` / ``plugin`` / ``use_skill``            -> ``SkillCard``
 
 未匹配的工具名 fallback 到 ``GenericToolCallCard``.
 
@@ -46,6 +48,7 @@ __all__ = [
     'resolveToolRenderer', 'registeredToolNames',
     'FileReadCard', 'FileWriteCard', 'FileEditCard',
     'BashCard', 'WebSearchCard', 'GrepSearchCard',
+    'McpToolCard', 'SkillCard',
 ]
 
 
@@ -793,6 +796,259 @@ class GrepSearchCard(ToolCallCardBase):
 
 
 # ----------------------------------------------------------------------
+# McpToolCard
+# ----------------------------------------------------------------------
+
+class McpToolCard(ToolCallCardBase):
+    """MCP (Model Context Protocol) 工具调用卡片.
+
+    Header 形如 ``[server] server_name / tool_name``. 展开内容显示:
+    - 参数: JSON 格式 CodeBlock
+    - 结果: Markdown 渲染 (支持流式追加)
+
+    支持 metadata 字段:
+        server_name:  MCP server 名称 (如 "aws-docs", "github")
+        description:  工具描述 (显示在 header 下方)
+        server_icon:  服务器图标标识 (预留, 当前用默认图标)
+    """
+
+    def _displayIcon(self, segment):
+        return FluentIcon.CONNECT
+
+    def _displayName(self, segment):
+        if segment is None:
+            return self.tr("MCP Tool")
+        meta = segment.metadata or {}
+        server = meta.get("server_name") or ""
+        tool = segment.tool_name or "mcp_tool"
+        if server:
+            return f"{server} / {tool}"
+        return tool
+
+    def _buildContent(self, parent):
+        # 工具描述 (可选)
+        self._descLabel = CaptionLabel("", parent)
+        self._descLabel.setObjectName("mcpToolDesc")
+        self._descLabel.setWordWrap(True)
+        self._descLabel.hide()
+        self._contentLayout.addWidget(self._descLabel)
+
+        # 参数区: JSON CodeBlock
+        self._argsLabel = CaptionLabel(self.tr("参数"), parent)
+        self._argsLabel.setObjectName("toolCallSectionLabel")
+        self._argsBlock = CodeBlock("", "json", parent)
+        self._argsLabel.hide()
+        self._argsBlock.hide()
+        self._contentLayout.addWidget(self._argsLabel)
+        self._contentLayout.addWidget(self._argsBlock)
+
+        # 结果区: Markdown 渲染
+        self._resultLabel = CaptionLabel(self.tr("结果"), parent)
+        self._resultLabel.setObjectName("toolCallSectionLabel")
+        self._resultView = MarkdownView("", parent)
+        self._resultLabel.hide()
+        self._resultView.hide()
+        self._contentLayout.addWidget(self._resultLabel)
+        self._contentLayout.addWidget(self._resultView)
+
+    def _onSegmentChanged(self, seg):
+        if seg is None:
+            self._descLabel.hide()
+            self._argsLabel.hide()
+            self._argsBlock.hide()
+            self._resultLabel.hide()
+            self._resultView.hide()
+            return
+
+        meta = seg.metadata or {}
+
+        # 描述
+        desc = meta.get("description") or ""
+        if desc:
+            self._descLabel.setText(desc)
+            self._descLabel.show()
+        else:
+            self._descLabel.hide()
+
+        # 参数
+        args = seg.arguments or ""
+        if args:
+            # 尝试格式化 JSON
+            formatted = self._formatJson(args)
+            self._argsBlock.setCode(formatted)
+            self._argsLabel.show()
+            self._argsBlock.show()
+        else:
+            self._argsLabel.hide()
+            self._argsBlock.hide()
+
+        # 结果
+        result = seg.result or ""
+        if result:
+            self._resultView.setMarkdown(result)
+            self._resultLabel.show()
+            self._resultView.show()
+        else:
+            self._resultLabel.hide()
+            self._resultView.hide()
+
+    def appendArgumentsDelta(self, delta):
+        if not delta:
+            return
+        super().appendArgumentsDelta(delta)
+        if self._segment:
+            formatted = self._formatJson(self._segment.arguments)
+            self._argsBlock.setCode(formatted)
+            self._argsLabel.show()
+            self._argsBlock.show()
+
+    def appendResultDelta(self, delta):
+        if not delta:
+            return
+        super().appendResultDelta(delta)
+        self._resultView.appendMarkdown(delta)
+        self._resultLabel.show()
+        self._resultView.show()
+
+    def setCodeBlockMaxVisibleLines(self, n):
+        super().setCodeBlockMaxVisibleLines(n)
+        self._argsBlock.setMaxVisibleLines(n)
+        self._resultView.setCodeBlockMaxVisibleLines(n)
+
+    @staticmethod
+    def _formatJson(text: str) -> str:
+        """尝试格式化 JSON, 失败则原样返回."""
+        if not text:
+            return ""
+        import json
+        try:
+            obj = json.loads(text)
+            return json.dumps(obj, indent=2, ensure_ascii=False)
+        except (ValueError, TypeError):
+            return text
+
+
+# ----------------------------------------------------------------------
+# SkillCard
+# ----------------------------------------------------------------------
+
+class SkillCard(ToolCallCardBase):
+    """Skill / Plugin 调用卡片.
+
+    Header 形如 ``[puzzle] skill_name``. 展开内容显示:
+    - 技能描述
+    - 输入参数 (简洁 key=value 列表)
+    - 输出结果 (Markdown 渲染)
+
+    支持 metadata 字段:
+        skill_name:   技能显示名 (如 "Code Review", "Translate")
+        description:  技能描述
+        category:     技能分类 (如 "code", "text", "data")
+        input_params: Dict[str, str] 输入参数键值对 (用于简洁展示)
+    """
+
+    def _displayIcon(self, segment):
+        return FluentIcon.TILES
+
+    def _displayName(self, segment):
+        if segment is None:
+            return self.tr("Skill")
+        meta = segment.metadata or {}
+        skill_name = meta.get("skill_name") or segment.tool_name or "skill"
+        category = meta.get("category") or ""
+        if category:
+            return f"{skill_name}  [{category}]"
+        return skill_name
+
+    def _buildContent(self, parent):
+        # 技能描述
+        self._descLabel = BodyLabel("", parent)
+        self._descLabel.setObjectName("skillDesc")
+        self._descLabel.setWordWrap(True)
+        self._descLabel.hide()
+        self._contentLayout.addWidget(self._descLabel)
+
+        # 输入参数列表
+        self._paramsWrap = QFrame(parent)
+        self._paramsWrap.setObjectName("skillParams")
+        self._paramsLayout = QVBoxLayout(self._paramsWrap)
+        self._paramsLayout.setContentsMargins(0, 4, 0, 4)
+        self._paramsLayout.setSpacing(2)
+        self._paramsWrap.hide()
+        self._contentLayout.addWidget(self._paramsWrap)
+
+        # 结果区: Markdown 渲染
+        self._resultLabel = CaptionLabel(self.tr("输出"), parent)
+        self._resultLabel.setObjectName("toolCallSectionLabel")
+        self._resultView = MarkdownView("", parent)
+        self._resultLabel.hide()
+        self._resultView.hide()
+        self._contentLayout.addWidget(self._resultLabel)
+        self._contentLayout.addWidget(self._resultView)
+
+    def _onSegmentChanged(self, seg):
+        if seg is None:
+            self._descLabel.hide()
+            self._paramsWrap.hide()
+            self._resultLabel.hide()
+            self._resultView.hide()
+            return
+
+        meta = seg.metadata or {}
+
+        # 描述
+        desc = meta.get("description") or ""
+        if desc:
+            self._descLabel.setText(desc)
+            self._descLabel.show()
+        else:
+            self._descLabel.hide()
+
+        # 输入参数
+        params = meta.get("input_params")
+        self._clearParams()
+        if isinstance(params, dict) and params:
+            for key, val in params.items():
+                row = CaptionLabel(f"{key}: {_short(str(val), 80)}", self._paramsWrap)
+                row.setObjectName("skillParamRow")
+                row.setWordWrap(True)
+                self._paramsLayout.addWidget(row)
+            self._paramsWrap.show()
+        else:
+            self._paramsWrap.hide()
+
+        # 结果
+        result = seg.result or ""
+        if result:
+            self._resultView.setMarkdown(result)
+            self._resultLabel.show()
+            self._resultView.show()
+        else:
+            self._resultLabel.hide()
+            self._resultView.hide()
+
+    def appendResultDelta(self, delta):
+        if not delta:
+            return
+        super().appendResultDelta(delta)
+        self._resultView.appendMarkdown(delta)
+        self._resultLabel.show()
+        self._resultView.show()
+
+    def setCodeBlockMaxVisibleLines(self, n):
+        super().setCodeBlockMaxVisibleLines(n)
+        self._resultView.setCodeBlockMaxVisibleLines(n)
+
+    def _clearParams(self) -> None:
+        while self._paramsLayout.count():
+            item = self._paramsLayout.takeAt(0)
+            w = item.widget()
+            if w:
+                w.setParent(None)
+                w.deleteLater()
+
+
+# ----------------------------------------------------------------------
 # 默认注册
 # ----------------------------------------------------------------------
 
@@ -813,6 +1069,13 @@ def _register_default_renderers() -> None:
         "grep_search": GrepSearchCard,
         "grep": GrepSearchCard,
         "rg": GrepSearchCard,
+        # MCP 工具
+        "mcp_tool": McpToolCard,
+        "mcp": McpToolCard,
+        # Skill / Plugin
+        "skill": SkillCard,
+        "plugin": SkillCard,
+        "use_skill": SkillCard,
     }
     for name, factory in defaults.items():
         registerToolRenderer(name, factory)

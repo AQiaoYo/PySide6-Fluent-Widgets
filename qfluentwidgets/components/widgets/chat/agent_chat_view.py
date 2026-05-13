@@ -210,7 +210,7 @@ class AgentChatView(SmoothScrollArea):
         # 用它决定 viewport 行为: True 时跟着 maximum 单调贴底, False 时
         # 锁回 _savedScrollValue. 单独缓存避免动画期间 setValue 自己改 _autoScroll.
         self._savedAtBottom: bool = False
-        # rangeChanged debounce timer (16ms): 修复"整个 view 上下跳"的根因。
+        # rangeChanged debounce timer (16ms): 修复"整个 view 上下跳"的根因.
         # Qt layout chain (setVisible / addWidget / layout pass / polish) 会在
         # 短时间内 emit rangeChanged 多次, 每次 maximum 都不一样 (中间
         # 值). 如果每次都走 ``_scrollToBottom`` (setValue(maximum)),
@@ -609,6 +609,196 @@ class AgentChatView(SmoothScrollArea):
     def messages(self) -> List[ChatMessage]:
         """按时间顺序返回当前所有消息 (返回的是引用列表)."""
         return [self._bubbles[mid].message() for mid in self._order if mid in self._bubbles]
+
+    def messageCount(self) -> int:
+        """返回当前消息总数."""
+        return len(self._order)
+
+    def lastMessage(self) -> Optional[ChatMessage]:
+        """返回最后一条消息, 无消息时返回 None.
+
+        高频场景: 流式追加时拿最后一条 AGENT 消息的 id.
+        """
+        if not self._order:
+            return None
+        last_id = self._order[-1]
+        bubble = self._bubbles.get(last_id)
+        return bubble.message() if bubble else None
+
+    def lastMessageByRole(self, role: ChatRole) -> Optional[ChatMessage]:
+        """返回最后一条指定角色的消息, 不存在时返回 None.
+
+        Args:
+            role: 目标角色 (ChatRole.USER / AGENT / SYSTEM)
+        """
+        for mid in reversed(self._order):
+            bubble = self._bubbles.get(mid)
+            if bubble and bubble.message().role == role:
+                return bubble.message()
+        return None
+
+    def findMessages(self, query: str) -> List[str]:
+        """按文本内容搜索消息, 返回匹配的 message id 列表 (按时间顺序).
+
+        大小写不敏感, 搜索范围为所有 TextSegment 的 content.
+
+        Args:
+            query: 搜索关键词
+        """
+        if not query:
+            return []
+        q = query.lower()
+        results = []
+        for mid in self._order:
+            bubble = self._bubbles.get(mid)
+            if bubble and q in bubble.message().content.lower():
+                results.append(mid)
+        return results
+
+    def addSystemMessage(self, text: str) -> str:
+        """快速插入一条系统消息 (分隔线 / 提示), 返回 message_id.
+
+        Args:
+            text: 系统消息文本
+        """
+        msg = ChatMessage(role=ChatRole.SYSTEM, content=text)
+        self.addMessage(msg)
+        return msg.id
+
+    def beginAgentResponse(self, status_text: Optional[str] = None,
+                           **msg_kwargs) -> str:
+        """一步创建空 AGENT 消息并开始生成, 返回 message_id.
+
+        等价于:
+            msg = ChatMessage(role=ChatRole.AGENT, **msg_kwargs)
+            view.addMessage(msg)
+            view.beginGeneration(msg.id, status_text)
+
+        Args:
+            status_text: 生成状态条文字 (如 "正在思考...")
+            **msg_kwargs: 传给 ChatMessage 的额外参数 (sender_name, subtitle 等)
+        """
+        msg = ChatMessage(role=ChatRole.AGENT, **msg_kwargs)
+        self.addMessage(msg)
+        self.beginGeneration(msg.id, status_text)
+        return msg.id
+
+    def scrollToMessage(self, message_id: str, highlight: bool = False) -> None:
+        """平滑滚动到指定消息, 使其顶部与 viewport 顶部对齐.
+
+        Args:
+            message_id: 目标消息 id
+            highlight:  是否短暂高亮该消息气泡 (闪烁效果)
+        """
+        bubble = self._bubbles.get(message_id)
+        if bubble is None:
+            return
+        self._smoothScrollWidgetToTop(bubble)
+        if highlight:
+            # 延迟到滚动动画完成后再高亮, 避免 paint 冲突
+            QTimer.singleShot(320, lambda: self._flashHighlight(bubble))
+
+    def _flashHighlight(self, widget: QWidget) -> None:
+        """给 widget 做一次短暂的高亮闪烁.
+
+        用一个半透明 overlay widget 覆盖在目标 widget 上方, 通过
+        QPropertyAnimation 驱动 overlay 的 opacity 从 0.3 -> 0 实现
+        "闪一下"效果. 不使用 QGraphicsOpacityEffect (在 QScrollArea
+        内的 widget 上会引发 QPainter 状态冲突).
+        """
+        if not widget.isVisible():
+            return
+
+        from PySide6.QtGui import QColor as _QC
+
+        # 创建 overlay, parent 设为 widget 自身 (跟随 widget 几何)
+        overlay = QWidget(widget)
+        overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        overlay.setGeometry(0, 0, widget.width(), widget.height())
+        overlay.setStyleSheet(
+            "background-color: rgba(96, 165, 250, 0.25); border-radius: 8px;"
+        )
+        overlay.show()
+        overlay.raise_()
+
+        # 用 maximumHeight 动画模拟 fade out (opacity 不可用, 改用 alpha 渐变)
+        # 更简单的方式: 用 QVariantAnimation 驱动 stylesheet alpha
+        from PySide6.QtCore import QVariantAnimation
+
+        ani = QVariantAnimation(overlay)
+        ani.setDuration(800)
+        ani.setStartValue(60)   # 起始 alpha
+        ani.setEndValue(0)      # 结束 alpha
+        ani.setEasingCurve(QEasingCurve.Type.OutQuad)
+
+        def _updateAlpha(alpha):
+            if overlay is not None:
+                overlay.setStyleSheet(
+                    f"background-color: rgba(96, 165, 250, {alpha / 255.0:.3f});"
+                    f" border-radius: 8px;"
+                )
+
+        ani.valueChanged.connect(_updateAlpha)
+        ani.finished.connect(lambda: (overlay.hide(), overlay.deleteLater()))
+        ani.start()
+
+    def exportAsMarkdown(self) -> str:
+        """导出当前对话为 Markdown 文本.
+
+        格式:
+            **User**: 消息内容
+            **Agent**: 消息内容
+            *System: 消息内容*
+        """
+        lines = []
+        for mid in self._order:
+            bubble = self._bubbles.get(mid)
+            if not bubble:
+                continue
+            msg = bubble.message()
+            content = msg.content.strip()
+            if msg.role == ChatRole.USER:
+                name = msg.sender_name or self._userDisplayName or "User"
+                lines.append(f"**{name}**: {content}")
+            elif msg.role == ChatRole.AGENT:
+                name = msg.sender_name or self._agentDisplayName or "Agent"
+                lines.append(f"**{name}**: {content}")
+            else:
+                lines.append(f"*System: {content}*")
+            lines.append("")
+        return "\n".join(lines)
+
+    def exportAsDict(self) -> List[dict]:
+        """导出当前对话为结构化字典列表 (用于持久化 / 序列化).
+
+        每条消息格式:
+            {
+                "id": str,
+                "role": "user" | "agent" | "system",
+                "content": str,
+                "sender_name": str | None,
+                "subtitle": str | None,
+                "timestamp": str | None,  (ISO 格式)
+            }
+        """
+        result = []
+        for mid in self._order:
+            bubble = self._bubbles.get(mid)
+            if not bubble:
+                continue
+            msg = bubble.message()
+            entry = {
+                "id": msg.id,
+                "role": msg.role.value,
+                "content": msg.content,
+                "sender_name": msg.sender_name,
+                "subtitle": msg.subtitle,
+                "timestamp": (
+                    msg.timestamp.isoformat() if msg.timestamp else None
+                ),
+            }
+            result.append(entry)
+        return result
 
     def setUserAvatar(self, avatar: Optional[Union[QIcon, str]]) -> None:
         """设置用户消息默认头像 (后续 addMessage 时生效)."""

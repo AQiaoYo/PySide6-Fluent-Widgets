@@ -34,6 +34,7 @@ from ..progress_ring import IndeterminateProgressRing
 from ._collapse_anim import animate_collapse, animations_enabled_root
 from .chat_message import ToolCallSegment, ToolCallStatus
 from .code_block import CodeBlock
+from .inline_spinner import InlineSpinner
 from .markdown_view import MarkdownView
 
 
@@ -144,10 +145,7 @@ class ToolCallCardBase(QFrame):
         statusStack.setContentsMargins(0, 0, 0, 0)
         statusStack.setSpacing(0)
 
-        self._spinner = IndeterminateProgressRing(self._statusContainer, start=False)
-        self._spinner.setFixedSize(self._STATUS_SIZE, self._STATUS_SIZE)
-        self._spinner.setStrokeWidth(2)
-        self._spinner.setTextVisible(False)
+        self._spinner = InlineSpinner(self._STATUS_SIZE, self._statusContainer, start=False)
 
         self._statusIcon = QLabel(self._statusContainer)
         self._statusIcon.setObjectName("toolCallStatusIcon")
