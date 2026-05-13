@@ -47,11 +47,32 @@ from .tool_renderers import (
     resolveToolRenderer, registeredToolNames,
     FileReadCard, FileWriteCard, FileEditCard,
     BashCard, WebSearchCard, GrepSearchCard,
+    McpToolCard, SkillCard,
 )
 from .generation_status_bar import GenerationStatusBar
 from .chat_bubble import ChatBubble, BubbleAction
 from .agent_chat_view import AgentChatView
 from .agent_chat_panel import AgentChatPanel, ChatInputEdit
+from .message_nav import MessageNav
+from .session_retry_card import SessionRetryCard
+from .tool_error_card import ToolErrorCard
+from .context_usage_indicator import ContextUsageIndicator
+from .session_review_panel import SessionReviewPanel
+from .dock_surface import DockSurface
+from .permission_dock import PermissionDock
+from .question_dock import QuestionDock
+from .followup_dock import FollowupDock
+from .revert_dock import RevertDock
+from .todo_dock import TodoDock
+from .inline_spinner import InlineSpinner
+from .animated_number import AnimatedNumber
+from .text_shimmer import TextShimmer
+from .text_reveal import TextReveal
+from .tool_status_title import ToolStatusTitle
+from .keybind_label import KeybindLabel
+from .attachment_preview import AttachmentPreview
+from .slash_command_popover import SlashCommandPopover
+from .mention_popover import MentionPopover, MentionItem
 
 
 __all__ = [
@@ -71,7 +92,28 @@ __all__ = [
     'resolveToolRenderer', 'registeredToolNames',
     'FileReadCard', 'FileWriteCard', 'FileEditCard',
     'BashCard', 'WebSearchCard', 'GrepSearchCard',
+    'McpToolCard', 'SkillCard',
     'GenerationStatusBar',
     'ChatBubble', 'BubbleAction', 'AgentChatView',
     'ChatInputEdit', 'AgentChatPanel',
+    'MessageNav',
+    'SessionRetryCard',
+    'ToolErrorCard',
+    'ContextUsageIndicator',
+    'SessionReviewPanel',
+    'DockSurface',
+    'PermissionDock',
+    'QuestionDock',
+    'FollowupDock',
+    'RevertDock',
+    'TodoDock',
+    'InlineSpinner',
+    'AnimatedNumber',
+    'TextShimmer',
+    'TextReveal',
+    'ToolStatusTitle',
+    'KeybindLabel',
+    'AttachmentPreview',
+    'SlashCommandPopover',
+    'MentionPopover', 'MentionItem',
 ]
