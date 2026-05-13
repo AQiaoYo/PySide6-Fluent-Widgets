@@ -462,3 +462,319 @@ ChatBubble #bubbleStoppedLabel {
     padding: 0 2px;
     color: rgba(255, 255, 255, 0.3);
 }
+
+
+/* ============================================================
+   MessageNav (dark) — 侧边消息导航条
+   ============================================================ */
+
+#messageNav {
+    background: transparent;
+    border: none;
+}
+
+/* ============================================================
+   SessionRetryCard (dark) — 重试倒计时卡片
+   ============================================================ */
+
+#sessionRetryCard {
+    background-color: rgba(80, 20, 20, 0.7);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    border-radius: 8px;
+}
+
+#sessionRetryCard #retryMessage {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    border: none;
+}
+
+#sessionRetryCard #retryInfo {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+}
+
+/* ============================================================
+   ToolErrorCard (dark) — 工具错误详情卡片
+   ============================================================ */
+
+#toolErrorCard {
+    background-color: rgba(80, 20, 20, 0.5);
+    border: 1px solid rgba(220, 53, 69, 0.25);
+    border-radius: 8px;
+}
+
+#toolErrorHeader {
+    background: transparent;
+    border: none;
+}
+
+#toolErrorName {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    border: none;
+    font-weight: 600;
+}
+
+#toolErrorSummary {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+}
+
+#toolErrorContent {
+    background: transparent;
+    border-top: 1px solid rgba(220, 53, 69, 0.15);
+}
+
+#toolErrorDetail {
+    color: rgba(255, 255, 255, 0.75);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 13px;
+}
+
+/* ============================================================
+   ContextUsageIndicator (dark) — 上下文用量指示器
+   ============================================================ */
+
+#contextUsageIndicator {
+    background: transparent;
+    border: none;
+}
+
+#contextUsageLabel {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+}
+
+/* ============================================================
+   SessionReviewPanel (dark) — 多文件 diff 审阅面板
+   ============================================================ */
+
+#sessionReviewPanel {
+    background: transparent;
+    border: none;
+}
+
+#reviewStatsBar {
+    background-color: rgba(255, 255, 255, 0.04);
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+#reviewSummary {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+}
+
+#reviewTotalStats {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+}
+
+#reviewFileItem {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#reviewFileHeader {
+    background: transparent;
+    border: none;
+}
+
+#reviewFileHeader:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+#reviewFileName {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+}
+
+#reviewFileStats {
+    color: rgba(255, 255, 255, 0.45);
+    background: transparent;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+}
+
+#reviewFileContent {
+    background: transparent;
+    border: none;
+}
+
+
+/* ============================================================
+   DockSurface (dark) — Dock 面板基类
+   ============================================================ */
+
+#dockSurface,
+#permissionDock,
+#questionDock,
+#followupDock,
+#revertDock,
+#todoDock {
+    background-color: rgba(40, 40, 44, 0.96);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 4px 0px;
+}
+
+#dockHeader {
+    background: transparent;
+    border: none;
+    padding: 4px 0px;
+}
+
+#dockContent {
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 4px 0px;
+}
+
+#dockChevron {
+    background: transparent;
+}
+
+/* ============================================================
+   PermissionDock (dark)
+   ============================================================ */
+
+#permissionDock {
+    border-color: rgba(255, 255, 255, 0.08);
+    background-color: rgba(40, 40, 44, 0.96);
+}
+
+#permissionTitle {
+    color: rgba(255, 255, 255, 0.9);
+    background: transparent;
+}
+
+#permissionDesc {
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+}
+
+#permissionPattern {
+    color: rgba(255, 255, 255, 0.65);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
+
+/* ============================================================
+   QuestionDock (dark)
+   ============================================================ */
+
+#questionTitle {
+    color: rgba(255, 255, 255, 0.9);
+    background: transparent;
+}
+
+/* ============================================================
+   FollowupDock (dark)
+   ============================================================ */
+
+#followupSummary {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    font-weight: 500;
+}
+
+#followupPreview {
+    color: rgba(255, 255, 255, 0.4);
+    background: transparent;
+}
+
+#followupItemText {
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+}
+
+/* ============================================================
+   RevertDock (dark)
+   ============================================================ */
+
+#revertSummary {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    font-weight: 500;
+}
+
+#revertPreview {
+    color: rgba(255, 255, 255, 0.4);
+    background: transparent;
+}
+
+#revertItemText {
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+}
+
+/* ============================================================
+   TodoDock (dark)
+   ============================================================ */
+
+#todoProgress {
+    color: rgba(255, 255, 255, 0.88);
+    background: transparent;
+    font-weight: 600;
+}
+
+#todoPreview {
+    color: rgba(255, 255, 255, 0.45);
+    background: transparent;
+}
+
+#todoItemIcon {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    font-size: 14px;
+}
+
+#todoItemText {
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+}
+
+/* ============================================================
+   McpToolCard (dark) — MCP 工具调用卡片
+   ============================================================ */
+
+#mcpToolDesc {
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: none;
+    font-style: italic;
+}
+
+/* ============================================================
+   SkillCard (dark) — Skill/Plugin 调用卡片
+   ============================================================ */
+
+#skillDesc {
+    color: rgba(255, 255, 255, 0.7);
+    background: transparent;
+    border: none;
+}
+
+#skillParams {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    padding: 6px 10px;
+}
+
+#skillParamRow {
+    color: rgba(255, 255, 255, 0.6);
+    background: transparent;
+    border: none;
+    font-family: "Cascadia Code", "Consolas", "Menlo", monospace;
+    font-size: 12px;
+}
