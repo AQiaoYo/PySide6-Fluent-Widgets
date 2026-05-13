@@ -1,0 +1,10 @@
+WorkflowCanvas {
+    background: rgb(245, 245, 245);
+    border: none;
+}
+
+WorkflowToolBar {
+    background: rgba(255, 255, 255, 0.95);
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 0px;
+}

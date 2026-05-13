@@ -187,6 +187,7 @@ class FluentStyleSheet(StyleSheetBase, Enum):
     TOAST = "toast"
     PROGRESS_TOAST = "progress_toast"
     AGENT_CHAT_VIEW = "agent_chat_view"
+    WORKFLOW_CANVAS = "workflow_canvas"
 
     def path(self, theme=Theme.AUTO):
         theme = qconfig.theme if theme == Theme.AUTO else theme
