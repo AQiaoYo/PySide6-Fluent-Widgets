@@ -637,6 +637,19 @@ class SmoothScrollBar(ScrollBar):
     def resetValue(self, value):
         self.__value = value
 
+    def _onValueChanged(self, value):
+        """当 partner (原生) scrollbar 值变化时同步内部目标值.
+
+        修复: 程序化滚动 (如 auto-scroll-to-bottom) 改变原生 scrollbar
+        后, __value 未同步, 导致下次用户滚轮时从旧 __value 开始计算,
+        产生 "飞回顶部" 的跳跃.
+
+        仅在动画未运行时同步, 避免动画期间把 __value 重置为中间插值.
+        """
+        if self.ani.state() != QPropertyAnimation.State.Running:
+            self.__value = value
+        super()._onValueChanged(value)
+
     def mousePressEvent(self, e):
         self.ani.stop()
         super().mousePressEvent(e)

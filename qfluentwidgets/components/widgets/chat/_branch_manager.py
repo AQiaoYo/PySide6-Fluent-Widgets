@@ -144,6 +144,10 @@ class _BranchManager:
         bp.active = len(bp.versions) - 1
         self._anchorOf[new_msg.id] = anchor_id
 
+        # 过渡动画: 重建前先拓印当前被裁掘部分的截图, 重建后走 opacity
+        # 1→0 + offset_y -8 让旧内容 "飘走". view 内部判 disabled / hidden 跳过.
+        view._playBranchSwitchOverlay()
+
         # 视图重建: 删 user_msg 及其后所有气泡, 加回新 user_msg
         for mid in list(view._order[idx:]):
             view.removeMessage(mid)
@@ -189,6 +193,9 @@ class _BranchManager:
         # 切版本
         bp.active = new_index
         target = bp.versions[new_index]
+
+        # 过渡动画: 重建前拓印当前截图, 重建后走 fade out + 上飘.
+        view._playBranchSwitchOverlay()
 
         # 视图重建
         for mid in list(view._order[idx:]):

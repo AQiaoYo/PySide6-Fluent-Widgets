@@ -9,7 +9,9 @@
 from datetime import datetime
 from typing import Callable, Dict, List, Optional, Tuple, Union
 
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import (
+    QEasingCurve, QEvent, QPoint, QPropertyAnimation, Qt, QTimer, Signal,
+)
 from PySide6.QtGui import QClipboard, QGuiApplication, QIcon
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QSizePolicy, QVBoxLayout, QWidget,
@@ -21,6 +23,7 @@ from ....common.overload import singledispatchmethod
 from ..button import PillPushButton
 from ..scroll_area import SmoothScrollArea
 from ._branch_manager import _BranchManager
+from ._branch_overlay import BranchSnapshotPlayer
 from ._generation_controller import _GenerationController
 from .chat_bubble import BubbleAction, ChatBubble
 from .chat_message import (
@@ -168,6 +171,56 @@ class AgentChatView(SmoothScrollArea):
         # requires_approval 时生效.
         self._approvalPolicies: Dict[str, ApprovalPolicy] = {}
 
+        # ===== 过渡动画相关 =====
+        # 总开关: False 时 平滑滚动 / 分支截图过渡 全部退化为瞬间行为.
+        # 子组件 (CodeBlock / ThinkingCard / ToolCallCardBase /
+        # GenerationStatusBar) 通过 ``animations_enabled_root`` 沿 parent
+        # 链查询本字段, 一次关掉子树里所有动画.
+        self._animationsEnabled: bool = True
+        # 平滑滚动单独开关.
+        self._smoothScrollEnabled: bool = True
+        # 分支切换截图过渡单独开关.
+        self._branchSwitchAnimationEnabled: bool = True
+        # 思考 / 工具卡展开后是否自动滚到 widget 底部 (默认 False, 不打扰阅读).
+        self._autoScrollOnCardExpand: bool = False
+        # 程序化滚动标志: 动画进行中阻止 ``_onScrollChanged`` 误判 ``_autoScroll``.
+        self._programmaticScroll: bool = False
+        # 滚动动画对象引用.
+        self._scrollAnim: Optional[QPropertyAnimation] = None
+        # 是否跟随 maximum 动态更新动画 endValue:
+        # 仅在 ``_smoothScrollToBottom`` 发起的动画中为 True, ``rangeChanged``
+        # 触发时把 anim.endValue 更新为 new max. 修复"发送消息后动画停在
+        # 旧底部"问题 (Qt layout deferred 刷新, emit 后立即 grab maximum 是旧值).
+        self._scrollAnimTrackingMax: bool = False
+        # layout 动画计数器: 卡片展开 / 折叠 / GenerationStatusBar
+        # show / hide 进出场 这些会连续改 sizeHint 的动画起运行后计
+        # 数器 +1, finished -1. > 0 时 ``_onRangeChanged`` 会强制把 viewport
+        # 锁回动画启动时保存的 ``_savedScrollValue``, 彻底冻结 viewport.
+        # 这是抖动修复的最后一道防线:
+        # - 动画每帧 sizeHint 变化 → maximum 变 → Qt 可能自动调 viewport.value
+        # - 动画 finished 时 setMaximumHeight(QWIDGETSIZE_MAX) 解锁引起高度
+        #   跳变 (target_h 跳到真实 sizeHint)
+        # 都会改 viewport.value, 这里都拦住.
+        # 归 0 后 schedule ``_catchUpToBottomIfNeeded`` 1 帧后 如果
+        # ``_autoScroll == True`` 且离底, 启动 180ms 短动画平滑追到底.
+        self._layoutAnimationDepth: int = 0
+        # layout 动画启动时保存的 viewport 位置 (动画期间锁回这里).
+        self._savedScrollValue: int = 0
+        # layout 动画启动时记录的 _autoScroll 状态 (是否在底部). 动画期间
+        # 用它决定 viewport 行为: True 时跟着 maximum 单调贴底, False 时
+        # 锁回 _savedScrollValue. 单独缓存避免动画期间 setValue 自己改 _autoScroll.
+        self._savedAtBottom: bool = False
+        # rangeChanged debounce timer (16ms): 修复"整个 view 上下跳"的根因。
+        # Qt layout chain (setVisible / addWidget / layout pass / polish) 会在
+        # 短时间内 emit rangeChanged 多次, 每次 maximum 都不一样 (中间
+        # 值). 如果每次都走 ``_scrollToBottom`` (setValue(maximum)),
+        # viewport.value 会在几个中间 maximum 之间跳 —— 这就是看到的
+        # “上下拖动”. Debounce 让连续快速 emit 合并为一次 setValue
+        # (用最后稳定的 maximum), viewport 一次贴到真底.
+        self._rangeCatchUpTimer: Optional[QTimer] = None
+        # 分支切换截图播放器.
+        self._branchSnapshotPlayer = BranchSnapshotPlayer(self)
+
         # 子领域控制器 (composition):
         # - ``_branches``    : 对话分叉 (editAndFork / switchVersion / versionInfo)
         # - ``_generation``  : 生成状态条 (begin / set / end / statusBar / setStatusBar)
@@ -179,12 +232,17 @@ class AgentChatView(SmoothScrollArea):
         self._jumpBtn = PillPushButton(FluentIcon.DOWN, self.tr("回到最新"), self.viewport())
         self._jumpBtn.setCheckable(False)
         self._jumpBtn.hide()
-        self._jumpBtn.clicked.connect(self._scrollToBottom)
+        # 点击 “回到最新” 走平滑滚动动画 (~280ms), 而不是瞬间跳
+        self._jumpBtn.clicked.connect(self._smoothScrollToBottom)
         self._jumpBtn.setFixedHeight(32)
 
         # 滚动监听
         self.verticalScrollBar().valueChanged.connect(self._onScrollChanged)
         self.verticalScrollBar().rangeChanged.connect(self._onRangeChanged)
+
+        # 用户主动输入 (拖滚动条) 时提前取消滚动动画, 避免动画 vs 用户
+        # 拖拽 竞争导致 viewport 拖不动 / 倒退.
+        self.verticalScrollBar().installEventFilter(self)
 
         FluentStyleSheet.AGENT_CHAT_VIEW.apply(self)
         FluentStyleSheet.AGENT_CHAT_VIEW.apply(self._container)
@@ -202,6 +260,13 @@ class AgentChatView(SmoothScrollArea):
 
         Returns:
             创建的 ChatBubble (已加入布局)
+
+        Note:
+            ``message.role == USER`` 时方法末尾会主动调
+            ``_forceSmoothScrollToBottom``, 覆盖 ``_autoScroll`` 状态将用户
+            带回底部 —— 任何 USER 消息进入都意味着用户主动行为, 期望看
+            到自己刚发的内容, 跟 ChatGPT/Claude 行为一致. ``AGENT`` 不
+            force 滚动 (避免初始空占位 bubble 启动多余动画).
         """
         # AGENT 消息: subtitle 为空 -> 用默认 provider 自动填充, 保证头像
         # 下方副标题始终可见 (用户反馈 切到新分支 / 流式按钮 后副标题消失).
@@ -243,7 +308,12 @@ class AgentChatView(SmoothScrollArea):
         self.messageAdded.emit(message.id)
         self.lastMessageChanged.emit()
 
-        if self._autoScroll:
+        if message.role == ChatRole.USER:
+            # USER 消息进入 → 强制带回底部 (覆盖 _autoScroll == False).
+            # 动画 endValue 会随 layout deferred 刷新后的 rangeChanged 动态
+            # 追踪到 new maximum, 保证最终停在真底部.
+            self._forceSmoothScrollToBottom()
+        elif self._autoScroll:
             # 不主动 scroll: bubble 加入 → layout 异步更新 → scrollbar
             # range 变化 → _onRangeChanged 同步滚到底, 与内容增长同步.
             pass
@@ -785,6 +855,72 @@ class AgentChatView(SmoothScrollArea):
         return self._actionsAlwaysVisible
 
     # ------------------------------------------------------------------
+    # 过渡动画 公共 API
+    # ------------------------------------------------------------------
+
+    def setAnimationsEnabled(self, enabled: bool) -> None:
+        """总开关: 一次关掉所有过渡动画 (平滑滚动 / 分支截图 / 卡片展开).
+
+        关闭后:
+
+        - ``_smoothScrollTo`` / ``_smoothScrollToBottom`` 退化为瞬时 setValue.
+        - ``_playBranchSwitchOverlay`` 不再启动.
+        - 沿 parent 链查询本字段的子组件 (CodeBlock / ThinkingCard /
+          ToolCallCardBase / GenerationStatusBar) 也退化为瞬时路径.
+
+        打开后所有路径恢复动画 (假设各子开关也 enabled).
+        """
+        self._animationsEnabled = bool(enabled)
+        if not self._animationsEnabled:
+            # 取消正在跑的动画, 避免被关之后还看到过渡尾巴
+            self._cancelScrollAnimation()
+            if self._branchSnapshotPlayer.is_playing():
+                self._branchSnapshotPlayer.cancel()
+
+    def animationsEnabled(self) -> bool:
+        return self._animationsEnabled
+
+    def setSmoothScrollEnabled(self, enabled: bool) -> None:
+        """单独控制平滑滚动 (默认 ``True``).
+
+        关闭后 ``_smoothScrollTo`` / ``_smoothScrollToBottom`` /
+        ``_forceSmoothScrollToBottom`` / ``_smoothScrollWidgetToTop`` 都退
+        化为瞬时 setValue. ``_animationsEnabled`` 总开关依然生效 (它关
+        后本开关状态不重要).
+        """
+        self._smoothScrollEnabled = bool(enabled)
+        if not self._smoothScrollEnabled:
+            self._cancelScrollAnimation()
+
+    def smoothScrollEnabled(self) -> bool:
+        return self._smoothScrollEnabled
+
+    def setBranchSwitchAnimationEnabled(self, enabled: bool) -> None:
+        """单独控制分支切换截图过渡 (默认 ``True``).
+
+        关闭后 ``editAndFork`` / ``switchVersion`` 不再走截图淺出路径,
+        视图重建瞬间发生.
+        """
+        self._branchSwitchAnimationEnabled = bool(enabled)
+        if not self._branchSwitchAnimationEnabled:
+            if self._branchSnapshotPlayer.is_playing():
+                self._branchSnapshotPlayer.cancel()
+
+    def branchSwitchAnimationEnabled(self) -> bool:
+        return self._branchSwitchAnimationEnabled
+
+    def setAutoScrollOnCardExpand(self, enabled: bool) -> None:
+        """思考 / 工具卡片展开后是否自动滚动到卡片底部 (默认 ``False``).
+
+        默认关: 思考 / 工具卡展开时用户通常在卡片附近, 强制滚动会丢失
+        阅读位置. 没有需求不建议打开.
+        """
+        self._autoScrollOnCardExpand = bool(enabled)
+
+    def autoScrollOnCardExpand(self) -> bool:
+        return self._autoScrollOnCardExpand
+
+    # ------------------------------------------------------------------
     # 对话分叉 (Conversation forking) 公共 API
     # ------------------------------------------------------------------
 
@@ -931,6 +1067,11 @@ class AgentChatView(SmoothScrollArea):
         return bar.maximum() - bar.value()
 
     def _onScrollChanged(self, _value: int):
+        # 动画驱动的 setValue 也会触发本信号. 动画期间不切换
+        # ``_autoScroll`` 状态, 仅 finished 后由 ``_onScrollAnimFinished``
+        # 调一次 ``_refreshScrollState`` 重新同步.
+        if self._programmaticScroll:
+            return
         dist = self._distanceToBottom()
         if dist > self._SCROLL_PAUSE_THRESHOLD and self._autoScroll:
             self._autoScroll = False
@@ -964,10 +1105,255 @@ class AgentChatView(SmoothScrollArea):
     def _onRangeChanged(self, _min: int, _max: int):
         # 同步滚到底.
         # rangeChanged 在 Qt 完成 layout 重新计算后才发出, 此时 maximum 是
-        # 内容稳定后的真值, 立即 setValue(maximum) 能让 viewport 与内容
-        # 增长保持完美同步, 不会出现"内容已增长但 scroll 还没跟上"的滞后.
-        if self._autoScroll:
-            self._scrollToBottom()
+        # 内容稳定后的真值.
+
+        # 卡片展开 / 折叠 动画期间: **一律**锁 viewport.value 到启动时的
+        # saved 快照, 不管启动时是否在底部. 这样:
+        # - 上方 widget 视觉位置完全不动 (widget.y_in_content 不变 +
+        #   viewport.value 不变 -> 视觉 y 不变), 不再有"上下漂移"抖动
+        # - 卡片下方 widget 跟着卡片增长被推下 (视觉连续, 卡片在向下伸展)
+        # - 启动时在底部的情况, endLayoutAnimation 后会触发 _catchUpToBottomIfNeeded
+        #   平滑追到新底部, 形成"卡片展开 → 视图平滑追底"的双段式动画
+        if self._layoutAnimationDepth > 0:
+            bar = self.verticalScrollBar()
+            target = max(0, min(self._savedScrollValue, _max))
+            if bar.value() != target:
+                self._programmaticScroll = True
+                try:
+                    bar.setValue(target)
+                finally:
+                    self._programmaticScroll = False
+            return
+
+        # 动画中且 tracking_max: 动态更新 endValue 让动画跟到真底部.
+        # 使用场景: 用户发送消息 -> emit -> 应用层 addMessage 同步返回
+        # 但 layout 未刷 -> _forceSmoothScrollToBottom 启动动画 (endValue=旧max)
+        # -> Qt 异步刷 layout -> rangeChanged -> 这里把 anim.endValue 追到
+        # new max, 动画顺滑跑到真底部.
+        if (self._programmaticScroll and self._scrollAnimTrackingMax
+                and self._scrollAnim is not None
+                and self._scrollAnim.state() == QPropertyAnimation.State.Running):
+            self._scrollAnim.setEndValue(int(_max))
+            return
+
+        # 非动画驱动 + 在底部状态: 贴底 (debounce 16ms).
+        # 不再直接 ``_scrollToBottom``, 避免 Qt layout chain 连续 emit
+        # 多次时 viewport 在多个中间 maximum 之间跳动.
+        if self._autoScroll and not self._programmaticScroll:
+            self._scheduleRangeCatchUp()
+
+    # ------------------------------------------------------------------
+    # layout 动画会席 (卡片展开 / 折叠 / GenerationStatusBar 进出场)
+    # ------------------------------------------------------------------
+
+    def beginLayoutAnimation(self, animating_widget: Optional[QWidget] = None) -> None:
+        """卡片展开 / 折叠 动画启动时调用 (一般由 ``animate_collapse`` /
+        ``CodeBlock.setExpanded`` 自动 duck-type 调).
+
+        首次进入时 (depth 0->1) 保存当前 ``bar.value()`` 与 ``_autoScroll``
+        快照. 动画期间 ``_onRangeChanged`` 一律锁 viewport.value 到 saved.
+
+        v5 设计下 ``animate_collapse`` 在跳变 parent 那一帧锁住 parent
+        的 min/max height, ChatBubble 只重排一次, sibling 一次跳到位. 整
+        个 220ms 动画期间 ChatBubble 完全不重排, viewport 不动.
+
+        Args:
+            animating_widget: 已废弃 (v4 freeze 方案的残留参数, v5 不用).
+                              保留只为向后兼容 ``begin_layout_animation``
+                              helper 的新签名调用.
+        """
+        del animating_widget  # v5 不需要 (v4 freeze 方案废弃)
+        if self._layoutAnimationDepth == 0:
+            self._savedScrollValue = self.verticalScrollBar().value()
+            self._savedAtBottom = bool(self._autoScroll)
+        self._layoutAnimationDepth += 1
+
+    def endLayoutAnimation(self) -> None:
+        """卡片展开 / 折叠 动画结束时调用.
+
+        计数器递减, 归 0 后 ``QTimer.singleShot(0, _catchUpToBottomIfNeeded)``
+        推迟一帧让 layout 真正稳定 + 启动平滑追底 (如果启动时在底部).
+        """
+        self._layoutAnimationDepth = max(0, self._layoutAnimationDepth - 1)
+        if self._layoutAnimationDepth == 0:
+            QTimer.singleShot(0, self._catchUpToBottomIfNeeded)
+
+    def _catchUpToBottomIfNeeded(self) -> None:
+        """layout 动画结束后 追底的 catch-up 逻辑.
+
+        新设计下 (v3): 动画期间 viewport 一律锁 saved, 动画结束时 viewport
+        在原 saved 位置. 如果启动时**在底部** (``_savedAtBottom == True``),
+        现在卡片展开后 saved 已经离底部很远了, 平滑追到新底部, 形成
+        "卡片展开 220ms → viewport 平滑追底 180ms" 的双段式动画 — 视觉
+        连续, 不抖.
+
+        启动时不在底部 (用户在中间查看历史): 不追底, viewport 保持原位.
+        """
+        if self._layoutAnimationDepth > 0:
+            return
+        if self._programmaticScroll:
+            return
+        if not self._savedAtBottom:
+            return
+        if self._distanceToBottom() <= self._SCROLL_BOTTOM_THRESHOLD:
+            return
+        # 平滑追底 (180ms 动画), 与卡片 220ms 展开动画形成自然双段过渡
+        self._smoothScrollToBottom(180)
+
+    def _scheduleRangeCatchUp(self) -> None:
+        """Debounce 贴底: 连续 16ms 内的 rangeChanged 合并为一次贴底.
+
+        **抖动修复根因**: Qt layout chain 在 setVisible / addWidget /
+        polish 多轮重算过程中 会 emit rangeChanged 多次, 每次
+        ``maximum`` 是不同的中间值. 之前每次都走 ``_scrollToBottom``
+        (设 viewport.value = 当时的 maximum), viewport 在多个中间
+        maximum 之间跳 —— 这就是用户看到的“整个 view 区域上下跳”.
+
+        **修复**: 每次重启 16ms timer (debounce), 连续快速 emit 会
+        不断重置 timer, 直到 16ms 内没有新 emit 才 fire 一次 setValue,
+        用的是最后稳定的 maximum, viewport 一次贴到真底.
+        """
+        if self._rangeCatchUpTimer is None:
+            self._rangeCatchUpTimer = QTimer(self)
+            self._rangeCatchUpTimer.setSingleShot(True)
+            self._rangeCatchUpTimer.setInterval(16)
+            self._rangeCatchUpTimer.timeout.connect(self._rangeCatchUpFire)
+        # ``start`` 会重置 timer (取消上个 pending fire) —— 这就是 debounce.
+        self._rangeCatchUpTimer.start()
+
+    def _rangeCatchUpFire(self) -> None:
+        """Debounce timer fire: 检查状态 + 瞬间贴到真底."""
+        if not self._autoScroll:
+            return
+        if self._programmaticScroll:
+            return
+        # layout 动画期间也不贴底 (depth>0 路径锁住 saved)
+        if self._layoutAnimationDepth > 0:
+            return
+        self._scrollToBottom()
+
+    # ------------------------------------------------------------------
+    # 平滑滚动 (“回到最新” / 发送消息后 / 卡片展开后定位)
+    # ------------------------------------------------------------------
+
+    def _shouldUseSmoothScroll(self) -> bool:
+        """总开关 + 平滑滚动开关 + visible 决定是否走平滑动画."""
+        if not self._smoothScrollEnabled:
+            return False
+        if not self._animationsEnabled:
+            return False
+        if not self.isVisible():
+            return False
+        return True
+
+    def _smoothScrollTo(self, target: int, duration: int = 280) -> None:
+        """平滑滚动到 verticalScrollBar 某个值 (clamp 到 [0, maximum]).
+
+        起点 = 当前 value, OutCubic. 动画期间 ``_programmaticScroll = True``,
+        ``_onScrollChanged`` 早 return 避免误切 ``_autoScroll`` 状态.
+        finished 后清标志并刷新 ``_refreshScrollState``.
+        关闭平滑滚动时退化为瞬间 setValue.
+
+        注意: tracking_max 模式下 (``_smoothScrollToBottom`` 调起), 即使
+        ``bar.value() == target`` (用户在底) 也不 short-circuit, 因为 layout
+        异步刷后 maximum 会变大, ``rangeChanged`` 会追 endValue 到真底部.
+        """
+        bar = self.verticalScrollBar()
+        target = max(0, min(int(target), bar.maximum()))
+        if not self._shouldUseSmoothScroll():
+            bar.setValue(target)
+            return
+        # tracking_max 模式: 不 short-circuit, 启动动画等待 rangeChanged 追 endValue.
+        if bar.value() == target and not self._scrollAnimTrackingMax:
+            return
+
+        # 取消上一轮动画但保留 _scrollAnimTrackingMax 标志 ——
+        # 该标志是 _smoothScrollToBottom 调本方法**之前**设的 True, 动画
+        # 中 _onRangeChanged 会读它来决定是否 setEndValue. 不能在这里清掉.
+        if (self._scrollAnim is not None
+                and self._scrollAnim.state() == QPropertyAnimation.State.Running):
+            self._scrollAnim.stop()
+        self._programmaticScroll = True
+        anim = QPropertyAnimation(bar, b"value", self)
+        anim.setDuration(int(duration))
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.setStartValue(int(bar.value()))
+        anim.setEndValue(int(target))
+        anim.finished.connect(self._onScrollAnimFinished)
+        self._scrollAnim = anim
+        anim.start()
+
+    def _smoothScrollToBottom(self, duration: int = 280) -> None:
+        """平滑滚到底. 启动前隐藏 jumpBtn (用户期望按钮立即消失).
+
+        设 ``_scrollAnimTrackingMax = True``: 动画期间 ``rangeChanged`` 会
+        动态更新 endValue, 跟随 Qt layout deferred 刷新后的真底部.
+        """
+        self._jumpBtn.hide()
+        self._scrollAnimTrackingMax = True
+        bar = self.verticalScrollBar()
+        self._smoothScrollTo(bar.maximum(), duration)
+
+    def _forceSmoothScrollToBottom(self, duration: int = 280) -> None:
+        """强制平滑滚到底, 不管当前 ``_autoScroll`` 状态如何.
+
+        用法: 用户发送消息后 (Panel 侧 hook), 即使用户在上方查看历史,
+        也要被带回底部看自己刚发的消息. 充充重置 ``_autoScroll = True``.
+        """
+        self._autoScroll = True
+        self._smoothScrollToBottom(duration)
+
+    def _smoothScrollWidgetToTop(self, w: QWidget, duration: int = 280) -> None:
+        """让指定 widget 的顶部与 viewport 顶部对齐 (扣除 _vLayout top padding).
+
+        供 CodeBlock 展开后定位用. CodeBlock 在 setExpanded(True) 动画
+        finished 时通过 duck typing 找最近的 ancestor (本 view) 调本方法.
+        """
+        if w is None or self.widget() is None:
+            return
+        # mapTo(scroll widget, (0,0)) -> widget 在滚动内容坐标系里的 y
+        pos = w.mapTo(self.widget(), QPoint(0, 0))
+        # 留出 _vLayout top padding 的呼吸空间 (16px), 让 widget 顶部别贴死
+        # viewport 顶.
+        target = max(0, pos.y() - 16)
+        self._smoothScrollTo(target, duration)
+
+    def _cancelScrollAnimation(self) -> None:
+        """取消正在跑的滚动动画. stop 不会触发 finished, 手动清标志."""
+        if (self._scrollAnim is not None
+                and self._scrollAnim.state() == QPropertyAnimation.State.Running):
+            self._scrollAnim.stop()
+        self._programmaticScroll = False
+        self._scrollAnimTrackingMax = False
+
+    def _onScrollAnimFinished(self) -> None:
+        """滚动动画自然跑完. 清 _programmaticScroll / tracking 标志 + 同步 jumpBtn / autoScroll."""
+        self._programmaticScroll = False
+        self._scrollAnimTrackingMax = False
+        self._refreshScrollState()
+
+    def _playBranchSwitchOverlay(self) -> None:
+        """启动一次分支切换截图过渡. 给 :class:`_BranchManager` 在视图重建前调.
+
+        抓取 ``_inner.grab()`` 当前截图, overlay 显示在 viewport 上,
+        opacity 1->0 + offset_y 0->-8px, 220ms OutCubic. 重建逻辑由
+        manager 处理, overlay 不参与 layout, 不影响重建后几何.
+        """
+        if not self._branchSwitchAnimationEnabled:
+            return
+        if not self._animationsEnabled:
+            return
+        if not self.isVisible():
+            return
+        # 上一次过渡还在跑: 立即收尾, 然后开始新一轮.
+        if self._branchSnapshotPlayer.is_playing():
+            self._branchSnapshotPlayer.cancel()
+        snapshot = self._inner.grab()
+        if snapshot.isNull() or snapshot.size().isEmpty():
+            return
+        self._branchSnapshotPlayer.play(
+            self.viewport(), snapshot, duration=220, offset_y=-8,
+        )
 
     # ------------------------------------------------------------------
     # 浮动按钮定位
@@ -993,3 +1379,23 @@ class AgentChatView(SmoothScrollArea):
         self._applyMaxContentWidth()
         self._positionJumpButton()
         self._positionGenBar()
+
+    # ------------------------------------------------------------------
+    # 事件拦截: 用户主动输入时取消滚动动画
+    # ------------------------------------------------------------------
+
+    def wheelEvent(self, event):
+        """用户滾轮 -> 立即停掉滚动动画 (用户优先), 然后让父类处理."""
+        self._cancelScrollAnimation()
+        super().wheelEvent(event)
+
+    def eventFilter(self, obj, event):
+        """用户在 verticalScrollBar 上 mouse press / wheel -> 停滚动动画.
+
+        不走 ``mousePressEvent`` 路径是因为拖动滚动条的事件会被 QScrollBar
+        拦截不到达 view, 只能用 eventFilter 看到.
+        """
+        if obj is self.verticalScrollBar():
+            if event.type() in (QEvent.Type.MouseButtonPress, QEvent.Type.Wheel):
+                self._cancelScrollAnimation()
+        return super().eventFilter(obj, event)

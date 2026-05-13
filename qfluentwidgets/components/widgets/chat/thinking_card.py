@@ -11,7 +11,7 @@
 
 from typing import Optional
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QPropertyAnimation, QSize, Qt, Signal
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget,
 )
@@ -20,6 +20,7 @@ from ....common.icon import FluentIcon
 from ....common.style_sheet import FluentStyleSheet
 from .._clickable import ClickableFrame
 from ..label import BodyLabel
+from ._collapse_anim import animate_collapse, animations_enabled_root
 from .chat_message import ThinkingSegment
 from .markdown_view import MarkdownView
 
@@ -58,6 +59,9 @@ class ThinkingCard(QFrame):
         self._segment: Optional[ThinkingSegment] = None
         self._expanded = False
         self._defaultExpanded = False
+        # 展开 / 折叠动画状态
+        self._expandAnim: Optional[QPropertyAnimation] = None
+        self._expandAnimEnabled: bool = True
 
         self._setupUi()
         self._refreshHeader()
@@ -118,7 +122,9 @@ class ThinkingCard(QFrame):
         self._contentWrap.hide()
 
         rootLayout.addWidget(self._header)
-        rootLayout.addWidget(self._contentWrap)
+        # AlignTop: 同 ToolCallCardBase, 让动画期间窗帘从顶部向下揭开
+        # (默认 alignment 让 widget 在 alloc 内垂直居中, 引起 "从中间向上下展开")
+        rootLayout.addWidget(self._contentWrap, 0, Qt.AlignmentFlag.AlignTop)
 
     def _updateChevron(self):
         icon = (
@@ -181,14 +187,24 @@ class ThinkingCard(QFrame):
     # ------------------------------------------------------------------
 
     def setExpanded(self, expanded: bool):
-        """显式设置展开状态."""
-        expanded = bool(expanded)
+        """显式设置展开状态.
+
+        动画路径 (当 ``_expandAnimEnabled`` + view 总开关均 True 时):
+            对 ``_contentWrap`` 的 ``maximumHeight`` 插值, 220ms OutCubic.
+            展开起点 0 -> sizeHint, 折叠起点 当前 -> 0.
+        瞬时路径: ``setVisible(b)`` (与原行为一致).
+        其它副作用 (chevron 图标, ``expandedChanged`` 信号) 不受动画开关影响.
+        """
+        self._setExpandedInternal(bool(expanded), animate=True)
+
+    def _setExpandedInternal(self, expanded: bool, *, animate: bool) -> None:
+        """内部实现 (瞬时展开/折叠, animate 参数保留兼容但不再使用)."""
         if expanded == self._expanded:
             return
         self._expanded = expanded
-        self._contentWrap.setVisible(expanded)
         self._updateChevron()
         self.expandedChanged.emit(expanded)
+        self._contentWrap.setVisible(expanded)
 
     def isExpanded(self) -> bool:
         return self._expanded
@@ -197,9 +213,37 @@ class ThinkingCard(QFrame):
         self.setExpanded(not self._expanded)
 
     def setDefaultExpanded(self, expanded: bool):
-        """设置初始展开状态 (仅对未交互过的卡片生效)."""
+        """设置初始展开状态 (仅对未交互过的卡片生效).
+
+        不走展开动画: 避免初始创建时 0->H 抖动.
+        """
         self._defaultExpanded = bool(expanded)
-        self.setExpanded(self._defaultExpanded)
+        self._setExpandedInternal(self._defaultExpanded, animate=False)
+
+    # ------------------------------------------------------------------
+    # 动画控制
+    # ------------------------------------------------------------------
+
+    def setExpandAnimationEnabled(self, enabled: bool) -> None:
+        """设置展开 / 折叠动画是否启用 (默认 ``True``).
+
+        关闭后 ``setExpanded`` / ``toggle`` 退化为瞬间 setVisible, 与本期
+        改造前行为等价.
+        """
+        self._expandAnimEnabled = bool(enabled)
+
+    def expandAnimationEnabled(self) -> bool:
+        return self._expandAnimEnabled
+
+    def _shouldAnimateExpand(self) -> bool:
+        """综合本卡开关 + 宿主总开关 + visible 状态 决定是否走动画."""
+        if not self._expandAnimEnabled:
+            return False
+        if not self.isVisible():
+            return False
+        if not animations_enabled_root(self):
+            return False
+        return True
 
     # ------------------------------------------------------------------
     # 内部: 刷新 header 文案

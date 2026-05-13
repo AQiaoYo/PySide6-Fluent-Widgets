@@ -464,7 +464,9 @@ class AgentChatPanel(QWidget):
         self._maxContentWidth = self._DEFAULT_MAX_CONTENT_WIDTH
 
         # 信号转发
-        self._inputEdit.sendRequested.connect(self.sendRequested.emit)
+        # sendRequested 不直接转发, 多一层 hook: 应用层 slot 完成 addMessage 后
+        # 主动 force-smooth-scroll 到底, 让用户看到自己刚发的消息.
+        self._inputEdit.sendRequested.connect(self._onUserSendRequested)
         self._inputEdit.attachmentRequested.connect(self.attachmentRequested.emit)
 
     def _inputRow_widget(self) -> QWidget:
@@ -617,3 +619,42 @@ class AgentChatPanel(QWidget):
 
     def clear(self):
         return self._chatView.clear()
+
+    # ------------------------------------------------------------------
+    # 发送消息 hook + 动画总开关
+    # ------------------------------------------------------------------
+
+    def _onUserSendRequested(self, text: str) -> None:
+        """用户发送消息 hook.
+
+        顺序关键:
+
+        1. 先 ``sendRequested.emit(text)`` -- Qt 同步发射, 应用层 slot
+           (一般是调 ``addMessage(USER消息)`` + ``addMessage(AGENT消息)``
+           + ``beginGeneration``) 在本行返回前已同步跑完, ``_inner.sizeHint``
+           已包含新 bubble, ``bar.maximum()`` 已是包含新内容的真值.
+        2. 后 ``chatView._forceSmoothScrollToBottom(280)`` -- 把 ``_autoScroll``
+           强制设为 True 后平滑滚到 maximum. 用户在上方查看历史时
+           也能被带回底部.
+
+        顺序不能反: 先滚动后 emit 时新消息尚未加入, ``bar.maximum()``
+        是旧值, 动画会停在旧底部, 而后 ``_onRangeChanged`` 在
+        ``_autoScroll == False`` 时又不会自动贴底, 就会出现"滚动动画跑完
+        但底下还有新消息没看到"的视觉割裂.
+        """
+        self.sendRequested.emit(text)
+        self._chatView._forceSmoothScrollToBottom()
+
+    def setAnimationsEnabled(self, enabled: bool) -> None:
+        """总开关: 一次关掉 panel 内所有过渡动画.
+
+        转发到 ``chatView.setAnimationsEnabled(b)`` (递归覆盖 view + 子组件)
+        并同步调 ``genBar.setEnterExitAnimationEnabled(b)`` 幂等设置
+        (genBar 也会通过 ``animations_enabled_root`` 查 view 总开关, 但
+        这里再设一次幂等, 避免任何缓存状态不同步).
+        """
+        self._chatView.setAnimationsEnabled(enabled)
+        self._genBar.setEnterExitAnimationEnabled(enabled)
+
+    def animationsEnabled(self) -> bool:
+        return self._chatView.animationsEnabled()

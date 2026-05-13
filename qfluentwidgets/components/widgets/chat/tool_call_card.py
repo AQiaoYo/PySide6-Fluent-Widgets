@@ -18,7 +18,7 @@
 
 from typing import Optional
 
-from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtCore import QPropertyAnimation, QSize, Qt, Signal
 from PySide6.QtGui import QColor
 from PySide6.QtWidgets import (
     QFrame, QHBoxLayout, QLabel, QSizePolicy, QVBoxLayout, QWidget,
@@ -31,6 +31,7 @@ from .._clickable import ClickableFrame
 from ..button import PrimaryPushButton, PushButton
 from ..label import BodyLabel, CaptionLabel
 from ..progress_ring import IndeterminateProgressRing
+from ._collapse_anim import animate_collapse, animations_enabled_root
 from .chat_message import ToolCallSegment, ToolCallStatus
 from .code_block import CodeBlock
 from .markdown_view import MarkdownView
@@ -93,6 +94,9 @@ class ToolCallCardBase(QFrame):
         self._segment: Optional[ToolCallSegment] = None
         self._expanded = False
         self._codeMaxVisibleLines = CodeBlock._DEFAULT_MAX_VISIBLE_LINES
+        # 展开 / 折叠动画状态
+        self._expandAnim: Optional[QPropertyAnimation] = None
+        self._expandAnimEnabled: bool = True
 
         self._setupUi()
         self._refreshHeader()
@@ -235,7 +239,11 @@ class ToolCallCardBase(QFrame):
         self._contentWrap.hide()
 
         rootLayout.addWidget(self._header)
-        rootLayout.addWidget(self._contentWrap)
+        # AlignTop: 让 _contentWrap 在 rootLayout 给的 alloc 内顶部对齐.
+        # 默认 Qt 给 widget 在 alloc 内垂直居中, 当 widget.maxH < alloc.h
+        # (动画起始 widget 被压扁时) 居中会让内容看起来 "从中间向上下展开".
+        # AlignTop 让窗帘从顶部向下揭开, 视觉自然.
+        rootLayout.addWidget(self._contentWrap, 0, Qt.AlignmentFlag.AlignTop)
 
     def _updateChevron(self):
         icon = (
@@ -352,19 +360,45 @@ class ToolCallCardBase(QFrame):
     # ------------------------------------------------------------------
 
     def setExpanded(self, expanded: bool):
+        """显式设置展开 / 折叠 (瞬时, 无动画)."""
         expanded = bool(expanded)
         if expanded == self._expanded:
             return
         self._expanded = expanded
-        self._contentWrap.setVisible(expanded)
         self._updateChevron()
         self.expandedChanged.emit(expanded)
+        self._contentWrap.setVisible(expanded)
 
     def isExpanded(self) -> bool:
         return self._expanded
 
     def toggle(self):
         self.setExpanded(not self._expanded)
+
+    # ------------------------------------------------------------------
+    # 动画控制
+    # ------------------------------------------------------------------
+
+    def setExpandAnimationEnabled(self, enabled: bool) -> None:
+        """设置展开 / 折叠动画是否启用 (默认 ``True``).
+
+        关闭后 ``setExpanded`` / ``toggle`` 退化为瞬间 setVisible, 与本期
+        改造前行为等价.
+        """
+        self._expandAnimEnabled = bool(enabled)
+
+    def expandAnimationEnabled(self) -> bool:
+        return self._expandAnimEnabled
+
+    def _shouldAnimateExpand(self) -> bool:
+        """综合本卡开关 + 宿主总开关 + visible 状态 决定是否走动画."""
+        if not self._expandAnimEnabled:
+            return False
+        if not self.isVisible():
+            return False
+        if not animations_enabled_root(self):
+            return False
+        return True
 
     # ------------------------------------------------------------------
     # 内部: 刷新 header

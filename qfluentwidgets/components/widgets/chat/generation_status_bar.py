@@ -23,7 +23,9 @@
 
 from typing import Optional
 
-from PySide6.QtCore import QSize, Qt, QTimer, QElapsedTimer, Signal
+from PySide6.QtCore import (
+    QEasingCurve, QElapsedTimer, QPropertyAnimation, QSize, Qt, QTimer, Signal,
+)
 from PySide6.QtWidgets import QFrame, QHBoxLayout, QSizePolicy, QWidget
 
 from ....common.icon import FluentIcon
@@ -31,6 +33,7 @@ from ....common.style_sheet import FluentStyleSheet
 from ..button import TransparentToolButton
 from ..label import BodyLabel, CaptionLabel
 from ..progress_ring import IndeterminateProgressRing
+from ._collapse_anim import animations_enabled_root
 
 
 __all__ = ['GenerationStatusBar']
@@ -72,12 +75,19 @@ class GenerationStatusBar(QFrame):
 
     _HEIGHT = 32
     _SPINNER_SIZE = 14
+    # 进入 / 退出动画时长 (默认 200ms, 比卡片展开 220 略快)
+    _ENTER_EXIT_ANIM_MS = 200
 
     def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
         self.setObjectName("generationStatusBar")
         self.setAttribute(Qt.WidgetAttribute.WA_StyledBackground, True)
-        self.setFixedHeight(self._HEIGHT)
+        # 不再走 setFixedHeight, 改为 min == max == _HEIGHT 等价设置.
+        # 进入 / 退出动画要动画 maximumHeight 从 0 -> _HEIGHT (反之),
+        # 需要临时 setMinimumHeight(0) 释放锁死. 如果走 setFixedHeight
+        # minimumHeight 会被锁在 _HEIGHT, 动画走不下去.
+        self.setMinimumHeight(self._HEIGHT)
+        self.setMaximumHeight(self._HEIGHT)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         self._timer = QTimer(self)
@@ -85,6 +95,10 @@ class GenerationStatusBar(QFrame):
         self._timer.timeout.connect(self._onTick)
         self._elapsed = QElapsedTimer()
         self._extraElapsedMs = 0  # 调用 setElapsedMs 时手动注入的偏置
+
+        # 进入 / 退出 高度动画状态
+        self._enterExitAnim: Optional[QPropertyAnimation] = None
+        self._enterExitAnimEnabled: bool = True
 
         self._setupUi()
         FluentStyleSheet.AGENT_CHAT_VIEW.apply(self)
@@ -189,3 +203,109 @@ class GenerationStatusBar(QFrame):
             return
         total_ms = self._extraElapsedMs + self._elapsed.elapsed()
         self._elapsedLabel.setText(_format_elapsed(total_ms))
+
+    # ------------------------------------------------------------------
+    # 进入 / 退出 高度动画 (Override show / hide)
+    # ------------------------------------------------------------------
+
+    def setEnterExitAnimationEnabled(self, enabled: bool) -> None:
+        """设置进入 / 退出动画是否启用 (默认 ``True``).
+
+        关闭后 ``show()`` / ``hide()`` 退化为原生瞬间路径, 与本期改造
+        前行为等价.
+        """
+        self._enterExitAnimEnabled = bool(enabled)
+
+    def enterExitAnimationEnabled(self) -> bool:
+        return self._enterExitAnimEnabled
+
+    def _shouldAnimateEnterExit(self) -> bool:
+        """本卡开关 + 宿主总开关 决定是否走动画."""
+        if not self._enterExitAnimEnabled:
+            return False
+        if not animations_enabled_root(self):
+            return False
+        return True
+
+    def show(self) -> None:
+        """进入路径: 如果当前 hidden 走高度展开动画 (0 -> _HEIGHT, 200ms OutCubic).
+
+        已经 visible 时 (包含出场动画中依然是 visible) 不重启进入动画,
+        仅取消出场动画并锁回 _HEIGHT.
+        """
+        # 出场动画进行中被 show: 取消出场 + 锁回高度.
+        if (self._enterExitAnim is not None
+                and self._enterExitAnim.state() == QPropertyAnimation.State.Running):
+            self._enterExitAnim.stop()
+            self._lockHeight()
+            super().show()
+            return
+
+        if self.isVisible():
+            super().show()
+            return
+        if not self._shouldAnimateEnterExit():
+            super().show()
+            return
+
+        # 进入动画: 先 super().show() 让 widget 进入 visible 状态, 为 0 高度
+        # 看不见; 然后动画 0 -> _HEIGHT.
+        self.setMinimumHeight(0)
+        self.setMaximumHeight(0)
+        super().show()
+        self._animateEnter()
+
+    def hide(self) -> None:
+        """退出路径: 如果当前 visible 走高度收缩动画 (current -> 0, 200ms OutCubic),
+        finished 后才真正 ``QFrame.hide`` widget.
+
+        已经 hidden 不重启退出动画.
+        """
+        # 进入动画中被 hide: 作为反转, 取消进入 + 启动出场.
+        if (self._enterExitAnim is not None
+                and self._enterExitAnim.state() == QPropertyAnimation.State.Running):
+            self._enterExitAnim.stop()
+
+        if not self.isVisible():
+            super().hide()
+            return
+        if not self._shouldAnimateEnterExit():
+            super().hide()
+            return
+        self._animateExit()
+
+    def _animateEnter(self) -> None:
+        anim = QPropertyAnimation(self, b"maximumHeight", self)
+        anim.setDuration(self._ENTER_EXIT_ANIM_MS)
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.setStartValue(0)
+        anim.setEndValue(self._HEIGHT)
+        anim.finished.connect(self._lockHeight)
+        self._enterExitAnim = anim
+        anim.start()
+
+    def _animateExit(self) -> None:
+        # 需要先放开 minimumHeight 才能动到 0
+        self.setMinimumHeight(0)
+        start_h = self.height() or self._HEIGHT
+        anim = QPropertyAnimation(self, b"maximumHeight", self)
+        anim.setDuration(self._ENTER_EXIT_ANIM_MS)
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.setStartValue(start_h)
+        anim.setEndValue(0)
+        anim.finished.connect(self._onExitFinished)
+        self._enterExitAnim = anim
+        anim.start()
+
+    def _lockHeight(self) -> None:
+        """进入动画 finished: 锁回 _HEIGHT 让 widget 保持固定高度."""
+        self.setMinimumHeight(self._HEIGHT)
+        self.setMaximumHeight(self._HEIGHT)
+
+    def _onExitFinished(self) -> None:
+        """退出动画 finished: 真正隐藏 widget + 锁回 _HEIGHT (下次 show 时默认高度正确)."""
+        # 字面调 QFrame.hide 代替 super().hide() 让代码 避免走本类 override
+        # 重新启动出场动画限制为递归.
+        QFrame.hide(self)
+        self.setMinimumHeight(self._HEIGHT)
+        self.setMaximumHeight(self._HEIGHT)

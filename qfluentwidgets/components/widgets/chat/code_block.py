@@ -8,7 +8,10 @@
 
 from typing import Dict, Optional
 
-from PySide6.QtCore import QRectF, QSize, Qt, QTimer, Signal
+from PySide6.QtCore import (
+    Property, QEasingCurve, QPropertyAnimation, QRectF, QSize, Qt, QTimer,
+    Signal,
+)
 from PySide6.QtGui import (
     QClipboard, QColor, QFont, QFontDatabase, QFontMetrics,
     QGuiApplication, QPainter, QPainterPath, QPen, QSyntaxHighlighter,
@@ -25,6 +28,9 @@ from ..button import TransparentToolButton
 from ..icon_widget import IconWidget
 from ..label import BodyLabel
 from ..scroll_bar import SmoothScrollDelegate
+from ._collapse_anim import (
+    animations_enabled_root, begin_layout_animation, end_layout_animation,
+)
 
 
 __all__ = ['CodeBlock']
@@ -186,10 +192,14 @@ class CodeBlock(QFrame):
 
     copied = Signal(str)
     expandedChanged = Signal(bool)
+    # 展开动画 finish 后发出, 请求宿主 (AgentChatView 等) 滚到 self.header 顶部
+    requestScrollIntoView = Signal(QWidget)
 
     _COPY_FEEDBACK_MS = 1200
     _DEFAULT_MAX_VISIBLE_LINES = 5
     _MIN_WIDTH = 560
+    # 展开 / 折叠动画时长
+    _EXPAND_ANIM_MS = 220
 
     # 语言名 -> FluentIcon 映射. 未命中时 fallback 到 CODE.
     _LANGUAGE_ICONS = {
@@ -249,6 +259,11 @@ class CodeBlock(QFrame):
         # 实际行数 ≤ maxLines: 完全展开, 无滚动条, 无展开按钮.
         self._maxVisibleLines = self._DEFAULT_MAX_VISIBLE_LINES
         self._expanded = False  # 展开按钮的状态
+        # 展开 / 折叠动画状态
+        self._expandAnim: Optional[QPropertyAnimation] = None
+        self._expandAnimEnabled: bool = True
+        # layout 动画会席 (动画期间 ancestor view 冻结 viewport 贴底)
+        self._layoutAnimHost: Optional[QWidget] = None
 
         self._setupUi()
         self._setupHighlighter()
@@ -504,17 +519,165 @@ class CodeBlock(QFrame):
 
         实际行数未溢出 (≤ maxVisibleLines) 时此方法仍会更新内部状态,
         但视觉上不会出现展开按钮. 状态变化时发出 ``expandedChanged``.
+
+        动画路径 (当 ``_expandAnimEnabled`` + view 级总开关均 True 时):
+            editor.height 从当前值插值到目标 (220ms OutCubic).
+            展开动画 finish 后 emit ``requestScrollIntoView(self)``,
+            宿主 (AgentChatView) 接不接由其决定.
+        瞬时路径: 合起重走 ``_adjustHeight`` (与原行为一致).
         """
         expanded = bool(expanded)
         if expanded == self._expanded:
             return
         self._expanded = expanded
-        self._adjustHeight()
+
+        if not self._shouldAnimateExpand():
+            self._adjustHeight()
+            self.expandedChanged.emit(expanded)
+            return
+
+        # 走动画路径.
+        # 1. 先计算目标 editor 高度 + 刷新除高度外的副作用 (滚动条
+        #    policy / 底部按钮显隐 / chevron 图标).
+        target_h = self._refreshLayoutNonHeight()
+        start_h = self._editor.height()
+
+        # 2. 取消上一轮动画 (避免堆叠).
+        if (self._expandAnim is not None
+                and self._expandAnim.state() == QPropertyAnimation.State.Running):
+            self._expandAnim.stop()
+            # 如果上一轮动画还拿着 layout 动画会席 (host), 先释放避免泄漏.
+            if self._layoutAnimHost is not None:
+                end_layout_animation(self._layoutAnimHost)
+                self._layoutAnimHost = None
+
+        # 3. 获取 layout 动画会席 —— 动画期间 ancestor view 会冻结 viewport 瞬间
+        # 贴底, 避免每帧 setValue(maximum) 引起视觉抖动.
+        self._layoutAnimHost = begin_layout_animation(self)
+
+        anim = QPropertyAnimation(self, b"editorHeight", self)
+        anim.setDuration(self._EXPAND_ANIM_MS)
+        anim.setEasingCurve(QEasingCurve.Type.OutCubic)
+        anim.setStartValue(int(start_h))
+        anim.setEndValue(int(target_h))
+        # 两个方向都需要在 finished 时释放 layout 会席. 展开额外调 emit
+        # 信号 + ancestor 滚到 widget header.
+        anim.finished.connect(self._onExpandAnimFinishedAll)
+        self._expandAnim = anim
+        anim.start()
         self.expandedChanged.emit(expanded)
+
+    def _onExpandAnimFinishedAll(self) -> None:
+        """动画结束统一入口: 释放 layout 会席, 再走展开后锁的默认滚动.
+
+        顺序重要: 先调 ``end_layout_animation`` 让 view 计数器归 0 并 schedule
+        ``_catchUpToBottomIfNeeded``; 然后调 ``_onExpandAnimFinished`` 启动滚
+        到 widget header 的动画. catch-up 在 schedule 的 timer 里检查
+        ``_programmaticScroll == True`` 会跳过, 不会取消本卡启动的 widget
+        header 滚动.
+        """
+        end_layout_animation(self._layoutAnimHost)
+        self._layoutAnimHost = None
+        if self._expanded:
+            self._onExpandAnimFinished()
+
+    def _onExpandAnimFinished(self) -> None:
+        """展开动画自然结束: emit 信号 + duck-type 调 ancestor 滚动."""
+        # 信号面: 宿主可以 connect ``requestScrollIntoView`` 做自己的定制逻辑.
+        self.requestScrollIntoView.emit(self)
+        # 默认路径: 沿 parent 链向上找提供 ``_smoothScrollWidgetToTop``
+        # 的 ancestor (一般是 AgentChatView), 让其滚到本卡 header 顶部.
+        # 找不到就不滚, 保证 demo / 独立使用 CodeBlock 也不会报错.
+        w = self.parentWidget()
+        while w is not None:
+            fn = getattr(w, '_smoothScrollWidgetToTop', None)
+            if callable(fn):
+                try:
+                    fn(self)
+                except Exception:
+                    # 宿主异常不能破坏动画收尾路径, 静默吞.
+                    pass
+                return
+            w = w.parentWidget()
 
     def toggleExpanded(self):
         """切换展开 / 折叠. 由底部按钮 click 调用, 也可外部手动调."""
         self.setExpanded(not self._expanded)
+
+    # ------------------------------------------------------------------
+    # 动画控制
+    # ------------------------------------------------------------------
+
+    def setExpandAnimationEnabled(self, enabled: bool) -> None:
+        """设置展开 / 折叠动画是否启用 (默认 ``True``).
+
+        关闭后 ``setExpanded`` / ``toggleExpanded`` 退化为瞬间 setFixedHeight,
+        与本期改造前行为等价. 主动调该方法后如果动画正在跑, 会被允许
+        跑完 (不中途被打断).
+        """
+        self._expandAnimEnabled = bool(enabled)
+
+    def expandAnimationEnabled(self) -> bool:
+        return self._expandAnimEnabled
+
+    def _shouldAnimateExpand(self) -> bool:
+        """综合本卡开关 + 宿主总开关 + visible 状态 决定是否走动画."""
+        if not self._expandAnimEnabled:
+            return False
+        if not self.isVisible():
+            return False
+        # 沿 parent 链查 view-level 总开关.
+        if not animations_enabled_root(self):
+            return False
+        return True
+
+    def _refreshLayoutNonHeight(self) -> int:
+        """刷新除 editor.height 外的副作用, 返回该为 editor 设的目标高度.
+
+        从 ``_adjustHeight`` 抽出, 让动画路径可以在不接手 setFixedHeight
+        的前提下, 仅同步 scrollbar policy / expandRow 显隐 / chevron 图标.
+        """
+        doc = self._editor.document()
+        actual_lines = max(1, doc.blockCount())
+        max_lines = max(1, self._maxVisibleLines)
+        overflow = actual_lines > max_lines
+
+        if not overflow:
+            visible_lines = actual_lines
+        elif self._expanded:
+            visible_lines = actual_lines
+        else:
+            visible_lines = max_lines
+
+        line_height = QFontMetrics(self._editor.font()).lineSpacing()
+        height = line_height * visible_lines + 20
+        if self._editor.lineWrapMode() == QPlainTextEdit.LineWrapMode.NoWrap:
+            height += self._editor.horizontalScrollBar().sizeHint().height()
+
+        if overflow and not self._expanded:
+            new_v = Qt.ScrollBarPolicy.ScrollBarAsNeeded
+        else:
+            new_v = Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        if self._editor.verticalScrollBarPolicy() != new_v:
+            self._editor.setVerticalScrollBarPolicy(new_v)
+
+        self._expandRow.setVisible(overflow)
+        if overflow:
+            icon = FluentIcon.UP if self._expanded else FluentIcon.CHEVRON_DOWN_MED
+            self._expandButton.setIcon(icon)
+            self._expandButton.setToolTip(
+                self.tr("折叠") if self._expanded else self.tr("展开")
+            )
+        return int(height)
+
+    # 动画驱动的 editor 高度 property: 供 ``QPropertyAnimation`` 调用
+    def _getEditorHeight(self) -> int:
+        return self._editor.height()
+
+    def _setEditorHeight(self, h: int) -> None:
+        self._editor.setFixedHeight(int(h))
+
+    editorHeight = Property(int, _getEditorHeight, _setEditorHeight)
 
     def _onCopyClicked(self):
         clipboard: QClipboard = QGuiApplication.clipboard()
