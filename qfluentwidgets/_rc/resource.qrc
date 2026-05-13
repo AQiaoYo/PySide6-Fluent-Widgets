@@ -428,6 +428,7 @@
         <file>qss/dark/toast.qss</file>
         <file>qss/dark/progress_toast.qss</file>
         <file>qss/dark/agent_chat_view.qss</file>
+        <file>qss/dark/workflow_canvas.qss</file>
 
         <file>qss/light/color_dialog.qss</file>
         <file>qss/light/dialog.qss</file>
@@ -472,6 +473,7 @@
         <file>qss/light/toast.qss</file>
         <file>qss/light/progress_toast.qss</file>
         <file>qss/light/agent_chat_view.qss</file>
+        <file>qss/light/workflow_canvas.qss</file>
 
         <file>i18n/qfluentwidgets.zh_CN.qm</file>
         <file>i18n/qfluentwidgets.zh_HK.qm</file>
