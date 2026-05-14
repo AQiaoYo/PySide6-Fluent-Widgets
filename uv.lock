@@ -11650,7 +11650,7 @@ wheels = [
 
 [[package]]
 name = "pyside6-fluent-widgets-qiao"
-version = "2.0.17"
+version = "2.0.18"
 source = { editable = "." }
 dependencies = [
     { name = "darkdetect" },
